@@ -81,8 +81,8 @@ def check():
                 assert target in documents and unquote(url.fragment) in documents[target].ids, f'Broken anchor: {path}: {ref}'
             refs += 1
         if path.parent.parent.name == 'docs':
-            assert 'MVP2 foundation complete.' in path.read_text(), f'Milestone missing: {path}'
-            assert 'Live hooks, enforcement, and Anthropic BYOK are pending.' in path.read_text(), f'Status missing: {path}'
+            assert 'Beta 0.1.0-beta.1' in path.read_text(), f'Release status missing: {path}'
+            assert 'Codex remains unverified.' in path.read_text() and 'not notarized.' in path.read_text(), f'Beta limits missing: {path}'
     index = json.loads((DIST/'assets/search-index.json').read_text())
     assert len(index) == len(PAGES)
     assert len({page['url'] for page in index}) == len(PAGES)
@@ -98,7 +98,7 @@ def check():
     manifest = json.loads((ROOT/'.openai/hosting.json').read_text())
     assert manifest['static']['directory'] == 'dist'
     assert not any(key in manifest for key in ('d1','r2','plugins','connectors')), 'Unexpected runtime capability'
-    for source in ['TraceRook_MVP2_Architecture_Implementation_Spec.md', 'docs/MVP2_ACCEPTANCE.md', 'docs/MVP2_PR2_PLAN.md']:
+    for source in ['TraceRook_MVP2_Architecture_Implementation_Spec.md', 'docs/MVP2_ACCEPTANCE.md', 'docs/MVP2_PR2_PLAN.md', 'docs/BETA_RELEASE.md']:
         assert (DIST/'reference'/source).read_bytes() == (ROOT.parent/source).read_bytes(), f'Stale authoritative reference: {source}'
     roadmap = (DIST/'docs/roadmap/index.html').read_text()
     assert '43' in roadmap and 'MVP2.0' in roadmap and 'Pending' in roadmap, 'Roadmap loses current evidence or pending gates'
