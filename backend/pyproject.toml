@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "httpx2"]
+dev = ["pytest>=8", "httpx2", "httpx>=0.28"]
 
 [project.scripts]
 tracerook-admin = "tracerook_backend.admin:main"
