@@ -22,23 +22,23 @@ document.querySelectorAll(".menu-toggle,.docs-toggle").forEach(button => {
 const examples = {
   credentials: {
     verdict: "Block before execution", title: "A credential file is headed outside the project.",
-    description: "A sensitive credential path and outbound upload in the same effective command supply concrete local evidence. Claude cannot downgrade this critical denial.",
+    description: "A sensitive credential path and outbound upload in the same command are concrete local evidence. TraceRook denies the call before it runs, and Claude cannot downgrade the decision.",
     source: "Local deterministic rule", rule: "TR-CRED-EXFIL", review: "No quick allow for critical denials", severity: "critical"
   },
   remote: {
     verdict: "Pause for human review", title: "An external script is about to run.",
-    description: "Fetching and executing remote code can change the project beyond the task. The proposed action should wait for a bound, one-time review; expiry denies the high-risk request.",
-    source: "Local high-risk evidence", rule: "TR-REMOTE-EXEC", review: "Allow once or block · 45-second window", severity: "high"
+    description: "Fetching and executing remote code can change the project beyond the task. The call waits for your one-time review; if the 45 seconds run out, it is denied.",
+    source: "Local high-risk evidence", rule: "TR-REMOTE-EXEC", review: "Allow once or Block · 45-second window", severity: "high"
   },
   drift: {
     verdict: "Review the mismatch", title: "A UI task turned into a production deployment.",
-    description: "The action no longer matches the user's task anchor. In the planned live flow, local publishing evidence and Claude's contextual assessment can recommend review. A model verdict alone cannot create a critical denial.",
-    source: "Local evidence + Claude context (planned)", rule: "TR-PUBLISH-DEPLOY / TR-TASK-DRIFT", review: "Require a decision on the exact action", severity: "high"
+    description: "The action no longer matches your task. Local publishing evidence flags it, and Claude confirms the session has drifted, so TraceRook asks you before anything ships.",
+    source: "Local evidence + Claude analysis", rule: "TR-PUBLISH-DEPLOY · session drift", review: "Decide on the exact action", severity: "high"
   },
   cleanup: {
     verdict: "Allow with no TraceRook override", title: "Ordinary cleanup stays ordinary.",
-    description: "The action is scoped to disposable build output and fits the task. A destructive-looking command token alone is insufficient evidence for a critical block. Native agent permissions still apply.",
-    source: "Local scope and task evidence", rule: "Benign near-miss / scoped cleanup", review: "No extra review in this example", severity: "low"
+    description: "The action is scoped to disposable build output and fits the task. A destructive-looking command alone isn't evidence for a block, so your agent keeps working.",
+    source: "Local scope and task evidence", rule: "Scoped cleanup", review: "No review needed", severity: "low"
   }
 };
 document.querySelectorAll("[data-scenario]").forEach(button => {
@@ -118,3 +118,49 @@ if (search) {
     if (event.key === "Escape" && document.activeElement === search) {search.value="";updateSearch();}
   });
 }
+
+document.querySelectorAll("[data-auth-form]").forEach(form => {
+  const status = form.querySelector(".form-status");
+  const submit = form.querySelector("button[type=submit]");
+  const messages = {
+    register: "Account created. Check your email to confirm your address and get your access code.",
+    login: "Logged in."
+  };
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    status.textContent = "";
+    status.dataset.state = "";
+    if (!form.checkValidity()) {
+      const invalid = form.querySelector(":invalid");
+      status.textContent = invalid.validationMessage;
+      status.dataset.state = "error";
+      invalid.focus();
+      return;
+    }
+    const body = {};
+    new FormData(form).forEach((value, key) => { body[key] = String(value); });
+    submit.disabled = true;
+    status.textContent = form.dataset.authForm === "register" ? "Creating your account…" : "Logging in…";
+    try {
+      const response = await fetch(form.getAttribute("action"), {
+        method: "POST", credentials: "same-origin",
+        headers: {"Content-Type": "application/json", "Accept": "application/json"},
+        body: JSON.stringify(body)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result && result.error && typeof result.error.message === "string" ? result.error.message : "");
+      if (typeof result.redirect === "string" && result.redirect.startsWith("/") && !result.redirect.startsWith("//")) {
+        window.location.assign(result.redirect);
+        return;
+      }
+      form.reset();
+      status.textContent = messages[form.dataset.authForm];
+      status.dataset.state = "success";
+    } catch (error) {
+      status.textContent = error.message || "We couldn't reach TraceRook right now. Please try again in a moment.";
+      status.dataset.state = "error";
+    } finally {
+      submit.disabled = false;
+    }
+  });
+});

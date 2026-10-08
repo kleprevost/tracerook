@@ -1,26 +1,41 @@
 # TraceRook architecture
 
-The macOS 26+ arm64 app, per-user LaunchAgent and hook CLI share Swift 6 modules in the root Swift package. The Xcode project consumes these as local package libraries. Strict concurrency is enforced by Swift 6; mutable service state uses actors and UI state uses MainActor.
+```text
+Claude Code ── PreToolUse hook (stdin JSON / stdout decision) ──▶ tracerook-hook
+                                                                     │  IPC v2, private Unix socket
+                                                                     ▼
+                                                     TraceRookAgent (per-user service)
+                                                  local rules · reviews · SQLite history
+                                                      │                         │
+                                         authenticated XPC              HTTPS, device token
+                                                      ▼                         ▼
+                                              TraceRook.app        TraceRook Cloud ──▶ Anthropic Claude
+                                  dashboard, menu bar, notifications   (api.tracerook.dev)
+```
 
-- **TraceRookContracts**: normalized sanitized event envelope, bounded Codable JSON, adapter and IPC contracts, version constants, coverage facts and typed errors.
-- **TraceRookPrivacy**: redaction, remote preflight and structured status-only logging.
-- **TraceRookAgentAdapters**: host normalization and denial encoding, canonical SHA-256 action binding. Original actions live only in process memory.
-- **TraceRookRules**: deterministic policy evidence; shared service/CLI emergency rules will be added before live enforcement.
-- **TraceRookCore**: domain records, exact approval transitions, analysis and Cloud protocols.
-- **TraceRookFixtures**: bundled, explicitly synthetic Cloud Demo. Its client rejects live-origin analysis. No networking dependency exists in this module.
+## Processes
 
-The service is the sole writer of private sanitized SQLite history. The authenticated hook socket carries events and decisions only, with no approval/trust commands. Authenticated XPC carries UI status and exact review mutations. Notifications are an affordance; deadlines and pending state belong to the service.
+- **`tracerook-hook`** runs once per hook invocation. It reads bounded stdin, normalizes the host payload, applies the shared emergency rules, asks the service for a decision within the hook deadline, and writes host-format output.
+- **`TraceRookAgent`** is the per-user LaunchAgent and the sole writer of private SQLite history. It evaluates local policy, owns pending reviews and their deadlines, and calls TraceRook Cloud for contextual analysis.
+- **`TraceRook.app`** is the SwiftUI dashboard and menu bar companion. It reads state and resolves reviews over XPC, delivers actionable notifications and opens the native review window.
+- **TraceRook Cloud** (`cloud/`) is a Cloudflare Worker. D1 holds invitation, account and device digests plus metadata-only receipts; a SQLite Durable Object holds usage accounting and device-scoped idempotency. It calls Anthropic's Messages API with TraceRook's key. See [cloud/CONTRACT.md](../cloud/CONTRACT.md).
+- **Local API** (`backend/`) is a loopback FastAPI server with the same enrollment and analysis shapes, backed by fixtures, for development and the in-app Local API demo.
 
-No third-party runtime dependencies, broad disk access, root daemon, cloud backend, embedded web UI or live-agent configuration changes are introduced by the foundation build.
+## Swift modules
 
-## MVP2 baseline contracts
+| Module | Responsibility |
+| --- | --- |
+| `TraceRookContracts` | Event envelopes, bounded JSON, IPC v2 framing, replies, budgets, coverage records, typed errors |
+| `TraceRookPrivacy` | Redaction, remote-payload preflight and status-code-only logging |
+| `TraceRookAgentAdapters` | Claude Code and Codex normalization, denial encoding, canonical SHA-256 action binding |
+| `TraceRookRules` | Deterministic policy rules shared by the service and hook bridge |
+| `TraceRookCore` | Domain records, exact review transitions, analysis providers, Cloud and service DTOs |
+| `TraceRookFixtures` | Bundled sample data for demo mode |
 
-The [MVP2 specification](../TraceRook_MVP2_Architecture_Implementation_Spec.md) extends this architecture. PR 1 adds live IPC v2 alongside the unchanged v1 event/fixture formats. `LiveIPC.swift` and `WireCodec.swift` define strict framing, invocation nonces, budgets, typed no-override/deny replies, provider status and per-class integration evidence. These tested contracts are now used by the implemented local socket and XPC service. The ordinary hook CLI remains disabled until real-host acceptance passes.
+Service state lives in actors and UI state on the MainActor, under Swift 6 strict concurrency. The Mac app has no third-party runtime dependencies.
 
-`ReviewRequest` and `ReviewResolution` live in Core's `ReviewContracts.swift` so they can reuse `ApprovalBinding` without a dependency cycle or duplicated domain type. Shape/binding validation is not caller authentication or approval consumption. The service actor and signed UI control plane now implement caller authentication, durable review transitions and exact one-time consumption. Hook wiring and actual native host review remain pending.
+## Transports
 
-See the [acceptance matrix](MVP2_ACCEPTANCE.md) for the actual source inventory, limits and open gates, and the [PR 2 plan](MVP2_PR2_PLAN.md) for exact service/persistence/UI changes. Existing Cloud Demo remains isolated and real coverage remains Not integrated.
-
-## Isolated local API demonstration
-
-The developer-only service client owns loopback HTTP transport and transient `mock_` credentials. SwiftUI sends separate allowlisted controls over authenticated XPC; fixed synthetic requests and validated fixture receipts never enter the live analysis provider or review/history paths. Enrollment, usage, rotation, revocation, deletion, deadlines and cancellation are implemented. See [current evidence](LOCAL_API_DEMO_EVIDENCE.md). The Python/FastAPI default factory mounts only `/mock/v1`; hosted production Cloud and native real Anthropic analysis remain unavailable.
+- **Hook socket.** Four-byte big-endian length prefix, one JSON packet, 1 MiB request and 16 KiB reply caps, duplicate-key rejection, Decimal-preserving numbers and a system-random 128-bit invocation nonce. Replies are `no_override` or `deny`. The socket carries events and decisions only.
+- **XPC.** Code-signing requirements on both sides. Carries status snapshots, Cloud controls and exact review resolutions.
+- **Cloud.** HTTPS to `api.tracerook.dev/v1` with an opaque bearer device token, strict JSON and a 32 KiB body limit.

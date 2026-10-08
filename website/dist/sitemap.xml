@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://tracerook.dev/</loc></url>
+  <url><loc>https://tracerook.dev/pricing/</loc></url>
+  <url><loc>https://tracerook.dev/register/</loc></url>
+  <url><loc>https://tracerook.dev/login/</loc></url>
   <url><loc>https://tracerook.dev/docs/</loc></url>
   <url><loc>https://tracerook.dev/docs/introduction/</loc></url>
-  <url><loc>https://tracerook.dev/docs/quickstart/</loc></url>
+  <url><loc>https://tracerook.dev/docs/beta/</loc></url>
+  <url><loc>https://tracerook.dev/docs/cloud/</loc></url>
   <url><loc>https://tracerook.dev/docs/dashboard/</loc></url>
-  <url><loc>https://tracerook.dev/docs/cloud-demo/</loc></url>
   <url><loc>https://tracerook.dev/docs/how-it-works/</loc></url>
   <url><loc>https://tracerook.dev/docs/rules/</loc></url>
   <url><loc>https://tracerook.dev/docs/approvals/</loc></url>
@@ -15,14 +18,9 @@
   <url><loc>https://tracerook.dev/docs/data-retention/</loc></url>
   <url><loc>https://tracerook.dev/docs/claude-code/</loc></url>
   <url><loc>https://tracerook.dev/docs/codex/</loc></url>
-  <url><loc>https://tracerook.dev/docs/safe-installation/</loc></url>
   <url><loc>https://tracerook.dev/docs/troubleshooting/</loc></url>
-  <url><loc>https://tracerook.dev/docs/mvp2/</loc></url>
   <url><loc>https://tracerook.dev/docs/architecture/</loc></url>
   <url><loc>https://tracerook.dev/docs/protocols/</loc></url>
-  <url><loc>https://tracerook.dev/docs/testing/</loc></url>
-  <url><loc>https://tracerook.dev/docs/roadmap/</loc></url>
-  <url><loc>https://tracerook.dev/docs/local-api-demo/</loc></url>
+  <url><loc>https://tracerook.dev/docs/build/</loc></url>
   <url><loc>https://tracerook.dev/docs/faq/</loc></url>
-  <url><loc>https://tracerook.dev/docs/beta/</loc></url>
 </urlset>

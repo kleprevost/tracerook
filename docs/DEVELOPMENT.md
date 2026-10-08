@@ -1,79 +1,22 @@
 # Developing TraceRook
 
-The [MVP1 architecture specification](../TraceRook_MVP1_Architecture_Spec.md) is authoritative. The [implementation record](IMPLEMENTATION_STATUS.md) documents completed checks, platform observations, and pending release gates.
-
-MVP2 work follows the additive [MVP2 specification](../TraceRook_MVP2_Architecture_Implementation_Spec.md) and [handoff](../TraceRook_MVP2_Agent_Handoff.md), starting with PR 1 only. Consult [MVP2 acceptance](MVP2_ACCEPTANCE.md) and the [PR 2 plan](MVP2_PR2_PLAN.md) before advancing phases.
-
 ## Requirements
 
 - Apple Silicon (`arm64`) Mac, macOS 26 or later.
-- Swift 6 and the macOS 27 SDK.
-- Full Xcode 27 for Xcode builds and archives; compatible Command Line Tools can build the development app with the repository scripts.
+- Swift 6 and the macOS 27 SDK. Full Xcode 27 builds archives; Command Line Tools builds the app with the repository scripts.
+- Node 24+ for TraceRook Cloud, Python 3.11+ for the local API and website tooling.
 
-## Build and run
-
-From the repository root:
+## Mac app
 
 ```sh
-./scripts/build.sh
+./scripts/build.sh                       # debug; ./scripts/build.sh release for optimized
 open build/TraceRook.app
+open build/TraceRook.app --args --demo   # bundled sample sessions, incidents and reviews
 ```
 
-Build the optimized development configuration with `./scripts/build.sh release`.
+Open `TraceRook.xcodeproj` and select the TraceRook scheme for Xcode development. Build settings restrict CPU to arm64, deployment to macOS 26.0 and Swift language mode to 6, with hardened runtime enabled. Builds are ad-hoc signed unless `TRACEROOK_SIGNING_IDENTITY` names a signing identity.
 
-Open `TraceRook.xcodeproj` and select the TraceRook scheme for Xcode development. SwiftPM owns the Swift Testing harness. Build settings restrict CPU to arm64, deployment to macOS 26.0, and Swift language mode to 6; hardened runtime is enabled.
-
-The app bundle includes the service executable, hook CLI, and LaunchAgent plist. The Phase 0/1 build does **not** register a Login Item or install agent hooks. The bridge refuses ordinary operational invocation. Do not wire it into agent settings manually.
-
-The MVP2 baseline keeps that operational refusal. Packaged `TraceRookAgent` and `tracerook-hook` support read-only `--version`, `--protocol-version` (v2 contract), and `--self-test`. The bridge self-test demonstrates synthetic length-prefixed v2 encoding/decoding; the service self-test validates fixtures and budget framing. Neither starts a listener or changes agent configuration.
-
-Development builds are ad-hoc signed unless `TRACEROOK_SIGNING_IDENTITY` is provided. Configuring an identity alone does not complete Developer ID distribution or notarization. Read [security and release limitations](../SECURITY_LIMITATIONS.md).
-
-## Explore the native demo
-
-```sh
-open build/TraceRook.app --args --demo
-```
-
-The preview includes menu bar navigation, dashboard destinations, session timelines, incident evidence, onboarding, privacy preview, provider selection, and simulated Cloud Account, Usage, and Plans. BYOK remains unavailable until Phase 4 and does not collect a key. Real activity stays empty and Not integrated.
-
-Select **Simulate review**, then open Approvals or the native review panel. A sample request has a 45-second deadline. Block and Allow once are terminal sample responses; repeated or expired responses are rejected. Demo approvals cannot authorize real actions.
-
-Request notification permission explicitly in onboarding or Settings to exercise the native notification path. The approvals queue remains accessible without notifications. Full manual notification-delivery acceptance is still pending.
-
-Settings supports System, Light, and Dark appearances without changing macOS preferences. `--appearance-light` and `--appearance-dark` are development preview switches.
-
-## Automated checks
-
-```sh
-./scripts/test.sh
-./scripts/smoke-test.sh
-./scripts/ui-smoke-test.sh
-```
-
-The smoke script includes the unit tests, app build, and relocated bundle/resource checks. The testing script supplies Swift Testing framework paths for Command Line Tools installations when required. See the implementation record for known build-tool adjustments.
-
-The UI smoke script renders 20 light/dark cases under `build/ui-smoke/`: dashboard destinations, pending/expired review, real/demo separation, and notification-denied settings. Render checks do not certify full VoiceOver support, actual notification delivery, or live-host enforcement.
-
-A separate Scene-level launch check verifies a visible dashboard:
-
-```sh
-build/TraceRook.app/Contents/MacOS/TraceRook --demo --launch-smoke-test
-```
-
-Live phases require harmless tests on real Claude Code and Codex versions proving a denied tool body never ran, with host permissions preserved on Allow once. Fixture parsing is not evidence of verified hook coverage.
-
-## Source layout
-
-| Directory | Purpose |
-| --- | --- |
-| `App/` | Native SwiftUI interface and AppKit review window |
-| `Agent/` | Background service executable foundation |
-| `HookCLI/` | Host bridge executable foundation |
-| `Packages/` | Shared contracts, adapters, privacy, rules, core, and fixtures |
-| `Tests/` | Swift Testing cases |
-| `Resources/` | App icon, Info.plist, and LaunchAgent resource |
-| `website/` | Static product website and documentation |
+The bundle contains the `TraceRookAgent` service, the `tracerook-hook` bridge and the LaunchAgent plist. Both helpers support `--version`, `--protocol-version` and `--self-test`. `--appearance-light` / `--appearance-dark` force an appearance and `--launch-smoke-test` verifies that the dashboard window opens.
 
 When adding executable source files, synchronize the Xcode project:
 
@@ -81,19 +24,66 @@ When adding executable source files, synchronize the Xcode project:
 python3 scripts/update-xcode-sources.py
 ```
 
-## Static website
+### Tests
+
+```sh
+./scripts/test.sh              # Swift Testing suites
+./scripts/smoke-test.sh        # tests, build, packaged helpers and bundle checks
+./scripts/ui-smoke-test.sh     # light/dark UI renders under build/ui-smoke/
+./scripts/bundle-smoke-test.sh # relocated release bundle
+./scripts/beta-e2e.sh --local  # service, adapter, rules, privacy, contracts and core suites
+```
+
+`scripts/test.sh` supplies the Swift Testing framework path that Command Line Tools installations need.
+
+## TraceRook Cloud
+
+```sh
+cd cloud
+npm ci
+npm run typecheck
+npm test
+```
+
+Tests run inside workerd with real D1 and Durable Object bindings and a fake Anthropic transport. Deployment, secrets and invitations are covered in [cloud/README.md](../cloud/README.md); the protocol is in [cloud/CONTRACT.md](../cloud/CONTRACT.md).
+
+## Local API
+
+```sh
+cd backend
+python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
+.venv/bin/pytest -q
+.venv/bin/python -m uvicorn tracerook_backend.app:app_factory --factory --host 127.0.0.1 --port 8787 --no-access-log
+```
+
+See [backend/README.md](../backend/README.md).
+
+## Website
 
 ```sh
 python3 website/scripts/build.py
 python3 website/scripts/check.py
 node --check website/dist/assets/site.js
-node website/scripts/preview.mjs
+node website/scripts/preview.mjs        # http://127.0.0.1:4173/
 ```
 
-Open `http://127.0.0.1:4173/`. The generated `website/dist/` is a portable static site with no runtime application backend. Search reads only its bundled same-origin index. See the [website guide](../website/README.md) for editing and publication details.
+See [website/README.md](../website/README.md).
+
+## Source layout
+
+| Directory | Purpose |
+| --- | --- |
+| `App/` | SwiftUI interface and AppKit review window |
+| `Agent/` | Background service |
+| `HookCLI/` | Host bridge |
+| `Packages/` | Shared contracts, adapters, privacy, rules, core and fixtures |
+| `Tests/` | Swift Testing cases |
+| `Resources/` | App icon, Info.plist and LaunchAgent |
+| `cloud/` | TraceRook Cloud Worker |
+| `backend/` | Local API |
+| `website/` | Static site and documentation |
+| `scripts/` | Build, test and packaging scripts |
 
 ## Contribution expectations
 
-Work through the specified phases in order. Each phase needs compilation, relevant tests, and a working demonstration. Keep synthetic examples labeled, preserve unrelated user configuration, and reject unsafe or incomplete remote payloads. Never substitute a fixture result for live protection.
-
-Document actual platform/API deviations and their evidence in the implementation record. Pending security behavior must remain visibly pending until its acceptance tests pass.
+Keep sample data clearly labeled, preserve unrelated user configuration, and reject unsafe or incomplete remote payloads rather than repairing them. New security behavior ships with tests that exercise its rejection paths.
