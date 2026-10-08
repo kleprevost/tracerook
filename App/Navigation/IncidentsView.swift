@@ -95,7 +95,7 @@ struct IncidentDetail: View {
                     Button(incident.falsePositive ? "Feedback saved" : "Report false positive") { environment.model.reportFalsePositive(incident.id) }.disabled(incident.falsePositive)
                 }.buttonStyle(.bordered)
                 if incident.severity == .critical {
-                    Text("Critical local blocks have no quick allow or in-flight exception. Future exceptions require an explicit advanced policy flow.").font(.caption).foregroundStyle(.secondary)
+                    Text("Critical local blocks have no quick allow or in-flight exception.").font(.caption).foregroundStyle(.secondary)
                 }
             }.padding(24)
         }.frame(maxWidth: .infinity)

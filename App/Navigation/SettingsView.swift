@@ -93,8 +93,8 @@ struct SettingsView: View {
                 }.pickerStyle(.radioGroup).disabled(environment.analysisModeBusy)
                 if let error = environment.analysisModeError { Text(error).font(.callout).foregroundStyle(.orange) }
                 if environment.model.mode == .anthropicBYOK {
-                    StatusBadge(text: "Connection unavailable in this build", color: .orange)
-                    Text("BYOK is unavailable in this development build. No key is requested, stored or sent.").font(.callout).foregroundStyle(.secondary)
+                    StatusBadge(text: "Not supported", color: .orange)
+                    Text("Direct Anthropic API keys aren't supported. Choose TraceRook Cloud for Claude analysis. No key is requested, stored or sent.").font(.callout).foregroundStyle(.secondary)
                     Button("What leaves my Mac?") { environment.privacyPreviewPresented = true }.buttonStyle(.bordered)
                 } else if environment.model.mode == .traceRookCloud {
                     Text("Invitation-only Claude analysis. Enrollment and inference are separate from verified host protection.").font(.callout).foregroundStyle(.secondary)
@@ -146,8 +146,8 @@ struct SettingsView: View {
     private var privacy: some View {
         Group {
             Surface("Minimum necessary data") {
-                Label("Cloud Demo sends nothing off your Mac", systemImage: "lock.shield").font(.headline)
-                Text("Planned BYOK sends selected redacted context directly to Anthropic, after explicit consent. Redaction cannot guarantee removal of every secret. Anthropic retention follows your provider account terms.")
+                Label("Only categories leave your Mac", systemImage: "lock.shield").font(.headline)
+                Text("With your consent, TraceRook Cloud receives a task category, an action category and local signal codes. Raw commands, paths, code and transcripts stay on this Mac. Demo mode sends nothing.")
                     .font(.callout).foregroundStyle(.secondary)
                 DetailField(name: "Source excerpts", value: "Off by default · selected bounded lines only")
                 DetailField(name: "Logs", value: "Status codes and generated identifiers only")

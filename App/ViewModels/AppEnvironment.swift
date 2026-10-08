@@ -117,7 +117,7 @@ final class AppEnvironment {
         var info: CFDictionary?
         guard SecCodeCopySigningInformation(code, SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
               let dictionary = info as? [String: Any] else { return "Signature unavailable" }
-        return dictionary[kSecCodeInfoTeamIdentifier as String] == nil ? "Ad-hoc development signature" : "Signed · release validation pending"
+        return dictionary[kSecCodeInfoTeamIdentifier as String] == nil ? "Ad-hoc signature" : "Developer ID signature"
     }
 }
 

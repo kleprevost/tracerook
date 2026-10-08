@@ -17,7 +17,7 @@ struct OverviewView: View {
         if environment.model.showingDemo { return "Sample findings only; no Demo analysis requests" }
         guard environment.agent.connected else { return "Background analysis state unavailable" }
         if environment.agent.cloud.analysisEnabledLocally { return "Cloud selected for host analysis; see validated receipts" }
-        if environment.model.mode == .anthropicBYOK { return "BYOK connection not configured in this build" }
+        if environment.model.mode == .anthropicBYOK { return "Direct API keys aren't supported; choose TraceRook Cloud" }
         return "Cloud analysis paused in the service"
     }
     var body: some View {
@@ -54,7 +54,7 @@ struct OverviewView: View {
                                 Text(providerStatus).font(.caption).foregroundStyle(.secondary)
                             }
                         }
-                        Text("Local rule enforcement requires an executing supported hook. This build has no verified live integrations.").font(.callout).foregroundStyle(.secondary)
+                        Text("Local rules decide inside each connected hook. Integration coverage shows each agent's current status.").font(.callout).foregroundStyle(.secondary)
                         Button("Provider & privacy settings") { environment.settingsSection = "AI Provider"; environment.model.destination = .settings }.buttonStyle(.link)
                     }
                 }

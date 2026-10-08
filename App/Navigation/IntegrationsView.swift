@@ -12,7 +12,7 @@ struct IntegrationsView: View {
                 Surface {
                     Label("Background service", systemImage: "gearshape.2").font(.headline)
                     Text(environment.agent.status).font(.callout)
-                    Text("Enable starts a per-user service and a private local history database. Agent hooks require a separate configuration preview and consent. This build uses local ad-hoc signatures and is not notarized.").font(.callout).foregroundStyle(.secondary)
+                    Text("Enable starts a per-user service and a private local history database. Agent hooks are configured separately, following the installation guide.").font(.callout).foregroundStyle(.secondary)
                     HStack {
                         Button("Enable Background Service") { environment.agent.enable() }
                         Button("Disable Service") { Task { await environment.agent.disable() } }
@@ -36,7 +36,7 @@ struct IntegrationsView: View {
                             fact("Recent hook", "Never")
                         }
                         Divider()
-                        Text("Planned supported events").font(.subheadline.bold())
+                        Text("Supported events").font(.subheadline.bold())
                         Text("SessionStart · UserPromptSubmit · PreToolUse · PostToolUse · SessionEnd").font(.caption.monospaced()).foregroundStyle(.secondary)
                         Text(provider == .codex
                              ? "Codex must review and trust the exact hook definition via /hooks. Installed does not mean trusted. Hosted tools and write_stdin continuations can be outside the pre-tool path."
@@ -57,7 +57,7 @@ struct IntegrationsView: View {
                         }
                     }
                 }
-                Text("A future installer will back up files, preserve unrelated hooks, detect concurrent changes, and atomically replace only TraceRook-owned entries.").font(.caption).foregroundStyle(.secondary)
+                Text("Add the TraceRook hook to your agent settings using the installation guide at tracerook.dev/docs/beta. TraceRook never edits unrelated settings or hooks.").font(.caption).foregroundStyle(.secondary)
             }.padding(28)
         }
         .sheet(item: $selectedPreview) { provider in IntegrationPreview(provider: provider) }
@@ -97,10 +97,10 @@ struct IntegrationPreview: View {
             Text(provider == .claudeCode ? "~/.claude/settings.json" : "~/.codex/hooks.json").font(.callout.monospaced())
             GroupBox("Before · sample") { Text("Existing settings and unrelated hooks").frame(maxWidth: .infinity, alignment: .leading).padding(8) }
             GroupBox("After · sample") {
-                Text("Preserve existing configuration\n+ TraceRook-owned command hook\n+ PreToolUse matcher: *\n+ timeout: 75 seconds\n+ Session/prompt/post-tool lifecycle hooks")
+                Text("Preserve existing configuration\n+ TraceRook-owned command hook\n+ PreToolUse matcher: *\n+ timeout: 85 seconds\n+ Session/prompt/post-tool lifecycle hooks")
                     .font(.callout.monospaced()).frame(maxWidth: .infinity, alignment: .leading).padding(8).textSelection(.enabled)
             }
-            Text("Real installation will show an exact diff and permission-preserving backup before consent. This sample cannot install hooks or confer trust.")
+            Text("This sample shows the shape of the hook configuration. It does not modify any file or confer trust.")
                 .font(.callout).foregroundStyle(.secondary)
             HStack { Spacer(); Button("Done") { dismiss() }.keyboardShortcut(.defaultAction) }
         }.padding(28).frame(width: 620)

@@ -176,7 +176,7 @@
   ],
   "account": {
     "email": "developer@example.invalid",
-    "plan": "Preview",
+    "plan": "Demo",
     "state": "demo",
     "account_id": "demo-account"
   },
@@ -199,24 +199,24 @@
   "plans": [
     {
       "id": "preview",
-      "name": "Preview",
-      "description": "Explore the Cloud experience with bundled sample data.",
-      "monthlyPriceLabel": "Demo only",
+      "name": "Demo",
+      "description": "Explore TraceRook with bundled sample sessions, findings and reviews.",
+      "monthlyPriceLabel": "Sample data",
       "features": [
         "Sample account and usage",
-        "Interactive simulated findings",
+        "Interactive sample findings",
         "No network requests"
       ]
     },
     {
       "id": "individual",
       "name": "Individual",
-      "description": "A future plan concept. Service and billing are unavailable.",
-      "monthlyPriceLabel": "Not available",
+      "description": "Invitation-only private beta. Billing isn't active during the beta.",
+      "monthlyPriceLabel": "$20 / month at launch",
       "features": [
-        "Future contextual analysis",
-        "Future device enrollment",
-        "No purchase or subscription"
+        "TraceRook Cloud analysis with Claude",
+        "Pre-execution protection for Claude Code",
+        "Up to 3 Macs"
       ]
     }
   ],

@@ -16,49 +16,49 @@ struct OnboardingView: View {
                 switch step {
                 case 0:
                     Text("A second look before supported actions execute").font(.title.bold())
-                    Text("TraceRook is designed to inspect local coding-agent tool calls, explain risky behavior and pause supported calls for review.").font(.body)
-                    Text("Hooks are guardrails, not universal endpoint enforcement. A skipped or timed-out callback may permit execution.").foregroundStyle(.secondary)
-                    StatusBadge(text: "Native UI milestone · live protection pending", color: .orange)
+                    Text("TraceRook inspects your coding agent's tool calls, explains risky behavior and pauses high-risk calls for your review.").font(.body)
+                    Text("TraceRook reviews the tool calls Claude Code sends through its hook. Commands you run yourself stay in your hands.").foregroundStyle(.secondary)
+                    StatusBadge(text: "Private beta · Claude Code supported", color: RookTheme.accent)
                 case 1:
                     Text("Compatibility on this Mac").font(.title2.bold())
                     DetailField(name: "Operating system", value: ProcessInfo.processInfo.operatingSystemVersionString)
                     DetailField(name: "Architecture", value: "Apple Silicon · arm64 build")
                     DetailField(name: "Signature", value: environment.signatureDescription)
                     DetailField(name: "Helper", value: "Bundled helper · see Integrations for service status")
-                    Text("This beta uses ad-hoc signatures and is not notarized. Service installation and host callback coverage must be verified separately.").foregroundStyle(.secondary)
+                    Text("Next, start the background service and connect Claude Code.").foregroundStyle(.secondary)
                 case 2:
                     Text("Choose an analysis experience").font(.title2.bold())
                     Picker("Analysis experience", selection: $choice) {
-                        Text("TraceRook Cloud · Preview / Demo").tag(AnalysisMode.traceRookCloudDemo)
+                        Text("Explore with sample data · Demo").tag(AnalysisMode.traceRookCloudDemo)
                         Text("Local rules only · hooks required").tag(AnalysisMode.localRulesOnly)
                         Text("Use my Anthropic API key · Coming soon").tag(AnalysisMode.anthropicBYOK)
                     }.pickerStyle(.radioGroup)
-                    Text(choice == .traceRookCloudDemo ? "Explore account, usage and simulated findings locally. Demo never enrolls a real account or makes a purchase." : choice == .anthropicBYOK ? "BYOK is not operational in this milestone. No key is collected or stored." : "Selecting offline mode first pauses Cloud analysis in the service. Local coverage requires installed, verified hooks.").foregroundStyle(.secondary)
+                    Text(choice == .traceRookCloudDemo ? "Explore account, usage and simulated findings locally. Demo never enrolls a real account or makes a purchase." : choice == .anthropicBYOK ? "Direct API keys aren't supported yet. No key is collected or stored." : "Local rules only. Cloud analysis stays paused in the service.").foregroundStyle(.secondary)
                 case 3:
                     Text("Keep context small and redacted").font(.title2.bold())
-                    Text("Working BYOK will send selected redacted context directly to Anthropic, with explicit consent. Redaction cannot guarantee removal of every secret.")
-                    Text("Cloud Demo sends no data. Source excerpts default off. No broad disk access, transcript scraping or anonymous analytics is used.").foregroundStyle(.secondary)
+                    Text("With your consent, TraceRook Cloud receives a task category, an action category and local signal codes. Commands, paths, code and transcripts stay on your Mac.")
+                    Text("Demo mode sends no data. Source excerpts default off. No broad disk access, transcript scraping or anonymous analytics is used.").foregroundStyle(.secondary)
                     Button("Preview example payload") { payloadPreview = true }.buttonStyle(.bordered)
                 case 4:
                     Text("Connect your local agents").font(.title2.bold())
                     IntegrationSummary(provider: .claudeCode)
                     IntegrationSummary(provider: .codex)
-                    Text("Live installation is not available in this development build. You will inspect an exact diff and backups, then explicitly choose integrations. Nothing has been installed by this setup flow.").foregroundStyle(.secondary)
+                    Text("Add the TraceRook hook to Claude Code using the installation guide at tracerook.dev/docs/beta. Codex support is coming soon. This setup flow doesn't change any agent settings.").foregroundStyle(.secondary)
                 case 5:
                     Text("Review without watching every command").font(.title2.bold())
-                    Text("Notifications are the entry point for review. The queue and bounded deadline still work when macOS suppresses delivery.")
+                    Text("Pending reviews wait in the menu bar and the Approvals queue, each with a 45-second deadline.")
                     DetailField(name: "Notifications", value: environment.notifications.status)
                     Button("Request notifications") { Task { await environment.notifications.requestPermission() } }.buttonStyle(.bordered)
-                    Text("Login-agent registration will be offered with consent when the live service is available.").foregroundStyle(.secondary)
+                    Text("Start the background service from Integrations. It asks for your consent before registering.").foregroundStyle(.secondary)
                 case 6:
-                    Text("Installed is not verified").font(.title2.bold())
-                    Text("Codex requires you to review and trust the hook definition with /hooks. TraceRook will wait for an actual host callback and harmless pre-tool smoke test before claiming coverage.")
-                    Text("A config check or successful fixture test alone never means Protected. This milestone reports both integrations as Not integrated.").foregroundStyle(.secondary)
+                    Text("Verify your connection").font(.title2.bold())
+                    Text("Start a Claude Code session after adding the hook. Its tool calls appear in Sessions with each decision.")
+                    Text("Integration status reflects recorded host callbacks, never a configuration file alone.").foregroundStyle(.secondary)
                 default:
-                    Text(choice == .traceRookCloudDemo ? "Your safe preview is ready" : "The dashboard is ready").font(.title.bold())
-                    Text("Try session timelines, evidence details and an exact-action review. Simulated approvals expire after 45 seconds, and no dangerous command is executed.")
+                    Text(choice == .traceRookCloudDemo ? "Your demo is ready" : "The dashboard is ready").font(.title.bold())
+                    Text("Try session timelines, evidence details and an exact-action review. Demo reviews expire after 45 seconds, and no command is executed.")
                     if choice == .traceRookCloudDemo { DemoBadge() }
-                    Text("Real protection remains unavailable until the live integration phases pass their tests.").foregroundStyle(.secondary)
+                    Text("Connect Claude Code from Integrations to protect real sessions.").foregroundStyle(.secondary)
                 }
             }.frame(maxWidth: .infinity, minHeight: 285, alignment: .topLeading)
             Divider()
