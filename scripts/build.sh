@@ -23,8 +23,13 @@ cp Resources/LaunchAgents/com.tracerook.agent.plist "$app_dir/Contents/Library/L
 cp Resources/Info.plist "$app_dir/Contents/Info.plist"
 cp Resources/TraceRook.icns "$app_dir/Contents/Resources/TraceRook.icns"
 identity="${TRACEROOK_SIGNING_IDENTITY:--}"
+if [[ "$identity" == - ]]; then
+  /usr/libexec/PlistBuddy -c 'Add :TraceRookSecurityMode string local-adhoc' "$app_dir/Contents/Info.plist"
+fi
 for executable in TraceRookAgent tracerook-hook; do
-  codesign --force --options runtime --timestamp=none --sign "$identity" "$app_dir/Contents/MacOS/$executable"
+  identifier=com.tracerook.agent
+  if [[ "$executable" == tracerook-hook ]]; then identifier=com.tracerook.hook; fi
+  codesign --force --identifier "$identifier" --options runtime --timestamp=none --sign "$identity" "$app_dir/Contents/MacOS/$executable"
 done
 codesign --force --options runtime --timestamp=none --sign "$identity" "$app_dir"
 final_app="$PWD/build/TraceRook.app"

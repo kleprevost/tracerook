@@ -11,6 +11,7 @@ final class AppEnvironment {
     let model = DesktopModel()
     let notifications = NotificationController()
     let reviewPanel = ReviewPanelController()
+    let agent: AgentConnection
     private(set) var snapshot: DemoSnapshot?
     private(set) var fixtureError = false
     var onboardingPresented = !UserDefaults.standard.bool(forKey: "onboardingCompleted")
@@ -19,6 +20,7 @@ final class AppEnvironment {
     var settingsSection = "General"
     var fixtureStatus: String { fixtureError ? "Demo fixtures unavailable" : "Bundled demo fixtures validated" }
     init() {
+        agent = AgentConnection(model: model)
         do {
             let demo = try FixtureLoader.loadDemo(); snapshot = demo
             try model.loadDemo(sessions: demo.sessions, incidents: demo.incidents)
@@ -28,6 +30,10 @@ final class AppEnvironment {
         if CommandLine.arguments.contains("--demo") { model.exploreDemo(); onboardingPresented = false }
         if CommandLine.arguments.contains("--appearance-dark") { appearance = "Dark" }
         if CommandLine.arguments.contains("--appearance-light") { appearance = "Light" }
+        if CommandLine.arguments.contains("--local-api-demo") {
+            model.destination = .settings; settingsSection = "Local API Demo"; onboardingPresented = false
+        }
+        if !CommandLine.arguments.contains("--ui-smoke-test") { agent.start() }
     }
     var colorScheme: SwiftUI.ColorScheme? { appearance == "Dark" ? .dark : appearance == "Light" ? .light : nil }
     func finishOnboarding(exploreDemo: Bool) {
