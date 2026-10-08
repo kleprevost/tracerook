@@ -110,7 +110,7 @@ struct TraceRookApp: App {
                 Button("Settings…") { environment.model.destination = .settings }.keyboardShortcut(",")
             }
             CommandMenu("TraceRook") {
-                Button("Explore Cloud Demo") { environment.model.exploreDemo() }.keyboardShortcut("d", modifiers: [.command, .shift])
+                Button("Explore Cloud Demo") { Task { await environment.exploreDemo() } }.keyboardShortcut("d", modifiers: [.command, .shift])
                 Button("Simulate review") { environment.simulate() }.disabled(!environment.model.showingDemo)
                 Button("Show real activity") { environment.model.showRealActivity() }
             }
@@ -128,7 +128,7 @@ struct MenuBarView: View {
     @Environment(AppEnvironment.self) private var environment
     @Environment(\.openWindow) private var openWindow
     var body: some View {
-        Text("Protection: \(environment.model.pauseUntil == nil ? "Limited · Not integrated" : "Paused")")
+        Text("Protection: \(environment.model.liveCoverage.title)")
         Text("Claude Code: Not integrated")
         Text("Codex: Not integrated")
         Divider()
@@ -136,14 +136,9 @@ struct MenuBarView: View {
         Text("Demo pending reviews: \(environment.model.demoApprovals.filter { $0.isPending(at: .now) }.count)")
         Button("Open Dashboard") { openWindow(id: "dashboard"); NSApp.activate(ignoringOtherApps: true) }
         Button("Approvals") {
-            if environment.model.demoApprovals.contains(where: { $0.isPending(at: .now) }) { environment.model.showingDemo = true }
             environment.model.destination = .approvals; openWindow(id: "dashboard")
         }
-        if environment.model.pauseUntil == nil {
-            Button("Pause Protection (15 minutes)") { environment.model.pause() }
-        } else {
-            Button("Resume Protection") { environment.model.resume() }
-        }
+        Text(environment.agent.cloud.analysisEnabledLocally ? "Cloud analysis: enabled" : "Cloud analysis: paused or unavailable")
         Button("Settings…") { environment.model.destination = .settings; openWindow(id: "dashboard") }
         Divider()
         Text(environment.agent.status)
