@@ -128,12 +128,26 @@ class AnthropicAnalyzer:
             raise ApiError(503, errors.PROVIDER_UNAVAILABLE, "Analysis declined for this content")
         if response.stop_reason != "end_turn":
             raise ApiError(502, errors.MALFORMED_RESPONSE, "Analysis response incomplete")
-        text = next((b.text for b in response.content if b.type == "text"), None)
+        if not self._settings.fallbacks_supported and response.model != self._settings.anthropic_model:
+            raise ApiError(502, errors.MALFORMED_RESPONSE, "Analysis model mismatch")
+        texts = [b.text for b in response.content if b.type == "text"]
         try:
-            verdict = validate_verdict(json.loads(text if text is not None else ""))
-        except (json.JSONDecodeError, InvalidVerdict, RecursionError) as exc:
+            if len(texts) != 1 or not isinstance(texts[0], str) or len(texts[0].encode("utf-8")) > 16384:
+                raise InvalidVerdict("text blocks")
+            def pairs(items):
+                obj = {}
+                for key, value in items:
+                    if key in obj:
+                        raise InvalidVerdict("duplicate keys")
+                    obj[key] = value
+                return obj
+            verdict = validate_verdict(json.loads(texts[0], object_pairs_hook=pairs))
+            tokens_in, tokens_out = response.usage.input_tokens, response.usage.output_tokens
+            if any(type(v) is not int or not 0 <= v <= 1000000 for v in (tokens_in, tokens_out)):
+                raise InvalidVerdict("usage")
+        except (json.JSONDecodeError, InvalidVerdict, RecursionError, UnicodeError) as exc:
             raise ApiError(502, errors.MALFORMED_RESPONSE, "Analysis response invalid") from exc
-        return AnalysisResult(verdict, str(response.model), int(response.usage.input_tokens), int(response.usage.output_tokens))
+        return AnalysisResult(verdict, str(response.model), tokens_in, tokens_out)
 
 
 def build_analyzer(settings: Settings) -> Analyzer:

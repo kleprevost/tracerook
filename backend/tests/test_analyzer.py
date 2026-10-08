@@ -26,7 +26,7 @@ def request(**over) -> AnalyzeRequest:
     return AnalyzeRequest(**{**base, **over})
 
 
-def response(text=None, stop="end_turn", model="claude-opus-5-5"):
+def response(text=None, stop="end_turn", model="claude-haiku-5-5"):
     content = [NS(type="thinking", thinking="")] + ([NS(type="text", text=text)] if text is not None else [])
     return NS(content=content, stop_reason=stop, model=model, usage=NS(input_tokens=321, output_tokens=87))
 
@@ -60,12 +60,12 @@ def run(coro):
 def test_success_parses_and_reports_usage():
     a, c = analyzer(response(json.dumps(GOOD)))
     result = run(a.analyze(request(), deadline_s=5))
-    assert result.verdict == GOOD and result.model_id == "claude-opus-5-5"
+    assert result.verdict == GOOD and result.model_id == "claude-haiku-5-5"
     assert (result.tokens_in, result.tokens_out) == (321, 87)
 
 
 def test_request_shape_opus_uses_structured_output_and_fallbacks():
-    a, c = analyzer(response(json.dumps(GOOD)))
+    a, c = analyzer(response(json.dumps(GOOD), model="claude-opus-5-5"), anthropic_model="claude-opus-5-5")
     run(a.analyze(request(), deadline_s=5))
     kw = c.beta.messages.calls[0]
     assert not c.messages.calls
@@ -81,7 +81,11 @@ def test_haiku_has_no_fallbacks_param():
     a, c = analyzer(response(json.dumps(GOOD)), anthropic_model="claude-haiku-5-5")
     run(a.analyze(request(), deadline_s=5))
     assert c.messages.calls and not c.beta.messages.calls
-    assert "fallbacks" not in c.messages.calls[0]
+    kw = c.messages.calls[0]
+    assert not {"fallbacks", "betas", "tools", "temperature", "top_p", "top_k", "thinking"} & kw.keys()
+    assert kw["model"] == "claude-haiku-5-5" and kw["output_config"]["effort"] == "low"
+    assert kw["output_config"]["format"]["type"] == "json_schema"
+    assert kw["timeout"] == 5
 
 
 def test_untrusted_text_is_json_encoded_not_prompt_structure():
@@ -146,7 +150,7 @@ def test_production_config_is_strict():
     with pytest.raises(ConfigError):
         Settings.from_env({"TRACEROOK_ENV": "production", "TRACEROOK_KEY_PEPPER": "p" * 32})  # no Anthropic key
     ok = Settings.from_env({"TRACEROOK_ENV": "production", "TRACEROOK_KEY_PEPPER": "p" * 32, "ANTHROPIC_API_KEY": "k"})
-    assert ok.analyzer == "anthropic" and ok.anthropic_model == "claude-opus-5-5" and ok.fallbacks_supported
+    assert ok.analyzer == "anthropic" and ok.anthropic_model == "claude-haiku-5-5" and not ok.fallbacks_supported
 
 
 def test_admin_cli_roundtrip():
@@ -166,3 +170,31 @@ def test_admin_cli_roundtrip():
         assert admin.run(["new-key", "nobody@example.com"], e.settings, e.store, io.StringIO()) == 1
     finally:
         e.close()
+
+
+def test_haiku_response_model_binding_and_bounded_blocks():
+    for bad in [response(json.dumps(GOOD), model="claude-opus-5-5"),
+                response('x' * 16385),
+                response('{"schema_version":1,"schema_version":1}')]:
+        a, client = analyzer(bad)
+        with pytest.raises(ApiError) as exc:
+            run(a.analyze(request(), deadline_s=5))
+        assert exc.value.code == "malformed_response"
+        assert len(client.messages.calls) == 1 and not client.beta.messages.calls
+    bad = response(json.dumps(GOOD))
+    bad.content.append(NS(type="text", text=json.dumps(GOOD)))
+    with pytest.raises(ApiError):
+        run(analyzer(bad)[0].analyze(request(), deadline_s=5))
+
+def test_haiku_refusal_does_not_retry_or_fallback():
+    a, client = analyzer(response(None, stop="refusal"))
+    with pytest.raises(ApiError) as exc:
+        run(a.analyze(request(), deadline_s=5))
+    assert exc.value.code == "provider_unavailable"
+    assert len(client.messages.calls) == 1 and not client.beta.messages.calls
+
+def test_haiku_invalid_usage_is_not_reported_as_actual_tokens():
+    bad=response(json.dumps(GOOD));bad.usage.input_tokens=True
+    with pytest.raises(ApiError) as exc:
+        run(analyzer(bad)[0].analyze(request(), deadline_s=5))
+    assert exc.value.code == "malformed_response"

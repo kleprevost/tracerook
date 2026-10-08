@@ -1,94 +1,45 @@
-# TraceRook Cloud backend
+# TraceRook backend
 
-Hosted service behind the app's **TraceRook Cloud** provider: accounts on a **$20/month Individual plan**,
-API-key authentication, device enrollment, usage metering, and contextual analysis of risky agent actions
-by Anthropic Claude. It is the real implementation of the contract the macOS client already models in
-`Packages/TraceRookCore/Models.swift` (`CloudAPIClient`, `CloudAccount`, `CloudUsage`, `CloudPlan`,
-`CloudAnalysisPayload`, `CloudAnalysisResponse`) and `TraceRook_MVP1_Architecture_Spec.md` §15.
+Current development target: the **Local API Demo**, an ephemeral fixture backend bound to `127.0.0.1:8787`, connected through the native service. The default factory mounts only `/mock/v1/`. It constructs no Anthropic analyzer or account database and reports explicit synthetic provenance and zero actual tokens/billing. Its advisory receipts cannot grant native host permission. See [local mock contracts and run instructions](LOCAL_MOCK.md).
 
-> Status: backend only. The Swift `HTTPSCloudAPIClient` and the Settings UI for entering an API key are not
-> written yet, and nothing here is wired into the shipping app. Billing/checkout is not implemented
-> (accounts are provisioned with `tracerook-admin`); the account `state` field is the hook for it.
+This repository also contains an older, separate `/v1` backend with API-key authentication, account/device records, SQLite usage metadata and a flat analysis protocol. It is implementation groundwork, not an operating hosted service, hosted MVP3 alpha, or commercial offering. Individual-plan price/quota values are planning placeholders; there is no billing/checkout or customer subscription system. No backend deployment was performed.
 
-## Connecting a client
-
-1. Base URL: wherever you deploy it (HTTPS only), e.g. `https://api.tracerook.dev`.
-2. Every request except `GET /v1/plans` and `/healthz` sends `Authorization: Bearer trk_live_…`.
-3. Once per install: `POST /v1/device/registrations` with `{"installation_id": "<client UUID>"}` (body optional;
-   sending the same `installation_id` returns the same `device_id`). Keep the `device_id`.
-4. Per analysis: `POST /v1/analyze` with the `CloudAnalysisPayload` JSON.
+## Run the current local demonstration
 
 ```sh
-curl -sS -X POST "$BASE/v1/analyze" -H "Authorization: Bearer $TRACEROOK_API_KEY" -H 'Content-Type: application/json' -d '{
-  "request_id": "6f1c…uuid", "schema_version": 1, "device_id": "dev_…", "session_pseudonym": "s-91ac",
-  "task_anchor_redacted": "Fix the README layout.", "proposed_action_redacted": "npm publish",
-  "prior_events_redacted": [], "privacy_policy_version": 1, "client_deadline_ms": 12000 }'
+cd backend
+/opt/homebrew/bin/python3 -m venv .venv
+.venv/bin/pip install -e '.[dev]'
+.venv/bin/pytest -q
+.venv/bin/python -m uvicorn tracerook_backend.app:app_factory --factory --host 127.0.0.1 --port 8787 --no-access-log
 ```
 
-| Method & path | Auth | Returns (Swift type) |
-|---|---|---|
-| `GET /v1/plans` | none | `{"plans": [CloudPlan]}` (note camelCase `monthlyPriceLabel`, as the Swift struct has no CodingKeys) |
-| `POST /v1/device/registrations` | key | `CloudDeviceRegistration` — 201 new, 200 existing |
-| `GET /v1/account` | key | `CloudAccount` (`plan` is the display name) |
-| `GET /v1/usage?month=YYYY-MM` | key | `CloudUsage` (`daily_actions[i]` = UTC day *i+1*) |
-| `POST /v1/analyze` | key | `CloudAnalysisResponse` (`expires_at` has no fractional seconds, as `.iso8601` requires) |
-| `POST /v1/events` | key | `{"acknowledged": true}`; validated, **not stored** |
+Tests require no key or external requests. The actual socket integration test requires port8787 free and cleans up its own process. Keep the default `TRACEROOK_MODE=local_mock`; no `.env`, paid infrastructure or persistent data is needed. Mock credentials/counters/receipts disappear on restart. The fixture quota is30 successful evaluations per device per UTC day.
 
-Errors are always `{"error": {"code", "message"}}`:
+## Isolated live developer diagnostic
 
-| HTTP | `code` | Client `TraceRookError` | Notes |
-|---|---|---|---|
-| 401 | `not_authenticated` | `notAuthenticated` | missing/invalid/revoked key |
-| 402 | `subscription_inactive` | *(new)* | account not `active` (canceled/past_due/suspended) |
-| 402 | `quota_exhausted` | `quotaExhausted` | monthly plan quota used |
-| 429 | `rate_limited` | `rateLimited` | honor `Retry-After` |
-| 422 | `unsafe_payload` | `unsafePayload` | server preflight found unredacted secrets/paths |
-| 400/413 | `malformed_request`, `payload_too_large` | `malformedInput` | |
-| 404/409 | `device_not_found`, `device_limit_reached`, `duplicate_request` | *(new)* | |
-| 503 | `provider_unavailable` | `providerUnavailable` | Anthropic down/declined; **not billed**; retry |
-| 502 / 504 | `malformed_response` / `timeout` | `malformedResponse` / `timeout` | **not billed** |
+On **2026-10-08**, a separately authorized, one-shot developer probe verified first-party Anthropic model `claude-haiku-5-5` and received a schema-validated synthetic benign verdict: **798 input tokens,178 output tokens,3,006ms**. This proves that isolated request succeeded; it does not establish hosted service availability, native live Claude integration, hook coverage, or pre-execution protection. The probe is separate from the legacy SDK analyzer and local mock server.
 
-The client must treat every non-200 as "no verdict" and fall back to local rules; a verdict is advisory and
-never overrides critical local rules (`recommended_action` is only `allow`, `request_approval` or `warn_allow`).
+The user explicitly selected Haiku5.5, overriding the MVP3 plan's Sonnet choice. The configured legacy analyzer now defaults to `claude-haiku-5-5`, low effort, structured verdict output, and text-block selection by type. Haiku receives no server fallback beta/parameter or removed sampling controls. Refusal, truncation, malformed output and model mismatch produce typed errors without a retry or fallback. Explicitly configured legacy Opus/Sonnet models retain their existing opt-in fallback support.
 
-## Guarantees (and how they're enforced)
+The [diagnostic instructions](LOCAL_MOCK.md#separate-opt-in-haiku-diagnostic) describe transient stdin/getpass credentials, at most one Messages call, bounded output and deadline, and safe status/token reporting. The diagnostic may incur actual token cost when explicitly invoked. Never put keys in command arguments, files or logs.
 
-- **No analyzed content is stored or logged.** SQLite holds accounts, hashed keys, devices and per-request
-  *metadata* (ids, day, tokens, model, latency). Validation errors never echo input.
-- **API keys:** 256-bit random, shown once, stored only as HMAC-SHA256 with a server pepper.
-- **Server-side preflight** (`redaction.py`, port of the Swift `Redactor` patterns): payloads that would still be
-  redacted are rejected with 422, not repaired.
-- **Prompt-injection hardening:** fixed system prompt; all agent-derived text is JSON-encoded under `untrusted`;
-  the output must satisfy a JSON schema *and* a strict validator that mirrors Swift `AnalysisVerdict.validate()`.
-  Malformed or refused output yields an error, never a partial verdict.
-- **Metering:** quota check + reservation is one atomic transaction; failures release the reservation; a retry with
-  the same `request_id` within 2 minutes replays the response (`Idempotent-Replay: true`) without re-billing.
-  Months are UTC.
+## Legacy backend reference
 
-## Run
+The following routes are mounted only when `TRACEROOK_MODE=production` is explicitly selected, alongside valid production settings, a strong `TRACEROOK_KEY_PEPPER`, and an Anthropic credential. The default mock factory does not mount them. This older protocol differs from MVP3's canonical `/v1/analysis` envelope and is not the native Local API Demo contract.
 
-```sh
-cd backend && python -m venv .venv && . .venv/bin/activate && pip install -e '.[dev]'
-pytest                                   # 70 tests, no network or API key needed
+| Method/path | Purpose |
+|---|---|
+| GET `/healthz`, `/readyz` | Legacy process/database checks |
+| GET `/v1/plans` | Planned product metadata |
+| POST `/v1/device/registrations` | API-key-scoped device registration |
+| GET `/v1/account` | Provisioned account metadata |
+| GET `/v1/usage?month=YYYY-MM` | Monthly analysis/token metadata |
+| POST `/v1/analyze` | Legacy flat redacted analysis request |
+| POST `/v1/events` | Sanitized counters, acknowledged without storage; synthetic origin refused in production |
 
-export TRACEROOK_ENV=production TRACEROOK_KEY_PEPPER="$(openssl rand -hex 32)" \
-       ANTHROPIC_API_KEY=… TRACEROOK_DATABASE_PATH=/var/lib/tracerook/tracerook.db
-tracerook-admin create-account someone@example.com     # prints the customer's API key once
-uvicorn tracerook_backend.app:app_factory --factory --host 127.0.0.1 --port 8000   # behind a TLS proxy
-```
+The legacy analyzer uses a fixed system prompt, JSON-encoded untrusted context, schema-constrained output and the bounded verdict validator. SDK retries are disabled and the client deadline is enforced. SQLite stores account/device/key and usage metadata; analyzed context is not persisted or logged. API keys are HMAC-digested with a server pepper. Critical local rules and host permissions remain native responsibilities.
 
-See `.env.example` for all settings. `TRACEROOK_ENV=development TRACEROOK_ANALYZER=stub` runs without an Anthropic key
-(refused in production) and enables `/docs`.
+Remaining hosted work includes canonical MVP3 enrollment/protocol, consent/preview integration, durable device-scoped idempotency, complete quotas/spend cutoffs, operational monitoring, credential lifecycle and deployment hardening. Legacy replay behavior does not bind retries to a payload digest; the local mock API does. Production account provisioning and planned pricing do not imply a launched product. No production integration or deployment should be inferred from the isolated probe.
 
-## Known limits / before launch
-
-- **Single process.** Rate limiting, the replay cache and the SQLite writer are in-process: run one uvicorn worker
-  per database. Horizontal scale means Postgres (`store.py` is the seam) and Redis (`ratelimit.py`).
-- **No billing.** Wire Stripe webhooks to `Store.update_account(state=…)`; add self-serve signup and key rotation UI.
-- **Cost model is a product decision.** Default model is `claude-opus-5-5` at `low` effort with a 2,000-action quota;
-  per-call cost and latency on Opus are far above `claude-haiku-5-5`. Measure real token use (it's recorded in
-  `usage_events`) before fixing price/quota/model. Haiku has no refusal fallback; `TRACEROOK_ANTHROPIC_MODEL` switches it.
-- **Not exercised against the live Anthropic API** (no key in the build environment): request shape, structured
-  output and the `server-side-fallback-2026-07-01` beta are verified only against a fake client and the SDK signature.
-- Behind a reverse proxy, failed-auth throttling keys on the socket peer; configure the proxy/uvicorn
-  `--forwarded-allow-ips` so the real client IP is used.
+References: [Haiku5.5 migration guide](https://platform.claude.com/docs/en/models/haiku-5-5/migration-guide), [first-party Models API](https://platform.claude.com/docs/en/api/models/retrieve).
