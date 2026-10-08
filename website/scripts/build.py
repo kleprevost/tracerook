@@ -17,9 +17,9 @@ from pages import PAGES, WALKTHROUGH
 
 # Standalone pages: (route, content file, title, description, active nav key, form page)
 STANDALONE = [
-    ("/pricing/", "pricing.html", "Pricing", "TraceRook beta access is $20/month, including TraceRook Cloud analysis with Anthropic Claude.", "pricing", False),
-    ("/register/", "register.html", "Join the beta", "Create your TraceRook account and get beta access for $20/month.", "register", True),
-    ("/login/", "login.html", "Log in", "Log in to your TraceRook account.", "login", True),
+    ("/pricing/", "pricing.html", "Pricing", "TraceRook is in an invitation-only private beta. The planned price is $20/month, including TraceRook Cloud analysis with Anthropic Claude.", "pricing", False),
+    ("/register/", "register.html", "Request an invitation", "Request an invitation to the TraceRook private beta.", "register", True),
+    ("/login/", "login.html", "Log in", "Log in to your TraceRook beta account.", "login", True),
 ]
 
 
@@ -36,12 +36,12 @@ def header(active=""):
 <header class="site-header"><div class="nav-shell">
 <a class="brand" href="/" aria-label="TraceRook home"><img src="/assets/tracerook.png" alt="" width="36" height="36">TraceRook</a>
 <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav">Menu</button>
-<nav id="main-nav" aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/pricing/" {current(active, 'pricing')}>Pricing</a><a href="/docs/" {current(active, 'docs')}>Documentation</a><a href="/login/" {current(active, 'login')}>Log in</a><a class="nav-cta" href="/register/" {current(active, 'register')}>Join the beta</a></nav>
+<nav id="main-nav" aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#about">About</a><a href="/pricing/" {current(active, 'pricing')}>Pricing</a><a href="/docs/" {current(active, 'docs')}>Documentation</a><a href="/login/" {current(active, 'login')}>Log in</a><a class="nav-cta" href="/register/" {current(active, 'register')}>Request an invitation</a></nav>
 </div></header>'''
 
 
 def footer():
-    return f'''<footer class="site-footer"><div class="footer-top"><a class="brand" href="/"><img src="/assets/tracerook.png" alt="" width="32" height="32">TraceRook</a><p>Independent judgment. Before the next tool call.</p><div><a href="/pricing/">Pricing</a><a href="/docs/">Documentation</a><a href="/docs/privacy/">Privacy</a><a href="/docs/beta/">Download</a><a href="https://github.com/kleprevost/tracerook">GitHub</a></div></div><div class="footer-bottom"><span>© 2026 TraceRook</span><span>Beta {RELEASE} · Native macOS · Apple Silicon</span><span>Claude is a product of Anthropic. No affiliation or endorsement implied.</span></div></footer>'''
+    return f'''<footer class="site-footer"><div class="footer-top"><a class="brand" href="/"><img src="/assets/tracerook.png" alt="" width="32" height="32">TraceRook</a><p>Independent judgment. Before the next tool call.</p><div><a href="/#about">About</a><a href="/pricing/">Pricing</a><a href="/docs/">Documentation</a><a href="/docs/privacy/">Privacy</a><a href="mailto:kyle@tracerook.dev">Contact</a><a href="https://github.com/kleprevost/tracerook">GitHub</a></div></div><div class="footer-bottom"><span>© 2026 TraceRook</span><span>Private beta {RELEASE} · Native macOS · Apple Silicon</span><span>Claude is a product of Anthropic. No affiliation or endorsement implied.</span></div></footer>'''
 
 
 def shell(title, description, body, active="", extra="", path="/", forms=False):
@@ -49,7 +49,7 @@ def shell(title, description, body, active="", extra="", path="/", forms=False):
         extra += f'<link rel="canonical" href="{SITE_URL}{esc(path)}"><meta property="og:url" content="{SITE_URL}{esc(path)}">'
     form_action = "'self'" if forms else "'none'"
     return f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="{esc(description)}"><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action {form_action}"><title>{esc(title)} · TraceRook</title><meta property="og:title" content="{esc(title)} · TraceRook"><meta property="og:description" content="{esc(description)}"><meta property="og:type" content="website"><link rel="icon" href="/assets/tracerook.png" type="image/png"><link rel="stylesheet" href="/assets/site.css"><script src="/assets/site.js" defer></script>{extra}<noscript><style>@media(max-width:680px){{.site-header{{height:auto;position:static}}.nav-shell{{flex-wrap:wrap;padding:18px 0}}.site-header nav{{display:flex;position:static;width:100%;padding:12px 0;background:transparent}}.menu-toggle,.docs-toggle{{display:none}}.docs-sidebar nav{{display:block;max-height:none}}}}</style></noscript></head><body>{header(active)}{body}{footer()}</body></html>'''
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="{esc(description)}"><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action {form_action}"><title>{esc(title)} · TraceRook</title><meta property="og:title" content="{esc(title)} · TraceRook"><meta property="og:description" content="{esc(description)}"><meta property="og:type" content="website"><link rel="icon" href="/assets/tracerook.png" type="image/png"><link rel="stylesheet" href="/assets/site.css"><script src="/assets/site.js" defer></script>{extra}<noscript><style>@media(max-width:1000px){{.site-header{{height:auto;position:static}}.nav-shell{{flex-wrap:wrap;padding:18px 0}}.site-header nav{{display:flex;position:static;width:100%;padding:12px 0;background:transparent}}.menu-toggle,.docs-toggle{{display:none}}.docs-sidebar nav{{display:block;max-height:none}}}}</style></noscript></head><body>{header(active)}{body}{footer()}</body></html>'''
 
 
 def write(route, document):
@@ -88,7 +88,7 @@ def build_docs():
                 q = PAGES[index]
                 adjacent += f'<a href="/docs/{q["slug"]}/"><small>{label}</small><strong>{esc(q["title"])}</strong></a>'
         adjacent += '</nav>'
-        body = f'''<div class="docs-layout"><aside class="docs-sidebar"><div class="docs-top"><a href="/docs/">Documentation</a><button class="docs-toggle" aria-expanded="false" aria-controls="docs-nav">Browse topics</button></div><nav id="docs-nav" aria-label="Documentation">{nav}</nav></aside><main id="main" class="doc-main"><div class="doc-eyebrow">{esc(p['group'])} <span>Beta {RELEASE}</span></div><h1>{esc(p['title'])}</h1><p class="doc-lead">{esc(p['description'])}</p><div class="mobile-toc"><details><summary>On this page</summary>{toc}</details></div><article class="doc-article">{sections}</article>{adjacent}</main><aside class="docs-toc" aria-label="On this page"><p>On this page</p>{toc}<a class="toc-bottom" href="/register/">Join the beta</a></aside></div>'''
+        body = f'''<div class="docs-layout"><aside class="docs-sidebar"><div class="docs-top"><a href="/docs/">Documentation</a><button class="docs-toggle" aria-expanded="false" aria-controls="docs-nav">Browse topics</button></div><nav id="docs-nav" aria-label="Documentation">{nav}</nav></aside><main id="main" class="doc-main"><div class="doc-eyebrow">{esc(p['group'])} <span>Beta {RELEASE}</span></div><h1>{esc(p['title'])}</h1><p class="doc-lead">{esc(p['description'])}</p><div class="mobile-toc"><details><summary>On this page</summary>{toc}</details></div><article class="doc-article">{sections}</article>{adjacent}</main><aside class="docs-toc" aria-label="On this page"><p>On this page</p>{toc}<a class="toc-bottom" href="/register/">Request an invitation</a></aside></div>'''
         write(f'/docs/{p["slug"]}/', shell(p['title'], p['description'], body, 'docs', path=f'/docs/{p["slug"]}/'))
     cards = ''
     for group in groups:

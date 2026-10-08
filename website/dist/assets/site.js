@@ -123,7 +123,7 @@ document.querySelectorAll("[data-auth-form]").forEach(form => {
   const status = form.querySelector(".form-status");
   const submit = form.querySelector("button[type=submit]");
   const messages = {
-    register: "Account created. Check your email to confirm your address and get your access code.",
+    request: "Thanks. Your request is in, and we'll email you when an invitation is ready.",
     login: "Logged in."
   };
   form.addEventListener("submit", async event => {
@@ -140,7 +140,7 @@ document.querySelectorAll("[data-auth-form]").forEach(form => {
     const body = {};
     new FormData(form).forEach((value, key) => { body[key] = String(value); });
     submit.disabled = true;
-    status.textContent = form.dataset.authForm === "register" ? "Creating your account…" : "Logging in…";
+    status.textContent = form.dataset.authForm === "request" ? "Sending your request…" : "Logging in…";
     try {
       const response = await fetch(form.getAttribute("action"), {
         method: "POST", credentials: "same-origin",
