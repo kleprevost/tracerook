@@ -1,0 +1,10 @@
+{
+  "session_id": "fixture-session",
+  "cwd": "/tmp/tracerook-demo",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Bash",
+  "tool_use_id": "fixture-call",
+  "tool_input": {
+    "command": "printf harmless"
+  }
+}

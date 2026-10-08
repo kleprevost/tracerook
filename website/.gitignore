@@ -1,0 +1,5 @@
+__pycache__/
+.sites-runtime/
+.sites-checkout/
+*.tar.gz
+.DS_Store
