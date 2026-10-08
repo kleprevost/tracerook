@@ -26,7 +26,7 @@ class Settings:
     key_pepper: bytes = b"dev-only-pepper"
     analyzer: str = "stub"  # "anthropic" | "stub"
     anthropic_api_key: str | None = None
-    anthropic_model: str = "claude-opus-5-5"
+    anthropic_model: str = "claude-haiku-5-5"
     anthropic_effort: str = "low"
     anthropic_fallbacks: bool = True
     # Hard server-side ceiling for one analysis; the client deadline can only shorten it.
@@ -83,7 +83,7 @@ class Settings:
                 key_pepper=pepper.encode(),
                 analyzer=analyzer,
                 anthropic_api_key=api_key,
-                anthropic_model=e.get("TRACEROOK_ANTHROPIC_MODEL", "claude-opus-5-5"),
+                anthropic_model=e.get("TRACEROOK_ANTHROPIC_MODEL", "claude-haiku-5-5"),
                 anthropic_effort=effort,
                 anthropic_fallbacks=_bool(e.get("TRACEROOK_ANTHROPIC_FALLBACKS"), True),
                 individual_quota=int(e.get("TRACEROOK_INDIVIDUAL_QUOTA", "2000")),
