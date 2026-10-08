@@ -14,7 +14,13 @@ import {
   digest,
 } from "../src/validation";
 import { replies, upstreamCalls } from "./setup";
-import { MAX_INPUT, MAX_OUTPUT, MODEL, VERDICT_SCHEMA } from "../src/anthropic";
+import {
+  MAX_INPUT,
+  MAX_OUTPUT,
+  MODEL,
+  VERDICT_SCHEMA,
+  providerErrorDiagnostic,
+} from "../src/anthropic";
 const device = () => crypto.randomUUID();
 const verdict = {
   schema_version: 1,
@@ -249,7 +255,10 @@ describe("real Workers, D1 and SQLite Durable Object API", () => {
     expect(sent.output_config.format.schema.properties.category.minItems).toBe(
       1,
     );
-    expect(upstreamCalls[0].options.redirect).toBe("error");
+    expect(upstreamCalls[0].options.redirect).toBe("manual");
+    expect(
+      new Request(upstreamCalls[0].url, upstreamCalls[0].options).redirect,
+    ).toBe("manual");
     expect(r.usage).toEqual({
       input_tokens: 100,
       output_tokens: 50,
@@ -483,6 +492,9 @@ describe("real Workers, D1 and SQLite Durable Object API", () => {
         event: "tracerook_provider_failure",
         stage: "verdict_validation",
         upstream_status: 200,
+        error_name: "Error",
+        error_code: "unclassified",
+        key_format_valid: false,
       });
       expect(messages.join(" ")).not.toContain("Private diagnostic canary");
       expect(messages.join(" ")).not.toContain(e.device_token);
@@ -503,11 +515,71 @@ describe("real Workers, D1 and SQLite Durable Object API", () => {
         event: "tracerook_provider_failure",
         stage: "http_status",
         upstream_status: 400,
+        error_name: "Error",
+        error_code: "unclassified",
+        key_format_valid: false,
       });
       expect(last).not.toContain("Private provider error canary");
     } finally {
       warning.mockRestore();
     }
+  });
+  it("classifies only exact known runtime errors and never echoes unknown exception text", () => {
+    expect(
+      providerErrorDiagnostic(new TypeError("Invalid header value.")),
+    ).toEqual({ error_name: "TypeError", error_code: "invalid_header" });
+    expect(
+      providerErrorDiagnostic(new Error("Network connection lost.")),
+    ).toEqual({ error_name: "Error", error_code: "network_connection_lost" });
+    expect(
+      providerErrorDiagnostic(
+        new Error("Private credential or context must not be echoed"),
+      ),
+    ).toEqual({ error_name: "Error", error_code: "unclassified" });
+    expect(
+      providerErrorDiagnostic({
+        name: "Private error name",
+        message: "Private error message",
+      }),
+    ).toEqual({ error_name: "unknown", error_code: "unclassified" });
+  });
+  it("checks actual workerd redirect support independently of the fetch double", () => {
+    let rejection: unknown;
+    try {
+      new Request("https://api.anthropic.com/v1/messages", {
+        redirect: "error",
+      });
+    } catch (error) {
+      rejection = error;
+    }
+    expect(providerErrorDiagnostic(rejection)).toEqual({
+      error_name: "TypeError",
+      error_code: "invalid_redirect",
+    });
+    expect(
+      new Request("https://api.anthropic.com/v1/messages", {
+        redirect: "manual",
+      }).redirect,
+    ).toBe("manual");
+  });
+  it("rejects every upstream redirect without following or retrying", async () => {
+    const e = await enroll();
+    for (const status of [301, 302, 303, 307, 308]) {
+      upstream({}, status);
+      const response = await call(
+        "analysis",
+        input(e.device_id),
+        e.device_token,
+      );
+      expect(response.status).toBe(503);
+      expect(upstreamCalls.at(-1)?.options.redirect).toBe("manual");
+    }
+    expect(upstreamCalls).toHaveLength(5);
+    expect(
+      upstreamCalls.every(
+        (call) => call.url === "https://api.anthropic.com/v1/messages",
+      ),
+    ).toBe(true);
   });
   it("expired verdict clears replay while durable identity and conservative crash charges remain", async () => {
     const e = await enroll(),
