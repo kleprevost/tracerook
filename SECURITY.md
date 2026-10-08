@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Report vulnerabilities privately through [GitHub security advisories](https://github.com/kleprevost/tracerook/security/advisories/new) rather than a public issue. Include the affected component (app, service, hook bridge, TraceRook Cloud or website), reproduction steps and the impact you observed. Leave secrets, prompts and private source out of reports.
+Report vulnerabilities privately through [GitHub security advisories](https://github.com/kleprevost/tracerook/security/advisories/new) or by email to [kyle@tracerook.dev](mailto:kyle@tracerook.dev), rather than a public issue. Include the affected component (app, service, hook bridge, TraceRook Cloud or website), reproduction steps and the impact you observed. Leave secrets, prompts and private source out of reports.
 
 ## Security model
 
