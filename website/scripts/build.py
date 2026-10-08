@@ -13,7 +13,7 @@ CONTENT = ROOT / "content"
 SITE_URL = "https://tracerook.dev"
 RELEASE = "0.1.0-beta.1"
 sys.path.insert(0, str(CONTENT))
-from pages import PAGES
+from pages import PAGES, WALKTHROUGH
 
 # Standalone pages: (route, content file, title, description, active nav key, form page)
 STANDALONE = [
@@ -59,7 +59,7 @@ def write(route, document):
 
 
 def build_home():
-    body = (CONTENT / "home.html").read_text()
+    body = (CONTENT / "home.html").read_text().replace("<!-- PRODUCT_WALKTHROUGH -->", WALKTHROUGH)
     write('/', shell("A second look before your agent acts", "TraceRook stops risky Claude Code actions before they run. Local rules on your Mac, contextual analysis with Anthropic Claude, and a native review for every high-risk call.", body))
 
 
@@ -97,7 +97,7 @@ def build_docs():
             if page['group'] == group:
                 cards += f'<a class="doc-card" href="/docs/{page["slug"]}/"><h3>{esc(page["title"])}</h3><p>{esc(page["description"])}</p><span>Read guide</span></a>'
         cards += '</div></section>'
-    body = f'''<main id="main" class="docs-index wrap"><div class="eyebrow">The TraceRook field guide</div><h1>Understand every<br><span class="muted">decision.</span></h1><p class="intro">Install the beta, connect TraceRook Cloud, and learn how local rules, Claude analysis and native review work together to keep your agent on task.</p><div class="search-area"><label for="doc-search">Search documentation</label><div class="search-box"><input id="doc-search" type="search" placeholder="Try install, privacy, or Allow once…" autocomplete="off"><kbd>/</kbd></div><p id="search-status" role="status" aria-live="polite"></p><div id="search-results" hidden></div><noscript><p>Browse the guides below. Search requires JavaScript; every guide is available without it.</p></noscript></div><div id="doc-collections">{cards}</div></main>'''
+    body = f'''<main id="main" class="docs-index wrap"><div class="eyebrow">The TraceRook field guide</div><h1>Understand every<br><span class="muted">decision.</span></h1><p class="intro">Install the beta, connect TraceRook Cloud, and learn how local rules, Claude analysis and native review work together to keep your agent on task.</p>{WALKTHROUGH}<div class="search-area"><label for="doc-search">Search documentation</label><div class="search-box"><input id="doc-search" type="search" placeholder="Try install, privacy, or Allow once…" autocomplete="off"><kbd>/</kbd></div><p id="search-status" role="status" aria-live="polite"></p><div id="search-results" hidden></div><noscript><p>Browse the guides below. Search requires JavaScript; every guide is available without it.</p></noscript></div><div id="doc-collections">{cards}</div></main>'''
     write('/docs/', shell('Documentation', 'TraceRook guides for installation, TraceRook Cloud, Claude analysis, privacy, approvals and Claude Code.', body, 'docs', path='/docs/'))
     index = [{"title": p['title'], "url": f"/docs/{p['slug']}/", "group": p['group'], "description": p['description'],
               "text": re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', ' '.join(s[2] for s in p['sections'])))).strip()} for p in PAGES]

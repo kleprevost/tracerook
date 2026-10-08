@@ -49,7 +49,11 @@ class Document(HTMLParser):
         if tag == 'meta' and attr.get('name') == 'description':
             self.description = bool(attr.get('content'))
         if tag in ('a', 'link') and 'href' in attr: self.refs.append(attr['href'])
-        if tag in ('img', 'script') and 'src' in attr: self.refs.append(attr['src'])
+        if tag in ('img', 'script', 'source', 'track') and 'src' in attr: self.refs.append(attr['src'])
+        if tag == 'video':
+            assert 'controls' in attr and 'autoplay' not in attr, 'Video must use manual playback controls'
+            assert attr.get('preload') == 'none', 'Video must not load before playback'
+            if 'poster' in attr: self.refs.append(attr['poster'])
         if tag == 'img':
             assert 'alt' in attr, 'Image has no alt text'
             assert 'width' in attr and 'height' in attr, 'Image dimensions missing'
