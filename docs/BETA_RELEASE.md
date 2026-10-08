@@ -74,3 +74,8 @@ Before sending a download, record the final evidence in the acceptance documents
 Report the archive version, macOS version, agent version, integration status, reproduction steps, and any visible failure. Review screenshots and logs for secrets, prompts, command arguments, paths, and personal data before sharing. Send reports through the channel provided with your invitation; the static website has no account, payment, or upload form.
 
 The intended alpha price is $20/month. Payment collection and subscriptions are not implemented. No software inference allotment is promised; provider availability and platform limits still apply. See [security limitations](../SECURITY_LIMITATIONS.md) and [privacy](PRIVACY.md) for the boundaries.
+
+
+## Final local regression · 2026-10-08
+
+`./scripts/beta-e2e.sh --local` passed **81 tests, zero failures** against the current source using an isolated Swift scratch directory under `build/beta-verification`. The filter covers Service, Adapter, Rules, Privacy, Contracts, and Core. This run made no Keychain calls or Cloud requests and did not rebuild the shared app bundle, modify host configuration, or stop the running service. Cloud tests used injected fake transports. This regression is separate from actual host, native UI, and hosted-provider acceptance.

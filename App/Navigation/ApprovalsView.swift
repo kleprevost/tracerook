@@ -129,6 +129,14 @@ struct LiveApprovalDetail: View {
     private var approval: ApprovalRecord? {
         environment.model.liveSnapshot?.approvals.first { $0.id == approvalID && $0.origin == .live }
     }
+    private func actionPreview(for approval: ApprovalRecord) -> TimelineEntry? {
+        guard let session = environment.model.liveSnapshot?.sessions.first(where: {
+            $0.id == approval.binding.sessionID && $0.origin == .live && $0.provider == approval.binding.provider
+        }), !environment.model.isSimulatedSession(session.id),
+              let event = session.events.first(where: { $0.id == approval.binding.eventID }),
+              !event.summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        return event
+    }
     private func activeRequest(for approval: ApprovalRecord, at now: Date) -> ReviewRequest? {
         guard !environment.model.showingDemo, environment.agent.connected,
               !environment.model.isSimulatedSession(approval.binding.sessionID), approval.isPending(at: now),
@@ -149,6 +157,15 @@ struct LiveApprovalDetail: View {
                     HStack { Text("Live action review").font(.caption.weight(.semibold)); Spacer(); SeverityBadge(severity: incident.severity) }
                     PageHeading(title: incident.title, subtitle: approval.binding.provider.title)
                     Text(incident.summary).font(.title3.weight(.medium))
+                    Surface("Proposed action · sanitized preview") {
+                        if let preview = actionPreview(for: approval) {
+                            DetailField(name: "Action type", value: preview.tool)
+                            Text(preview.summary).font(.callout.monospaced()).textSelection(.enabled)
+                            Text("This service-redacted summary may omit sensitive details. Compare it with the pending action in your agent before allowing.").font(.caption).foregroundStyle(.secondary)
+                        } else {
+                            Text("Action preview unavailable; inspect the host before allowing. Allow once is disabled until a matching preview is available.").font(.callout).foregroundStyle(.orange)
+                        }
+                    }
                     Surface("Evidence and task relevance") {
                         Text(incident.rationale).font(.callout)
                         ForEach(incident.evidence, id: \.self) { Label($0, systemImage: "magnifyingglass").font(.callout) }
@@ -169,6 +186,7 @@ struct LiveApprovalDetail: View {
                             HStack {
                                 Button("Block", role: .destructive) { resolve(.block) }.buttonStyle(.bordered)
                                 Button("Allow once") { resolve(.allowOnce) }.buttonStyle(.borderedProminent)
+                                    .disabled(actionPreview(for: approval) == nil)
                             }.disabled(!pending || submitting)
                         }
                     }
@@ -183,6 +201,10 @@ struct LiveApprovalDetail: View {
     private func resolve(_ choice: ReviewChoice) {
         guard !submitting, let approval, let request = activeRequest(for: approval, at: .now) else {
             resolutionMessage = "This review expired or is no longer available."
+            return
+        }
+        guard choice != .allowOnce || actionPreview(for: approval) != nil else {
+            resolutionMessage = "Action preview unavailable. This invocation cannot be allowed from the app."
             return
         }
         submitting = true
