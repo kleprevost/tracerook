@@ -35,7 +35,7 @@ struct CloudAlphaView: View {
             } else {
                 if let usage = cloud.usage {
                     DetailField(name: "UTC day", value: usage.dateUTC)
-                    DetailField(name: "Analyzed actions today", value: usage.evaluationsToday.formatted())
+                    DetailField(name: "Analysis requests today", value: usage.evaluationsToday.formatted())
                     DetailField(name: "Actual tokens", value: "\(usage.inputTokens.formatted()) input · \(usage.outputTokens.formatted()) output")
                     DetailField(name: "Unresolved reservations", value: "\(usage.reservedInputTokens.formatted()) input · \(usage.reservedOutputTokens.formatted()) output")
                 }
