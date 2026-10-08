@@ -12,9 +12,10 @@ DIST = ROOT / 'dist'
 sys.path.insert(0, str(ROOT / 'content'))
 from pages import PAGES
 
-FORM_PAGES = {'register': '/api/auth/register', 'login': '/api/auth/login'}
+FORM_PAGES = {'register': '/api/beta/request', 'login': '/api/auth/login'}
+FOUNDERS = ('Kyle LePrevost', 'mailto:kyle@tracerook.dev', 'https://hardcidr.com', 'John Yang', 'mailto:john@tracerook.dev', 'https://www.linkedin.com/in/johnwyang/')
 # Retired release-status language must not reappear in shipped copy.
-RETIRED_PHRASES = ('MVP', 'development preview', 'Development preview', 'release gate', 'acceptance gate',
+RETIRED_PHRASES = ('Now open', 'Join the beta', 'MVP', 'development preview', 'Development preview', 'release gate', 'acceptance gate',
                    'remains unverified', 'remains pending', 'not notarized', 'Phase 0', 'Phase 1')
 
 
@@ -102,6 +103,9 @@ def check():
             assert control in document.ids, f'Unresolved ARIA control: {path}: {control}'
         for ref in document.refs:
             url = urlsplit(ref)
+            if url.scheme == 'mailto':
+                assert ref.endswith('@tracerook.dev'), f'Contact address outside the domain: {ref}'
+                continue
             if url.scheme or url.netloc:
                 assert url.scheme == 'https', f'Unexpected external link: {ref}'
                 continue
@@ -129,6 +133,9 @@ def check():
         assert route in sitemap, f'Sitemap missing {route}'
     pricing = (DIST/'pricing/index.html').read_text()
     assert '$20' in pricing and '/register/' in pricing, 'Pricing page lost its plan or call to action'
+    assert 'Invitation only' in pricing and "Billing isn't active" in pricing, 'Pricing must state invitation-only access and inactive billing'
+    home = (DIST/'index.html').read_text()
+    assert 'id="about"' in home and all(item in home for item in FOUNDERS), 'Homepage About section is missing founder identity or contact'
     print(f'PASS: {len(paths)} HTML pages, {refs} local links/assets/anchors, {len(index)} searchable guides, {len(text.split())} documentation words, static and form boundaries.')
 
 
