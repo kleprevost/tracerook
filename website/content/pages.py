@@ -9,6 +9,8 @@ PAGES = []
 RELEASE_URL = 'https://github.com/kleprevost/tracerook/releases/tag/v0.1.0-beta.1'
 
 
+WALKTHROUGH = '<section class="walkthrough" id="walkthrough" aria-labelledby="walkthrough-title"><div class="section-heading"><div><span class="eyebrow">A minute inside TraceRook</span><h2 id="walkthrough-title">See the native app in action.</h2></div><p>A 60-second tour of sessions, findings, and a timed Block review.</p></div><figure class="walkthrough-player"><video controls playsinline preload="none" width="1920" height="1080" poster="/assets/tracerook-walkthrough-poster.jpg" aria-label="TraceRook native app walkthrough with demo data" aria-describedby="walkthrough-caption"><source src="/assets/tracerook-walkthrough.mp4" type="video/mp4"><track kind="captions" src="/assets/tracerook-walkthrough.vtt" srclang="en" label="English" default><p><a href="/assets/tracerook-walkthrough.mp4">Download the walkthrough video</a>.</p></video><figcaption id="walkthrough-caption">Recorded in the native app using labeled demo scenarios. No real commands execute in this walkthrough; the Codex scenes are simulations.</figcaption></figure><div class="walkthrough-links"><a class="text-link" href="/assets/tracerook-walkthrough.mp4" download>Download video</a><a class="text-link" href="/assets/tracerook-walkthrough-transcript.txt">Read transcript</a></div></section>'
+
 def page(slug, title, group, description, *sections):
     PAGES.append(dict(slug=slug, title=title, group=group, description=description, sections=sections))
 
