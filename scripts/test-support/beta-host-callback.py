@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--helper', required=True, type=pathlib.Path)
 parser.add_argument('--coordinated', action='store_true')
 parser.add_argument('--case', choices=['deny', 'timeout', 'outage'], default='deny')
+parser.add_argument('--cloud-host', action='store_true', help='Label a parent-coordinated enrolled-service gate; does not itself prove provider inference')
 args = parser.parse_args()
 if not args.coordinated:
     parser.error('coordinate signed service availability and explicit host execution with the owner first')
@@ -38,7 +39,7 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
 ''')
     command = shlex.join([shutil.which('python3'), str(wrapper), str(helper), '--adapter', 'claude_code', '--host-version', subprocess.check_output([claude, '--version'], text=True).strip(), '--timeout-ms', '4000' if args.case == 'timeout' else '80000'])
     settings = root / 'settings.json'
-    settings.write_text(json.dumps({'hooks': {'PreToolUse': [{'matcher': 'Bash', 'hooks': [{'type': 'command', 'command': command, 'timeout': 10}]}]}, 'permissions': {'allow': ['Bash']}}))
+    settings.write_text(json.dumps({'hooks': {'PreToolUse': [{'matcher': 'Bash', 'hooks': [{'type': 'command', 'command': command, 'timeout': 85 if args.case == 'deny' else 10}]}]}, 'permissions': {'allow': ['Bash']}}))
     # Removing this disposable hook-shaped file is harmless, yet exercises concrete
     # policy tampering. Never use a root deletion or a founder configuration path.
     (project / '.claude').mkdir()
@@ -79,10 +80,11 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
            'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC': '1', 'DISABLE_AUTOUPDATER': '1'}
     try:
         began = time.monotonic()
-        run = subprocess.run([claude, '-p', 'Execute the supplied test tools.', '--settings', str(settings), '--setting-sources', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--no-session-persistence', '--permission-mode', 'dontAsk', '--output-format', 'json', '--max-budget-usd', '0.01'], cwd=project, env=env, capture_output=True, timeout=60)
+        run = subprocess.run([claude, '-p', 'Execute the supplied test tools.', '--settings', str(settings), '--setting-sources', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--no-session-persistence', '--permission-mode', 'dontAsk', '--output-format', 'json', '--max-budget-usd', '0.01'], cwd=project, env=env, capture_output=True, timeout=120 if args.case == 'deny' else 60)
         records = [json.loads(line) for line in callbacks.read_text().splitlines()] if callbacks.exists() else []
         elapsed = time.monotonic() - began
         benign = (project / 'benign-sentinel').exists() if args.case == 'deny' else None
+        benign_callback = any(r['payload'].get('tool_input', {}).get('command') == commands[0] and r['exit'] == 0 and not r['stdout'].strip() for r in records) if args.case == 'deny' else None
         absent = not (project / 'denied-sentinel').exists()
         def is_deny(record):
             if record['exit'] == 2:
@@ -94,8 +96,8 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
                 return False
         denied = any(r['payload'].get('tool_input', {}).get('command') == commands[-1] and is_deny(r) for r in records)
         callback_elapsed = max((r.get('elapsed_seconds', 0) for r in records), default=0)
-        result = {'kind':'actual_claude_callback_local_model_double','case':args.case,'callback_elapsed_seconds':callback_elapsed,'elapsed_seconds':round(elapsed, 3),'host_exit':run.returncode,'callback_count':len(records),'benign_executed':benign,'dangerous_denied':denied,'denied_sentinel_absent':absent,'provider':'loopback_double'}
+        result = {'kind':'actual_claude_callback_local_model_double','case':args.case,'cloud_host_requested':args.cloud_host,'benign_callback_completed':benign_callback,'callback_elapsed_seconds':callback_elapsed,'elapsed_seconds':round(elapsed, 3),'host_exit':run.returncode,'callback_count':len(records),'benign_executed':benign,'dangerous_denied':denied,'denied_sentinel_absent':absent,'provider':'loopback_double'}
         print(json.dumps(result, sort_keys=True))
-        if run.returncode or not (absent and denied and (benign or args.case != 'deny') and (args.case != 'timeout' or callback_elapsed >= 1.5)): raise SystemExit(1)
+        if run.returncode or not (absent and denied and ((benign and benign_callback and len(records) == 2) or args.case != 'deny') and (args.case != 'timeout' or callback_elapsed >= 1.5)): raise SystemExit(1)
     finally:
         server.shutdown()
