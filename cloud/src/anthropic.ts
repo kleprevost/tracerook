@@ -32,6 +32,7 @@ export const VERDICT_SCHEMA = {
     schema_version: { type: "integer", enum: [1] },
     category: {
       type: "array",
+      minItems: 1,
       items: { type: "string", enum: ["unsafe_action", "agent_misbehavior"] },
     },
     severity: {
@@ -100,6 +101,8 @@ export async function analyze(
   key: string,
 ): Promise<UpstreamResult> {
   const started = Date.now();
+  let stage = "request",
+    upstreamStatus = 0;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), a.deadline_ms - 250);
   try {
@@ -125,15 +128,21 @@ export async function analyze(
         },
       }),
     });
+    upstreamStatus = response.status;
+    stage = "http_status";
+    if (response.status !== 200)
+      throw new APIError(503, "provider_unavailable", true);
+    stage = "content_type";
     if (
-      response.status !== 200 ||
       response.headers.get("content-type")?.split(";")[0].trim() !==
-        "application/json"
+      "application/json"
     )
       throw new APIError(503, "provider_unavailable", true);
+    stage = "request_id";
     const upstreamID = response.headers.get("request-id");
     if (!upstreamID || !/^req_[A-Za-z0-9_-]{1,150}$/.test(upstreamID))
       throw new APIError(503, "provider_unavailable", true);
+    stage = "message_json";
     const r = strictJSON(
       await boundedBody(
         response,
@@ -141,6 +150,7 @@ export async function analyze(
         Math.max(1, a.deadline_ms - 250 - (Date.now() - started)),
       ),
     ) as Record<string, unknown>;
+    stage = "message_shape";
     if (
       !r ||
       r.model !== MODEL ||
@@ -149,6 +159,7 @@ export async function analyze(
       r.content.length > 32
     )
       throw new APIError(503, "provider_unavailable", true);
+    stage = "content_blocks";
     if (
       r.content.some(
         (b) =>
@@ -156,9 +167,11 @@ export async function analyze(
       )
     )
       throw new APIError(503, "provider_unavailable", true);
+    stage = "text_block_count";
     const texts = r.content.filter((b) => b.type === "text");
     if (texts.length !== 1)
       throw new APIError(503, "provider_unavailable", true);
+    stage = "text_block_shape";
     const block = texts[0];
     if (
       !block ||
@@ -167,6 +180,7 @@ export async function analyze(
       new TextEncoder().encode(block.text).length > 16384
     )
       throw new APIError(503, "provider_unavailable", true);
+    stage = "usage";
     const u = r.usage as Record<string, unknown>;
     if (!u) throw new APIError(503, "provider_unavailable", true);
     const input = integer(u.input_tokens, 0, MAX_INPUT),
@@ -178,13 +192,26 @@ export async function analyze(
     ])
       if (u[name] !== undefined && u[name] !== 0)
         throw new APIError(503, "provider_unavailable", true);
+    stage = "verdict_json";
+    const parsedVerdict = strictJSON(block.text);
+    stage = "verdict_validation";
+    const validatedVerdict = verdict(parsedVerdict);
     return {
-      verdict: verdict(strictJSON(block.text)),
+      verdict: validatedVerdict,
       input,
       output,
       upstreamID,
     };
   } catch (e) {
+    // Constant stage names and a numeric status only. Never log provider bodies,
+    // submitted context, credentials, headers, or exception text.
+    console.warn(
+      JSON.stringify({
+        event: "tracerook_provider_failure",
+        stage: controller.signal.aborted ? "deadline" : stage,
+        upstream_status: upstreamStatus,
+      }),
+    );
     if (controller.signal.aborted)
       throw new APIError(504, "deadline_exceeded", true);
     if (

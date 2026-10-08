@@ -14,7 +14,7 @@ import {
   digest,
 } from "../src/validation";
 import { replies, upstreamCalls } from "./setup";
-import { MAX_INPUT, MAX_OUTPUT, MODEL } from "../src/anthropic";
+import { MAX_INPUT, MAX_OUTPUT, MODEL, VERDICT_SCHEMA } from "../src/anthropic";
 const device = () => crypto.randomUUID();
 const verdict = {
   schema_version: 1,
@@ -246,6 +246,9 @@ describe("real Workers, D1 and SQLite Durable Object API", () => {
     expect(sent.max_tokens).toBe(MAX_OUTPUT);
     expect(sent.output_config.effort).toBe("low");
     expect(sent.output_config.format.type).toBe("json_schema");
+    expect(sent.output_config.format.schema.properties.category.minItems).toBe(
+      1,
+    );
     expect(upstreamCalls[0].options.redirect).toBe("error");
     expect(r.usage).toEqual({
       input_tokens: 100,
@@ -441,6 +444,70 @@ describe("real Workers, D1 and SQLite Durable Object API", () => {
     ).json()) as any;
     expect(u.input_tokens).toBe(0);
     expect(u.reserved_input_tokens).toBe(5 * MAX_INPUT);
+  });
+  it("rejects an empty benign category and emits only bounded operator diagnostics", async () => {
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const e = await enroll();
+      upstream({
+        model: MODEL,
+        stop_reason: "end_turn",
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              ...verdict,
+              category: [],
+              rationale: "Private diagnostic canary omitted from logs",
+            }),
+          },
+        ],
+        usage: { input_tokens: 100, output_tokens: 50 },
+      });
+      const response = await call(
+        "analysis",
+        input(e.device_id),
+        e.device_token,
+      );
+      expect(response.status).toBe(503);
+      expect(VERDICT_SCHEMA.properties.category.minItems).toBe(1);
+      const messages = warning.mock.calls
+        .map((args) => args[0])
+        .filter(
+          (value) =>
+            typeof value === "string" &&
+            value.includes("tracerook_provider_failure"),
+        );
+      expect(messages).toHaveLength(1);
+      expect(JSON.parse(messages[0])).toEqual({
+        event: "tracerook_provider_failure",
+        stage: "verdict_validation",
+        upstream_status: 200,
+      });
+      expect(messages.join(" ")).not.toContain("Private diagnostic canary");
+      expect(messages.join(" ")).not.toContain(e.device_token);
+      expect(upstreamCalls).toHaveLength(1);
+      upstream({ error: { message: "Private provider error canary" } }, 400);
+      expect(
+        (await call("analysis", input(e.device_id), e.device_token)).status,
+      ).toBe(503);
+      const last = warning.mock.calls
+        .map((args) => args[0])
+        .filter(
+          (value) =>
+            typeof value === "string" &&
+            value.includes("tracerook_provider_failure"),
+        )
+        .at(-1);
+      expect(JSON.parse(last)).toEqual({
+        event: "tracerook_provider_failure",
+        stage: "http_status",
+        upstream_status: 400,
+      });
+      expect(last).not.toContain("Private provider error canary");
+    } finally {
+      warning.mockRestore();
+    }
   });
   it("expired verdict clears replay while durable identity and conservative crash charges remain", async () => {
     const e = await enroll(),
