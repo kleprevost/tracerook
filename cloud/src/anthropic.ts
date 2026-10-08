@@ -96,6 +96,37 @@ export interface UpstreamResult {
   output: number;
   upstreamID: string;
 }
+const knownProviderErrors = new Map<string, string>([
+  [
+    'Invalid redirect value, must be one of "follow" or "manual" ("error" won\'t be implemented since it does not make sense at the edge; use "manual" and check the response status code).',
+    "invalid_redirect",
+  ],
+  ["Invalid header value.", "invalid_header"],
+  ["Network connection lost.", "network_connection_lost"],
+  ["Too many subrequests.", "too_many_subrequests"],
+  ["DNS lookup failed. host = api.anthropic.com", "dns_error"],
+  [
+    "Cannot perform I/O on behalf of a different request. I/O objects (such as streams, request/response bodies, and others) created in the context of one request handler cannot be accessed from a different request's handler. This is a limitation of Cloudflare Workers which allows us to improve overall performance.",
+    "request_context",
+  ],
+  [
+    "Cannot perform I/O on behalf of a different Durable Object. I/O objects (such as streams, request/response bodies, and others) created in the context of one Durable Object cannot be accessed from a different Durable Object in the same isolate. This is a limitation of Cloudflare Workers which allows us to improve overall performance.",
+    "request_context",
+  ],
+  ["The script will never generate a response.", "request_context"],
+]);
+export function providerErrorDiagnostic(error: unknown) {
+  const value = error instanceof Error ? error : undefined;
+  return {
+    error_name:
+      value && ["Error", "TypeError", "RangeError"].includes(value.name)
+        ? value.name
+        : "unknown",
+    error_code: value
+      ? (knownProviderErrors.get(value.message) ?? "unclassified")
+      : "unclassified",
+  };
+}
 export async function analyze(
   a: Analysis,
   key: string,
@@ -108,7 +139,9 @@ export async function analyze(
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      redirect: "error",
+      // workerd rejects redirect:error before egress despite published docs.
+      // Manual never follows; the exact-200 check below denies every redirect.
+      redirect: "manual",
       signal: controller.signal,
       headers: {
         "content-type": "application/json",
@@ -218,6 +251,8 @@ export async function analyze(
         event: "tracerook_provider_failure",
         stage: controller.signal.aborted ? "deadline" : stage,
         upstream_status: upstreamStatus,
+        ...providerErrorDiagnostic(e),
+        key_format_valid: /^sk-ant-[A-Za-z0-9_-]+$/.test(key),
       }),
     );
     if (controller.signal.aborted)
