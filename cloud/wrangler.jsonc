@@ -28,16 +28,19 @@
         {
           "binding": "DB",
           "database_name": "tracerook-cloud-staging",
-          "database_id": "REPLACE_STAGING_D1_ID",
+          "database_id": "5d8add54-a775-47eb-be02-01a823e91082",
           "migrations_dir": "migrations",
         },
       ],
     },
     "production": {
       "name": "tracerook-cloud-production",
+      "routes": [{"pattern":"api.tracerook.dev", "custom_domain":true}],
+      "workers_dev": false,
+      "preview_urls": false,
       "vars": {
         "ENVIRONMENT": "production",
-        "CLOUD_ANALYSIS_ENABLED": "false",
+        "CLOUD_ANALYSIS_ENABLED": "true",
         "GLOBAL_MONTHLY_CAP_MICRO_USD": "null",
         "INPUT_PRICE_MICRO_USD_PER_TOKEN": "0.1",
         "OUTPUT_PRICE_MICRO_USD_PER_TOKEN": "0.5",
@@ -54,7 +57,7 @@
         {
           "binding": "DB",
           "database_name": "tracerook-cloud-production",
-          "database_id": "REPLACE_PRODUCTION_D1_ID",
+          "database_id": "f39917fb-a81b-48a3-891c-9c1b9a979d69",
           "migrations_dir": "migrations",
         },
       ],
