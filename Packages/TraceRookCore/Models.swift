@@ -127,6 +127,15 @@ public struct IncidentRecord: Codable, Sendable, Identifiable, Equatable {
     public let providerMode: AnalysisMode
     public var reviewed: Bool
     public var falsePositive: Bool
+    public init(id: UUID = UUID(), sessionID: UUID, origin: DataOrigin, title: String, severity: Severity,
+                categories: [FindingCategory] = [.unsafeAction], ruleIDs: [String], summary: String, rationale: String,
+                evidence: [String] = [], limitations: [String] = [], execution: ExecutionState = .executionUnknown,
+                createdAt: Date = .now, providerMode: AnalysisMode = .localRulesOnly, reviewed: Bool = false, falsePositive: Bool = false) {
+        self.id = id; self.sessionID = sessionID; self.origin = origin; self.title = title; self.severity = severity
+        self.categories = categories; self.ruleIDs = ruleIDs; self.summary = summary; self.rationale = rationale
+        self.evidence = evidence; self.limitations = limitations; self.execution = execution; self.createdAt = createdAt
+        self.providerMode = providerMode; self.reviewed = reviewed; self.falsePositive = falsePositive
+    }
 }
 public enum ApprovalState: String, Codable, Sendable {
     case pending, approvedOnce = "approved_once", denied, expired, aborted

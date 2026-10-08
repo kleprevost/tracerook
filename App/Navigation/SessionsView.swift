@@ -33,7 +33,7 @@ struct SessionsView: View {
                                 HStack { Text(session.project).font(.headline); Spacer(); SeverityBadge(severity: session.risk) }
                                 Text(session.provider.title).font(.caption).foregroundStyle(.secondary)
                                 Text(session.taskAnchor).font(.caption).foregroundStyle(.secondary).lineLimit(2)
-                                Text("Demo · \(session.endedAt == nil ? "Sample session" : "Ended")").font(.caption2).foregroundStyle(RookTheme.amber)
+                                Text(session.origin == .demo ? "Demo · sample session" : environment.model.isSimulatedSession(session.id) ? "Simulated ingestion · no host callback" : session.activity(at: .now)).font(.caption2).foregroundStyle(RookTheme.amber)
                             }.padding(.vertical, 8).tag(session.id)
                         }
                     }.listStyle(.plain)
@@ -49,13 +49,18 @@ struct SessionsView: View {
     }
 }
 struct SessionDetail: View {
+    @Environment(AppEnvironment.self) private var environment
     let session: SessionRecord
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                HStack { PageHeading(title: session.project, subtitle: session.provider.title); DemoBadge() }
+                HStack {
+                    PageHeading(title: session.project, subtitle: session.provider.title)
+                    if session.origin == .demo { DemoBadge() }
+                    else if environment.model.isSimulatedSession(session.id) { StatusBadge(text: "SIMULATED INGESTION", color: RookTheme.amber) }
+                }
                 Surface("Session context") {
-                    DetailField(name: "Coverage", value: "Demo data · no live protection")
+                    DetailField(name: "Coverage", value: session.origin == .demo ? "Demo data · no live protection" : environment.model.isSimulatedSession(session.id) ? "Simulated ingestion · no host protection proved" : session.coverage.title)
                     DetailField(name: "Task anchor", value: session.taskAnchor.isEmpty ? "Task unknown · context unavailable" : session.taskAnchor)
                     DetailField(name: "First observed", value: session.firstSeenAt.formatted(date: .abbreviated, time: .shortened))
                     DetailField(name: "Last observed", value: session.lastSeenAt.formatted(date: .abbreviated, time: .shortened))
@@ -73,7 +78,7 @@ struct SessionDetail: View {
                         StatusBadge(text: event.execution.title, color: RookTheme.color(event.severity))
                     }
                 }
-                Text("Sample timelines contain no original command, source file or full transcript. Allowing past TraceRook does not establish host execution.").font(.caption).foregroundStyle(.secondary)
+                Text("Timelines contain minimized, sanitized context. Allowing past TraceRook does not establish host execution.").font(.caption).foregroundStyle(.secondary)
             }.padding(24)
         }.frame(maxWidth: .infinity)
     }

@@ -5,12 +5,24 @@ struct IntegrationsView: View {
     @Environment(AppEnvironment.self) private var environment
     @ViewState<AgentProvider?> private var selectedPreview: AgentProvider?
     var body: some View {
+        @Bindable var agent = environment.agent
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeading(title: "Connect with confidence", subtitle: "Installation, host trust and verified execution are separate checks.")
                 Surface {
-                    Label("Live integration installation is not available in this build", systemImage: "wrench.and.screwdriver").font(.headline)
-                    Text("No agent configuration or Login Item has been changed. The preview below illustrates the planned consent flow with sample paths.").font(.callout).foregroundStyle(.secondary)
+                    Label("Background service", systemImage: "gearshape.2").font(.headline)
+                    Text(environment.agent.status).font(.callout)
+                    Text("Enable starts a per-user service and a private local history database. Agent hooks require a separate configuration preview and consent. This build uses local ad-hoc signatures and is not notarized.").font(.callout).foregroundStyle(.secondary)
+                    HStack {
+                        Button("Enable Background Service") { environment.agent.enable() }
+                        Button("Disable Service") { Task { await environment.agent.disable() } }
+                        if environment.agent.connected {
+                            Button("Demonstrate service ingestion") {
+                                Task { _ = try? await environment.agent.command(.simulatedIngestion); await environment.agent.refresh(); environment.model.showRealActivity() }
+                            }
+                        }
+                    }.buttonStyle(.bordered)
+                    Text("Simulated ingestion tests the real local store and IPC; it does not verify host protection.").font(.caption).foregroundStyle(.secondary)
                 }
                 ForEach(AgentProvider.allCases, id: \.self) { provider in
                     Surface {
@@ -49,6 +61,26 @@ struct IntegrationsView: View {
             }.padding(28)
         }
         .sheet(item: $selectedPreview) { provider in IntegrationPreview(provider: provider) }
+        .sheet(item: $agent.servicePlan) { plan in
+            VStack(alignment: .leading, spacing: 16) {
+                PageHeading(title: "Enable the local background service", subtitle: "Non-notarized build · per-user LaunchAgent")
+                Text(plan.destination.path).font(.caption.monospaced()).textSelection(.enabled)
+                Text("This installs the exact configuration below, starts the bundled helper at login, and creates a private history store. The helper validates exact signatures of this installed app and CLI. Replacing an ad-hoc bundle changes that local trust boundary; it does not prove publisher identity.").font(.callout)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Before").font(.headline)
+                        Text(plan.originalContent.flatMap { String(data: $0, encoding: .utf8) } ?? "No existing file")
+                        Text("After").font(.headline)
+                        Text(plan.preview)
+                    }.font(.caption.monospaced()).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
+                }.frame(height: 260)
+                HStack {
+                    Button("Cancel") { agent.servicePlan = nil }
+                    Spacer()
+                    Button("Install this configuration") { agent.confirmLocalService() }.buttonStyle(.borderedProminent)
+                }
+            }.padding(24).frame(width: 680)
+        }
     }
     private func fact(_ title: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 5) { Text(title).font(.caption).foregroundStyle(.secondary); Text(value).font(.callout.weight(.medium)) }

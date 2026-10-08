@@ -19,7 +19,7 @@ struct OverviewView: View {
                 coverageBanner
                 HStack(spacing: 14) {
                     MetricCard(title: "Verified integrations", value: "0 / 2", caption: "Actual local coverage", symbol: "link")
-                    MetricCard(title: environment.model.showingDemo ? "Sample sessions" : "Observed sessions", value: "\(environment.model.sessions.count)", caption: environment.model.showingDemo ? "Bundled fixtures" : "Waiting for live ingestion", symbol: "terminal")
+                    MetricCard(title: environment.model.showingDemo ? "Sample sessions" : "Observed sessions", value: "\(environment.model.showingDemo ? environment.model.sessions.count : environment.model.observedHostSessionCount)", caption: environment.model.showingDemo ? "Bundled fixtures" : "Actual host callbacks only", symbol: "terminal")
                     MetricCard(title: environment.model.showingDemo ? "Sample findings" : "Decisions today", value: "\(environment.model.incidents.count)", caption: environment.model.showingDemo ? "Synthetic risk scenarios" : "No observed decisions", symbol: "exclamationmark.shield")
                     MetricCard(title: "Pending reviews", value: "\(environment.model.pendingCount)", caption: environment.model.showingDemo ? "Simulation only" : "No waiting hook calls", symbol: "hand.raised")
                 }
@@ -66,7 +66,10 @@ struct OverviewView: View {
                     }
                 } else {
                     Surface {
-                        EmptyActivity(title: "No real activity observed", description: "The live service and hooks arrive in the next implementation phase. Explore the demo to try the review experience safely.", symbol: "terminal")
+                        EmptyActivity(title: "No real activity observed", description: "Enable the background service in Integrations. Host protection requires separately installed and verified hooks.", symbol: "terminal")
+                        if environment.model.liveSnapshot?.simulatedSessionIDs.isEmpty == false {
+                            Button("Inspect simulated service ingestion") { environment.model.destination = .sessions }.buttonStyle(.link)
+                        }
                     }
                 }
                 Text("TraceRook watches supported local hook paths. Hosted tools, skipped callbacks and nested processes may be outside coverage.")

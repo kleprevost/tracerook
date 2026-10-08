@@ -5,50 +5,10 @@
 	"objectVersion" = "60";
 	"archiveVersion" = "1";
 	"objects" = {
-		"56C0EDC92681176F60480FFF" = {
+		"062F86332F4818E96EFAAAF9" = {
 			"isa" = "XCSwiftPackageProductDependency";
 			"package" = "BC4A71180870F7945155FBB0";
-			"productName" = "TraceRookCore";
-		};
-		"583E366C8A5051980A8F33A3" = {
-			"productType" = "com.apple.product-type.tool";
-			"productReference" = "29230EDC32B3EDC6569809ED";
-			"buildConfigurationList" = "87A847E40CC280661E6AE0FA";
-			"packageProductDependencies" = ("51C878DA3CE436AEBD0FFBED", "65D92690B425464829648542",);
-			"productName" = "tracerook-hook";
-			"isa" = "PBXNativeTarget";
-			"buildPhases" = ("D5E4992505D5E76EA8891348", "D4A778B25B6ACA6D75D1449B",);
-			"dependencies" = ();
-			"name" = "tracerook-hook";
-			"buildRules" = ();
-		};
-		"8DE3D33197A9F175A42E8760" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Navigation/SessionsView.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"0783F69D117F79F63200EDA0" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/TraceRookApp.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"DC3C53879DB42DBAA4D572F8" = {
-			"isa" = "PBXFrameworksBuildPhase";
-			"buildActionMask" = "2147483647";
-			"files" = ("D00947770396C2052CC31B78", "386FA201971935B7973EBC5A", "03B92FFBD8D76F0FC58B054F", "7B65A7AD4B1C97A345E40B38",);
-			"runOnlyForDeploymentPostprocessing" = "0";
-		};
-		"4D6FC5A1736DCA577CF68A90" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "image.icns";
-			"path" = "Resources/TraceRook.icns";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"03B92FFBD8D76F0FC58B054F" = {
-			"isa" = "PBXBuildFile";
-			"productRef" = "5F02449DD18A3D036AA17E29";
+			"productName" = "TraceRookAgentAdapters";
 		};
 		"DCF681C6B82BDC4288C8E45C" = {
 			"isa" = "PBXFileReference";
@@ -56,25 +16,206 @@
 			"path" = "App/Navigation/OnboardingView.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
-		"7B65A7AD4B1C97A345E40B38" = {
+		"061506A4AA8897BE192797A9" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookContracts";
+		};
+		"E6D3599795DF9175F7785EC5" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Theme/UISmokeRenderer.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"458613076E66BFE984971049" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookPrivacy";
+		};
+		"FF30A5AD2B5EA4F467D4C05B" = {
 			"isa" = "PBXBuildFile";
-			"productRef" = "BE36E342AF8AADFD37BCB7B1";
+			"fileRef" = "580ACDB041A7BFCCB0F03A45";
+		};
+		"DD5C5EB52E5A1005CD99ECCA" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookContracts";
+		};
+		"7B6E086D22B71C6065C9F7BD" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "35CD2478586BAC3221FE009D";
+		};
+		"A51AEF87F274216C633EBB19" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "061506A4AA8897BE192797A9";
+		};
+		"8659F25135FA0F32E8629A7F" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "0932B2A26AEC48EA2317FABB";
+		};
+		"A16A072159C359D2DC0973B7" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookIPC";
+		};
+		"1BD403957CFE0791090DFB61" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "65D92690B425464829648542";
+		};
+		"E663F5A7B7051ECCC9FA401F" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "DCF681C6B82BDC4288C8E45C";
+		};
+		"0932B2A26AEC48EA2317FABB" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookContracts";
+		};
+		"9FEDE05E99A66170F24889F3" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "F8FF2DBC50C6DE5EEF56FEE1";
+		};
+		"3008601693758A92766A6129" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Theme/Components.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"50BE5BCDCE691EE1661CECF5" = {
+			"isa" = "XCConfigurationList";
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+			"buildConfigurations" = ("9B38A52CCC9C936EDF67912D", "4CD918808948232DAB1935C9",);
+		};
+		"133B2E41E8C705934A01FC9A" = {
+			"isa" = "PBXGroup";
+			"name" = "Agent";
+			"children" = ("B154251CA19E80F3F07268B9", "D12DECE7A5E3204ED0DE132E",);
+			"sourceTree" = "<group>";
+		};
+		"F9187E824FE171A6F0EFAE28" = {
+			"isa" = "PBXResourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("01BCCC5587056415CE68AF04",);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"25F0C13A65E9639870159491" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Navigation/IncidentsView.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"BF342EEE3C24006746C2361F" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "7CA329557820D2676D542BB5";
+		};
+		"F8FF2DBC50C6DE5EEF56FEE1" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookIPC";
+		};
+		"D62A00695DE07D092046ACB6" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookCore";
+		};
+		"944CA901318F800857008451" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "244210E48437B6556980A702";
+			"remoteGlobalIDString" = "583E366C8A5051980A8F33A3";
+			"remoteInfo" = "tracerook-hook";
+			"proxyType" = "1";
+		};
+		"5769B88F711B90BC52E80B05" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookFixtures";
+		};
+		"4CD918808948232DAB1935C9" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"buildSettings" = {
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.app";
+				"INFOPLIST_FILE" = "Resources/Info.plist";
+				"MACOSX_DEPLOYMENT_TARGET" = "26.0";
+				"GENERATE_INFOPLIST_FILE" = "NO";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
+				"SUPPORTED_PLATFORMS" = "macosx";
+				"ARCHS" = "arm64";
+				"SDKROOT" = "macosx";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_VERSION" = "6.0";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"COMBINE_HIDPI_IMAGES" = "YES";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+			};
+		};
+		"0526815EC911AC603A9BCD22" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookContracts";
+		};
+		"4799B7B727461BD0D768F482" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "C9A0E87054E4488A24E356EC";
 		};
 		"E8EDDF0CD9ECA02FEF7A50E9" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("92A989B0ACCFC315107ABAE8", "18AB2AE805230A62C4B97196", "B2C37EB144B0D2A8BEDF9830", "FF30A5AD2B5EA4F467D4C05B", "E663F5A7B7051ECCC9FA401F", "F0C8C3DE7652AE8CE793682E", "B03E562213FB0EEE9A19CA28", "1E5962E7238EBB3B50346404", "0A38AAB26ECFBE1EF2F2732B", "33514E65B1C278C6D6BDCEA3", "7B3DABBA443E6DFC00C43CA7", "CD41F0A40525A87D7B05DDF9", "C63E7D218F43F5371CD1AB82",);
+			"files" = ("92A989B0ACCFC315107ABAE8", "18AB2AE805230A62C4B97196", "B2C37EB144B0D2A8BEDF9830", "FF30A5AD2B5EA4F467D4C05B", "E663F5A7B7051ECCC9FA401F", "F0C8C3DE7652AE8CE793682E", "B03E562213FB0EEE9A19CA28", "1E5962E7238EBB3B50346404", "0A38AAB26ECFBE1EF2F2732B", "4B5B9D8F305B0FCA480C3070", "D7648C6DDBE9A449A3758E72", "33514E65B1C278C6D6BDCEA3", "7B3DABBA443E6DFC00C43CA7", "CD41F0A40525A87D7B05DDF9", "C63E7D218F43F5371CD1AB82",);
 			"runOnlyForDeploymentPostprocessing" = "0";
 		};
-		"0A38AAB26ECFBE1EF2F2732B" = {
+		"1FC23E488ED8449EA4C2A64A" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "583E366C8A5051980A8F33A3";
+			"targetProxy" = "944CA901318F800857008451";
+		};
+		"D4A778B25B6ACA6D75D1449B" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("8659F25135FA0F32E8629A7F", "FBF8A340FC674C32C05F81EC", "CF43239E7CA7A3BA5F1576C6", "D6A3CD7FC423993139369B0A", "F009DC018907CA098A6A7049",);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"9B4987B6F34910D49CCDCD4D" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookCore";
+		};
+		"33514E65B1C278C6D6BDCEA3" = {
 			"isa" = "PBXBuildFile";
-			"fileRef" = "85D97EA6C5FD545350999192";
+			"fileRef" = "3008601693758A92766A6129";
 		};
 		"BADD0D843818D00AFA055632" = {
 			"isa" = "PBXSourcesBuildPhase";
 			"buildActionMask" = "2147483647";
-			"files" = ("32A2B13F62E25AE0EAD0DADA",);
+			"files" = ("1AAA0FDDE3AC1D94A454EE16", "32A2B13F62E25AE0EAD0DADA",);
 			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"0783F69D117F79F63200EDA0" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/TraceRookApp.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"CF43239E7CA7A3BA5F1576C6" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "2770570BC6E121DDABCC73EC";
+		};
+		"7B65A7AD4B1C97A345E40B38" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "BE36E342AF8AADFD37BCB7B1";
+		};
+		"D7648C6DDBE9A449A3758E72" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0D9F3E16DCE1DAE3F65EC4B0";
+		};
+		"4D6FC5A1736DCA577CF68A90" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "image.icns";
+			"path" = "Resources/TraceRook.icns";
+			"sourceTree" = "SOURCE_ROOT";
 		};
 		"8950F664DAE2B30A475755EE" = {
 			"isa" = "XCBuildConfiguration";
@@ -86,54 +227,99 @@
 				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
 				"SUPPORTED_PLATFORMS" = "macosx";
 				"ARCHS" = "arm64";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
 				"SDKROOT" = "macosx";
 				"SWIFT_VERSION" = "6.0";
-				"CODE_SIGN_STYLE" = "Automatic";
 				"ENABLE_HARDENED_RUNTIME" = "YES";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.tracerookagent";
-				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.agent";
 			};
 		};
-		"1BD403957CFE0791090DFB61" = {
-			"isa" = "PBXBuildFile";
-			"productRef" = "65D92690B425464829648542";
+		"8DE3D33197A9F175A42E8760" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Navigation/SessionsView.swift";
+			"sourceTree" = "SOURCE_ROOT";
 		};
-		"DD5C5EB52E5A1005CD99ECCA" = {
+		"5F02449DD18A3D036AA17E29" = {
 			"isa" = "XCSwiftPackageProductDependency";
 			"package" = "BC4A71180870F7945155FBB0";
-			"productName" = "TraceRookContracts";
+			"productName" = "TraceRookFixtures";
 		};
-		"51C878DA3CE436AEBD0FFBED" = {
+		"32A2B13F62E25AE0EAD0DADA" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "D12DECE7A5E3204ED0DE132E";
+		};
+		"4623B6E3C52775341D8C8231" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Navigation/OverviewView.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"0D9F3E16DCE1DAE3F65EC4B0" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Services/LocalServiceRegistration.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"472F2D08A39E550494F5EDEC" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("A51AEF87F274216C633EBB19", "C79B12F3C9805E545101262A", "A69E194B46208E1A95D8F7ED", "BF342EEE3C24006746C2361F", "0772E2F1FD769102B2969374", "FAA504B43A5B03618076B812",);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"B154251CA19E80F3F07268B9" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Agent/AgentRuntime.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"4B5B9D8F305B0FCA480C3070" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "5CD3FE2A3C96DE5839340BBF";
+		};
+		"DC3C53879DB42DBAA4D572F8" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("368776A1D7D799BAE6E8CB20", "388193A2C033D0DD82F64B9D", "76A0D14E7637D274D9ECB0BB", "5E927181D14D5F2E4CD1C12D", "9FEDE05E99A66170F24889F3",);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"C79B12F3C9805E545101262A" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "0573B1CF95D3F215181D8565";
+		};
+		"388193A2C033D0DD82F64B9D" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "9B4987B6F34910D49CCDCD4D";
+		};
+		"0573B1CF95D3F215181D8565" = {
 			"isa" = "XCSwiftPackageProductDependency";
 			"package" = "BC4A71180870F7945155FBB0";
-			"productName" = "TraceRookContracts";
+			"productName" = "TraceRookCore";
 		};
-		"944CA901318F800857008451" = {
-			"isa" = "PBXContainerItemProxy";
-			"containerPortal" = "244210E48437B6556980A702";
-			"remoteGlobalIDString" = "583E366C8A5051980A8F33A3";
-			"remoteInfo" = "tracerook-hook";
-			"proxyType" = "1";
+		"D12DECE7A5E3204ED0DE132E" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "Agent/main.swift";
+			"sourceTree" = "SOURCE_ROOT";
 		};
-		"FC9C2D4CB810DF4D65FC9BFD" = {
-			"isa" = "PBXContainerItemProxy";
-			"containerPortal" = "244210E48437B6556980A702";
-			"remoteGlobalIDString" = "9B355378FB866F0BC792862C";
-			"remoteInfo" = "TraceRookAgent";
-			"proxyType" = "1";
+		"3CCE7051BAA1B8E65CDEECD3" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Debug";
+			"buildSettings" = {
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+			};
 		};
-		"FF30A5AD2B5EA4F467D4C05B" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "580ACDB041A7BFCCB0F03A45";
-		};
-		"18AB2AE805230A62C4B97196" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "111E42CE9C4486E4FE1EFB28";
-		};
-		"1FC23E488ED8449EA4C2A64A" = {
-			"isa" = "PBXTargetDependency";
-			"target" = "583E366C8A5051980A8F33A3";
-			"targetProxy" = "944CA901318F800857008451";
+		"EB9B6A82A6FECD10C0E43155" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"buildSettings" = {
+				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
+				"CLANG_ENABLE_MODULES" = "YES";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
+			};
 		};
 		"454976A291F27633D56F6E02" = {
 			"inputPaths" = ();
@@ -145,113 +331,12 @@
 			"shellScript" = "set -eu\nmkdir -p \"$TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/Library/LaunchAgents\"\ncp \"$SRCROOT/Resources/LaunchAgents/com.tracerook.agent.plist\" \"$TARGET_BUILD_DIR/$CONTENTS_FOLDER_PATH/Library/LaunchAgents/\"\ncp \"$BUILT_PRODUCTS_DIR/TraceRookAgent\" \"$TARGET_BUILD_DIR/$EXECUTABLE_FOLDER_PATH/\"\ncp \"$BUILT_PRODUCTS_DIR/tracerook-hook\" \"$TARGET_BUILD_DIR/$EXECUTABLE_FOLDER_PATH/\"";
 			"files" = ();
 		};
-		"45C0F793A23C8A34E99DB3D9" = {
-			"isa" = "PBXGroup";
-			"name" = "HookCLI";
-			"children" = ("35CD2478586BAC3221FE009D",);
-			"sourceTree" = "<group>";
-		};
-		"4799B7B727461BD0D768F482" = {
-			"isa" = "PBXBuildFile";
-			"productRef" = "C9A0E87054E4488A24E356EC";
-		};
-		"0553E0DC7EB9A37A31881E92" = {
-			"isa" = "XCConfigurationList";
-			"defaultConfigurationIsVisible" = "0";
-			"defaultConfigurationName" = "Release";
-			"buildConfigurations" = ("A731B0BDF46F90746671ECC2", "8950F664DAE2B30A475755EE",);
-		};
-		"7B1BFF88BE467291A1190B76" = {
-			"isa" = "XCBuildConfiguration";
-			"name" = "Debug";
-			"buildSettings" = {
-				"SWIFT_STRICT_CONCURRENCY" = "complete";
-				"DEBUG_INFORMATION_FORMAT" = "dwarf";
-				"MACOSX_DEPLOYMENT_TARGET" = "26.0";
-				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
-				"SUPPORTED_PLATFORMS" = "macosx";
-				"ARCHS" = "arm64";
-				"SDKROOT" = "macosx";
-				"SWIFT_VERSION" = "6.0";
-				"CODE_SIGN_STYLE" = "Automatic";
-				"ENABLE_HARDENED_RUNTIME" = "YES";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.tracerook-hook";
-				"PRODUCT_NAME" = "$(TARGET_NAME)";
-			};
-		};
-		"85D97EA6C5FD545350999192" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Notifications/NotificationController.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"25F0C13A65E9639870159491" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Navigation/IncidentsView.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"BC4A71180870F7945155FBB0" = {
-			"isa" = "XCLocalSwiftPackageReference";
-			"relativePath" = ".";
-		};
-		"D671A37D0FB20006E33C7EDC" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Navigation/ApprovalsView.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"EB9B6A82A6FECD10C0E43155" = {
-			"isa" = "XCBuildConfiguration";
-			"name" = "Release";
-			"buildSettings" = {
-				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
-				"CLANG_ENABLE_MODULES" = "YES";
-				"SWIFT_STRICT_CONCURRENCY" = "complete";
-			};
-		};
-		"87A847E40CC280661E6AE0FA" = {
-			"isa" = "XCConfigurationList";
-			"defaultConfigurationIsVisible" = "0";
-			"defaultConfigurationName" = "Release";
-			"buildConfigurations" = ("7B1BFF88BE467291A1190B76", "452F2231750B5E2727B020E5",);
-		};
-		"D4A778B25B6ACA6D75D1449B" = {
-			"isa" = "PBXFrameworksBuildPhase";
-			"buildActionMask" = "2147483647";
-			"files" = ("9BD39105C8FD1F833DC59579", "1BD403957CFE0791090DFB61",);
-			"runOnlyForDeploymentPostprocessing" = "0";
-		};
-		"D12DECE7A5E3204ED0DE132E" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "Agent/main.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"386FA201971935B7973EBC5A" = {
-			"isa" = "PBXBuildFile";
-			"productRef" = "56C0EDC92681176F60480FFF";
-		};
-		"4CD918808948232DAB1935C9" = {
-			"isa" = "XCBuildConfiguration";
-			"name" = "Release";
-			"buildSettings" = {
-				"COMBINE_HIDPI_IMAGES" = "YES";
-				"DEBUG_INFORMATION_FORMAT" = "dwarf-with-dsym";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.app";
-				"INFOPLIST_FILE" = "Resources/Info.plist";
-				"MACOSX_DEPLOYMENT_TARGET" = "26.0";
-				"GENERATE_INFOPLIST_FILE" = "NO";
-				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
-				"SUPPORTED_PLATFORMS" = "macosx";
-				"ARCHS" = "arm64";
-				"PRODUCT_NAME" = "$(TARGET_NAME)";
-				"SWIFT_VERSION" = "6.0";
-				"CODE_SIGN_STYLE" = "Automatic";
-				"SDKROOT" = "macosx";
-				"SWIFT_STRICT_CONCURRENCY" = "complete";
-				"ENABLE_HARDENED_RUNTIME" = "YES";
-			};
+		"FC9C2D4CB810DF4D65FC9BFD" = {
+			"isa" = "PBXContainerItemProxy";
+			"containerPortal" = "244210E48437B6556980A702";
+			"remoteGlobalIDString" = "9B355378FB866F0BC792862C";
+			"remoteInfo" = "TraceRookAgent";
+			"proxyType" = "1";
 		};
 		"35CD2478586BAC3221FE009D" = {
 			"isa" = "PBXFileReference";
@@ -259,87 +344,29 @@
 			"path" = "HookCLI/main.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
-		"50BE5BCDCE691EE1661CECF5" = {
+		"368776A1D7D799BAE6E8CB20" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "0526815EC911AC603A9BCD22";
+		};
+		"D6A3CD7FC423993139369B0A" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "861D13B35E363FAF75BEECCF";
+		};
+		"0772E2F1FD769102B2969374" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "062F86332F4818E96EFAAAF9";
+		};
+		"0553E0DC7EB9A37A31881E92" = {
 			"isa" = "XCConfigurationList";
 			"defaultConfigurationIsVisible" = "0";
 			"defaultConfigurationName" = "Release";
-			"buildConfigurations" = ("9B38A52CCC9C936EDF67912D", "4CD918808948232DAB1935C9",);
-		};
-		"E663F5A7B7051ECCC9FA401F" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "DCF681C6B82BDC4288C8E45C";
-		};
-		"CF7F534C76BFD347EF40FD30" = {
-			"isa" = "PBXBuildFile";
-			"productRef" = "820B9044E912199A78707D93";
-		};
-		"7B3DABBA443E6DFC00C43CA7" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "E6D3599795DF9175F7785EC5";
-		};
-		"92A989B0ACCFC315107ABAE8" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "D671A37D0FB20006E33C7EDC";
-		};
-		"328392595BF659D6BAB0B509" = {
-			"path" = "TraceRookAgent";
-			"isa" = "PBXFileReference";
-			"explicitFileType" = "compiled.mach-o.executable";
-			"sourceTree" = "BUILT_PRODUCTS_DIR";
-		};
-		"0A3E27B8CA818264D75C8D81" = {
-			"isa" = "PBXGroup";
-			"name" = "Products";
-			"children" = ("C29F103474EA28CEB1E7045E", "328392595BF659D6BAB0B509", "29230EDC32B3EDC6569809ED",);
-			"sourceTree" = "<group>";
-		};
-		"5F02449DD18A3D036AA17E29" = {
-			"isa" = "XCSwiftPackageProductDependency";
-			"package" = "BC4A71180870F7945155FBB0";
-			"productName" = "TraceRookFixtures";
-		};
-		"F9085ADD90333F0C37D6B5B4" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/ViewModels/AppEnvironment.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"29230EDC32B3EDC6569809ED" = {
-			"path" = "tracerook-hook";
-			"isa" = "PBXFileReference";
-			"explicitFileType" = "compiled.mach-o.executable";
-			"sourceTree" = "BUILT_PRODUCTS_DIR";
-		};
-		"CD41F0A40525A87D7B05DDF9" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "0783F69D117F79F63200EDA0";
-		};
-		"580ACDB041A7BFCCB0F03A45" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Navigation/IntegrationsView.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"F9187E824FE171A6F0EFAE28" = {
-			"isa" = "PBXResourcesBuildPhase";
-			"buildActionMask" = "2147483647";
-			"files" = ("01BCCC5587056415CE68AF04",);
-			"runOnlyForDeploymentPostprocessing" = "0";
-		};
-		"7B6E086D22B71C6065C9F7BD" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "35CD2478586BAC3221FE009D";
-		};
-		"D62A00695DE07D092046ACB6" = {
-			"isa" = "XCSwiftPackageProductDependency";
-			"package" = "BC4A71180870F7945155FBB0";
-			"productName" = "TraceRookCore";
+			"buildConfigurations" = ("A731B0BDF46F90746671ECC2", "8950F664DAE2B30A475755EE",);
 		};
 		"9B38A52CCC9C936EDF67912D" = {
 			"isa" = "XCBuildConfiguration";
 			"name" = "Debug";
 			"buildSettings" = {
-				"COMBINE_HIDPI_IMAGES" = "YES";
+				"SWIFT_STRICT_CONCURRENCY" = "complete";
 				"DEBUG_INFORMATION_FORMAT" = "dwarf";
 				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.app";
 				"INFOPLIST_FILE" = "Resources/Info.plist";
@@ -348,34 +375,13 @@
 				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
 				"SUPPORTED_PLATFORMS" = "macosx";
 				"ARCHS" = "arm64";
-				"PRODUCT_NAME" = "$(TARGET_NAME)";
-				"SWIFT_VERSION" = "6.0";
-				"CODE_SIGN_STYLE" = "Automatic";
 				"SDKROOT" = "macosx";
-				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"SWIFT_VERSION" = "6.0";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"COMBINE_HIDPI_IMAGES" = "YES";
 				"ENABLE_HARDENED_RUNTIME" = "YES";
 			};
-		};
-		"01BCCC5587056415CE68AF04" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "4D6FC5A1736DCA577CF68A90";
-		};
-		"BE36E342AF8AADFD37BCB7B1" = {
-			"isa" = "XCSwiftPackageProductDependency";
-			"package" = "BC4A71180870F7945155FBB0";
-			"productName" = "TraceRookPrivacy";
-		};
-		"13C4608B5138EBE9B3A45A55" = {
-			"isa" = "PBXGroup";
-			"name" = "App";
-			"children" = ("D671A37D0FB20006E33C7EDC", "111E42CE9C4486E4FE1EFB28", "25F0C13A65E9639870159491", "580ACDB041A7BFCCB0F03A45", "DCF681C6B82BDC4288C8E45C", "4623B6E3C52775341D8C8231", "8DE3D33197A9F175A42E8760", "A36A6FF7D8DBF950AB28456D", "85D97EA6C5FD545350999192", "3008601693758A92766A6129", "E6D3599795DF9175F7785EC5", "0783F69D117F79F63200EDA0", "F9085ADD90333F0C37D6B5B4", "4D6FC5A1736DCA577CF68A90",);
-			"sourceTree" = "<group>";
-		};
-		"472F2D08A39E550494F5EDEC" = {
-			"isa" = "PBXFrameworksBuildPhase";
-			"buildActionMask" = "2147483647";
-			"files" = ("CF7F534C76BFD347EF40FD30", "E626AAA056EE265790085E7D", "4799B7B727461BD0D768F482",);
-			"runOnlyForDeploymentPostprocessing" = "0";
 		};
 		"A36A6FF7D8DBF950AB28456D" = {
 			"isa" = "PBXFileReference";
@@ -383,10 +389,89 @@
 			"path" = "App/Navigation/SettingsView.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
-		"3008601693758A92766A6129" = {
+		"0D6E4079E36703EBD37C0072" = {
+			"isa" = "PBXGroup";
+			"sourceTree" = "<group>";
+			"children" = ("13C4608B5138EBE9B3A45A55", "133B2E41E8C705934A01FC9A", "45C0F793A23C8A34E99DB3D9", "0A3E27B8CA818264D75C8D81",);
+		};
+		"A69E194B46208E1A95D8F7ED" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "5769B88F711B90BC52E80B05";
+		};
+		"51C878DA3CE436AEBD0FFBED" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookContracts";
+		};
+		"CF7F534C76BFD347EF40FD30" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "820B9044E912199A78707D93";
+		};
+		"328392595BF659D6BAB0B509" = {
+			"path" = "TraceRookAgent";
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "compiled.mach-o.executable";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"861D13B35E363FAF75BEECCF" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookRules";
+		};
+		"FAA504B43A5B03618076B812" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "3FE8CB6DC594DA0E89DBD781";
+		};
+		"87A847E40CC280661E6AE0FA" = {
+			"isa" = "XCConfigurationList";
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+			"buildConfigurations" = ("7B1BFF88BE467291A1190B76", "452F2231750B5E2727B020E5",);
+		};
+		"583E366C8A5051980A8F33A3" = {
+			"productType" = "com.apple.product-type.tool";
+			"productReference" = "29230EDC32B3EDC6569809ED";
+			"buildConfigurationList" = "87A847E40CC280661E6AE0FA";
+			"packageProductDependencies" = ("0932B2A26AEC48EA2317FABB", "B5979E11E7C3BA1FD783840C", "2770570BC6E121DDABCC73EC", "861D13B35E363FAF75BEECCF", "A16A072159C359D2DC0973B7",);
+			"productName" = "tracerook-hook";
+			"isa" = "PBXNativeTarget";
+			"buildPhases" = ("D5E4992505D5E76EA8891348", "D4A778B25B6ACA6D75D1449B",);
+			"dependencies" = ();
+			"name" = "tracerook-hook";
+			"buildRules" = ();
+		};
+		"580ACDB041A7BFCCB0F03A45" = {
 			"isa" = "PBXFileReference";
 			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Theme/Components.swift";
+			"path" = "App/Navigation/IntegrationsView.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"D5E4992505D5E76EA8891348" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ("7B6E086D22B71C6065C9F7BD",);
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"9BD39105C8FD1F833DC59579" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "51C878DA3CE436AEBD0FFBED";
+		};
+		"45C0F793A23C8A34E99DB3D9" = {
+			"isa" = "PBXGroup";
+			"name" = "HookCLI";
+			"children" = ("35CD2478586BAC3221FE009D",);
+			"sourceTree" = "<group>";
+		};
+		"13C4608B5138EBE9B3A45A55" = {
+			"isa" = "PBXGroup";
+			"name" = "App";
+			"children" = ("D671A37D0FB20006E33C7EDC", "111E42CE9C4486E4FE1EFB28", "25F0C13A65E9639870159491", "580ACDB041A7BFCCB0F03A45", "DCF681C6B82BDC4288C8E45C", "4623B6E3C52775341D8C8231", "8DE3D33197A9F175A42E8760", "A36A6FF7D8DBF950AB28456D", "85D97EA6C5FD545350999192", "5CD3FE2A3C96DE5839340BBF", "0D9F3E16DCE1DAE3F65EC4B0", "3008601693758A92766A6129", "E6D3599795DF9175F7785EC5", "0783F69D117F79F63200EDA0", "F9085ADD90333F0C37D6B5B4", "4D6FC5A1736DCA577CF68A90",);
+			"sourceTree" = "<group>";
+		};
+		"111E42CE9C4486E4FE1EFB28" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Navigation/DashboardView.swift";
 			"sourceTree" = "SOURCE_ROOT";
 		};
 		"D00947770396C2052CC31B78" = {
@@ -397,7 +482,7 @@
 			"productType" = "com.apple.product-type.application";
 			"productReference" = "C29F103474EA28CEB1E7045E";
 			"buildConfigurationList" = "50BE5BCDCE691EE1661CECF5";
-			"packageProductDependencies" = ("DD5C5EB52E5A1005CD99ECCA", "56C0EDC92681176F60480FFF", "5F02449DD18A3D036AA17E29", "BE36E342AF8AADFD37BCB7B1",);
+			"packageProductDependencies" = ("0526815EC911AC603A9BCD22", "9B4987B6F34910D49CCDCD4D", "458613076E66BFE984971049", "538158161EAF1DA24ABD5708", "F8FF2DBC50C6DE5EEF56FEE1",);
 			"productName" = "TraceRook";
 			"isa" = "PBXNativeTarget";
 			"buildPhases" = ("E8EDDF0CD9ECA02FEF7A50E9", "DC3C53879DB42DBAA4D572F8", "454976A291F27633D56F6E02", "F9187E824FE171A6F0EFAE28",);
@@ -405,40 +490,23 @@
 			"name" = "TraceRook";
 			"buildRules" = ();
 		};
-		"111E42CE9C4486E4FE1EFB28" = {
+		"29230EDC32B3EDC6569809ED" = {
+			"path" = "tracerook-hook";
 			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Navigation/DashboardView.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"820B9044E912199A78707D93" = {
-			"isa" = "XCSwiftPackageProductDependency";
-			"package" = "BC4A71180870F7945155FBB0";
-			"productName" = "TraceRookContracts";
+			"explicitFileType" = "compiled.mach-o.executable";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
 		};
 		"9B355378FB866F0BC792862C" = {
 			"productType" = "com.apple.product-type.tool";
 			"productReference" = "328392595BF659D6BAB0B509";
 			"buildConfigurationList" = "0553E0DC7EB9A37A31881E92";
-			"packageProductDependencies" = ("820B9044E912199A78707D93", "D62A00695DE07D092046ACB6", "C9A0E87054E4488A24E356EC",);
+			"packageProductDependencies" = ("061506A4AA8897BE192797A9", "0573B1CF95D3F215181D8565", "5769B88F711B90BC52E80B05", "7CA329557820D2676D542BB5", "062F86332F4818E96EFAAAF9", "3FE8CB6DC594DA0E89DBD781",);
 			"productName" = "TraceRookAgent";
 			"isa" = "PBXNativeTarget";
 			"buildPhases" = ("BADD0D843818D00AFA055632", "472F2D08A39E550494F5EDEC",);
 			"dependencies" = ();
 			"name" = "TraceRookAgent";
 			"buildRules" = ();
-		};
-		"D5E4992505D5E76EA8891348" = {
-			"isa" = "PBXSourcesBuildPhase";
-			"buildActionMask" = "2147483647";
-			"files" = ("7B6E086D22B71C6065C9F7BD",);
-			"runOnlyForDeploymentPostprocessing" = "0";
-		};
-		"E6D3599795DF9175F7785EC5" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Theme/UISmokeRenderer.swift";
-			"sourceTree" = "SOURCE_ROOT";
 		};
 		"452F2231750B5E2727B020E5" = {
 			"isa" = "XCBuildConfiguration";
@@ -450,22 +518,140 @@
 				"SWIFT_OPTIMIZATION_LEVEL" = "-O";
 				"SUPPORTED_PLATFORMS" = "macosx";
 				"ARCHS" = "arm64";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
 				"SDKROOT" = "macosx";
 				"SWIFT_VERSION" = "6.0";
-				"CODE_SIGN_STYLE" = "Automatic";
 				"ENABLE_HARDENED_RUNTIME" = "YES";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.tracerook-hook";
-				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.hook";
 			};
 		};
-		"3CCE7051BAA1B8E65CDEECD3" = {
+		"01BCCC5587056415CE68AF04" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "4D6FC5A1736DCA577CF68A90";
+		};
+		"C29F103474EA28CEB1E7045E" = {
+			"path" = "TraceRook.app";
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.application";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"76A0D14E7637D274D9ECB0BB" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "458613076E66BFE984971049";
+		};
+		"E626AAA056EE265790085E7D" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "D62A00695DE07D092046ACB6";
+		};
+		"7B1BFF88BE467291A1190B76" = {
 			"isa" = "XCBuildConfiguration";
 			"name" = "Debug";
 			"buildSettings" = {
-				"ENABLE_USER_SCRIPT_SANDBOXING" = "NO";
-				"CLANG_ENABLE_MODULES" = "YES";
 				"SWIFT_STRICT_CONCURRENCY" = "complete";
+				"DEBUG_INFORMATION_FORMAT" = "dwarf";
+				"MACOSX_DEPLOYMENT_TARGET" = "26.0";
+				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
+				"SUPPORTED_PLATFORMS" = "macosx";
+				"ARCHS" = "arm64";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"SDKROOT" = "macosx";
+				"SWIFT_VERSION" = "6.0";
+				"ENABLE_HARDENED_RUNTIME" = "YES";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.hook";
 			};
+		};
+		"3FE8CB6DC594DA0E89DBD781" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookPrivacy";
+		};
+		"76F8DEC3DFE0BDB465198890" = {
+			"isa" = "XCConfigurationList";
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+			"buildConfigurations" = ("3CCE7051BAA1B8E65CDEECD3", "EB9B6A82A6FECD10C0E43155",);
+		};
+		"2770570BC6E121DDABCC73EC" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookAgentAdapters";
+		};
+		"0A38AAB26ECFBE1EF2F2732B" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "85D97EA6C5FD545350999192";
+		};
+		"C9A0E87054E4488A24E356EC" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookFixtures";
+		};
+		"0A3E27B8CA818264D75C8D81" = {
+			"isa" = "PBXGroup";
+			"name" = "Products";
+			"children" = ("C29F103474EA28CEB1E7045E", "328392595BF659D6BAB0B509", "29230EDC32B3EDC6569809ED",);
+			"sourceTree" = "<group>";
+		};
+		"7CA329557820D2676D542BB5" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookIPC";
+		};
+		"D671A37D0FB20006E33C7EDC" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Navigation/ApprovalsView.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"92A989B0ACCFC315107ABAE8" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "D671A37D0FB20006E33C7EDC";
+		};
+		"1E5962E7238EBB3B50346404" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "A36A6FF7D8DBF950AB28456D";
+		};
+		"5E927181D14D5F2E4CD1C12D" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "538158161EAF1DA24ABD5708";
+		};
+		"85D97EA6C5FD545350999192" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Notifications/NotificationController.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"BE36E342AF8AADFD37BCB7B1" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookPrivacy";
+		};
+		"B5979E11E7C3BA1FD783840C" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookCore";
+		};
+		"7B3DABBA443E6DFC00C43CA7" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "E6D3599795DF9175F7785EC5";
+		};
+		"170A9142ED6ED6814DF72F80" = {
+			"isa" = "PBXTargetDependency";
+			"target" = "9B355378FB866F0BC792862C";
+			"targetProxy" = "FC9C2D4CB810DF4D65FC9BFD";
+		};
+		"CD41F0A40525A87D7B05DDF9" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "0783F69D117F79F63200EDA0";
+		};
+		"B2C37EB144B0D2A8BEDF9830" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "25F0C13A65E9639870159491";
+		};
+		"18AB2AE805230A62C4B97196" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "111E42CE9C4486E4FE1EFB28";
 		};
 		"A731B0BDF46F90746671ECC2" = {
 			"isa" = "XCBuildConfiguration";
@@ -477,79 +663,26 @@
 				"SWIFT_OPTIMIZATION_LEVEL" = "-Onone";
 				"SUPPORTED_PLATFORMS" = "macosx";
 				"ARCHS" = "arm64";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
 				"SDKROOT" = "macosx";
 				"SWIFT_VERSION" = "6.0";
-				"CODE_SIGN_STYLE" = "Automatic";
 				"ENABLE_HARDENED_RUNTIME" = "YES";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.tracerookagent";
-				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"CODE_SIGN_STYLE" = "Automatic";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.tracerook.agent";
 			};
 		};
-		"C63E7D218F43F5371CD1AB82" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "F9085ADD90333F0C37D6B5B4";
-		};
-		"1E5962E7238EBB3B50346404" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "A36A6FF7D8DBF950AB28456D";
-		};
-		"33514E65B1C278C6D6BDCEA3" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "3008601693758A92766A6129";
-		};
-		"4623B6E3C52775341D8C8231" = {
-			"isa" = "PBXFileReference";
-			"lastKnownFileType" = "sourcecode.swift";
-			"path" = "App/Navigation/OverviewView.swift";
-			"sourceTree" = "SOURCE_ROOT";
-		};
-		"9BD39105C8FD1F833DC59579" = {
-			"isa" = "PBXBuildFile";
-			"productRef" = "51C878DA3CE436AEBD0FFBED";
-		};
-		"F0C8C3DE7652AE8CE793682E" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "4623B6E3C52775341D8C8231";
-		};
-		"170A9142ED6ED6814DF72F80" = {
-			"isa" = "PBXTargetDependency";
-			"target" = "9B355378FB866F0BC792862C";
-			"targetProxy" = "FC9C2D4CB810DF4D65FC9BFD";
-		};
-		"32A2B13F62E25AE0EAD0DADA" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "D12DECE7A5E3204ED0DE132E";
-		};
-		"0D6E4079E36703EBD37C0072" = {
-			"isa" = "PBXGroup";
-			"sourceTree" = "<group>";
-			"children" = ("13C4608B5138EBE9B3A45A55", "133B2E41E8C705934A01FC9A", "45C0F793A23C8A34E99DB3D9", "0A3E27B8CA818264D75C8D81",);
-		};
-		"C29F103474EA28CEB1E7045E" = {
-			"path" = "TraceRook.app";
-			"isa" = "PBXFileReference";
-			"explicitFileType" = "wrapper.application";
-			"sourceTree" = "BUILT_PRODUCTS_DIR";
-		};
-		"133B2E41E8C705934A01FC9A" = {
-			"isa" = "PBXGroup";
-			"name" = "Agent";
-			"children" = ("D12DECE7A5E3204ED0DE132E",);
-			"sourceTree" = "<group>";
-		};
-		"B2C37EB144B0D2A8BEDF9830" = {
-			"isa" = "PBXBuildFile";
-			"fileRef" = "25F0C13A65E9639870159491";
-		};
-		"76F8DEC3DFE0BDB465198890" = {
-			"isa" = "XCConfigurationList";
-			"defaultConfigurationIsVisible" = "0";
-			"defaultConfigurationName" = "Release";
-			"buildConfigurations" = ("3CCE7051BAA1B8E65CDEECD3", "EB9B6A82A6FECD10C0E43155",);
+		"820B9044E912199A78707D93" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookContracts";
 		};
 		"B03E562213FB0EEE9A19CA28" = {
 			"isa" = "PBXBuildFile";
 			"fileRef" = "8DE3D33197A9F175A42E8760";
+		};
+		"F0C8C3DE7652AE8CE793682E" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "4623B6E3C52775341D8C8231";
 		};
 		"244210E48437B6556980A702" = {
 			"buildConfigurationList" = "76F8DEC3DFE0BDB465198890";
@@ -568,19 +701,60 @@
 			"projectRoot" = "";
 			"mainGroup" = "0D6E4079E36703EBD37C0072";
 		};
-		"C9A0E87054E4488A24E356EC" = {
+		"386FA201971935B7973EBC5A" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "56C0EDC92681176F60480FFF";
+		};
+		"5CD3FE2A3C96DE5839340BBF" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/Services/AgentConnection.swift";
+			"sourceTree" = "SOURCE_ROOT";
+		};
+		"03B92FFBD8D76F0FC58B054F" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "5F02449DD18A3D036AA17E29";
+		};
+		"F009DC018907CA098A6A7049" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "A16A072159C359D2DC0973B7";
+		};
+		"538158161EAF1DA24ABD5708" = {
 			"isa" = "XCSwiftPackageProductDependency";
 			"package" = "BC4A71180870F7945155FBB0";
 			"productName" = "TraceRookFixtures";
+		};
+		"BC4A71180870F7945155FBB0" = {
+			"isa" = "XCLocalSwiftPackageReference";
+			"relativePath" = ".";
+		};
+		"FBF8A340FC674C32C05F81EC" = {
+			"isa" = "PBXBuildFile";
+			"productRef" = "B5979E11E7C3BA1FD783840C";
+		};
+		"C63E7D218F43F5371CD1AB82" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "F9085ADD90333F0C37D6B5B4";
+		};
+		"1AAA0FDDE3AC1D94A454EE16" = {
+			"isa" = "PBXBuildFile";
+			"fileRef" = "B154251CA19E80F3F07268B9";
+		};
+		"F9085ADD90333F0C37D6B5B4" = {
+			"isa" = "PBXFileReference";
+			"lastKnownFileType" = "sourcecode.swift";
+			"path" = "App/ViewModels/AppEnvironment.swift";
+			"sourceTree" = "SOURCE_ROOT";
 		};
 		"65D92690B425464829648542" = {
 			"isa" = "XCSwiftPackageProductDependency";
 			"package" = "BC4A71180870F7945155FBB0";
 			"productName" = "TraceRookAgentAdapters";
 		};
-		"E626AAA056EE265790085E7D" = {
-			"isa" = "PBXBuildFile";
-			"productRef" = "D62A00695DE07D092046ACB6";
+		"56C0EDC92681176F60480FFF" = {
+			"isa" = "XCSwiftPackageProductDependency";
+			"package" = "BC4A71180870F7945155FBB0";
+			"productName" = "TraceRookCore";
 		};
 	};
 	"rootObject" = "244210E48437B6556980A702";

@@ -22,6 +22,29 @@ for target, folder in [("TraceRook", "App"), ("TraceRookAgent", "Agent"), ("trac
         refs.append(ref); builds.append(build)
     objects[ident("group:" + folder)]["children"] = refs
     objects[ident("sources:" + target)]["files"] = builds
+package = next(key for key, value in objects.items() if value.get("isa") == "XCLocalSwiftPackageReference")
+products = {
+    "TraceRook": ["TraceRookContracts", "TraceRookCore", "TraceRookPrivacy", "TraceRookFixtures", "TraceRookIPC"],
+    "TraceRookAgent": ["TraceRookContracts", "TraceRookCore", "TraceRookFixtures", "TraceRookIPC", "TraceRookAgentAdapters", "TraceRookPrivacy"],
+    "tracerook-hook": ["TraceRookContracts", "TraceRookCore", "TraceRookAgentAdapters", "TraceRookRules", "TraceRookIPC"],
+}
+for target, names in products.items():
+    record = next(value for value in objects.values() if value.get("isa") == "PBXNativeTarget" and value.get("name") == target)
+    dependencies, files = [], []
+    for name in names:
+        dependency, build = ident("product:" + target + ":" + name), ident("link:" + target + ":" + name)
+        objects[dependency] = dict(isa="XCSwiftPackageProductDependency", package=package, productName=name)
+        objects[build] = dict(isa="PBXBuildFile", productRef=dependency)
+        dependencies.append(dependency); files.append(build)
+    record["packageProductDependencies"] = dependencies
+    phase = next(objects[key] for key in record["buildPhases"] if objects[key]["isa"] == "PBXFrameworksBuildPhase")
+    phase["files"] = files
+for value in objects.values():
+    if value.get("isa") == "XCBuildConfiguration":
+        settings = value.get("buildSettings", {})
+        old = settings.get("PRODUCT_BUNDLE_IDENTIFIER")
+        if old == "com.tracerook.tracerookagent": settings["PRODUCT_BUNDLE_IDENTIFIER"] = "com.tracerook.agent"
+        if old == "com.tracerook.tracerook-hook": settings["PRODUCT_BUNDLE_IDENTIFIER"] = "com.tracerook.hook"
 icon_ref, icon_build, icon_phase = ident("app-icon"), ident("app-icon-build"), ident("app-resources")
 objects[icon_ref] = dict(isa="PBXFileReference", lastKnownFileType="image.icns", path="Resources/TraceRook.icns", sourceTree="SOURCE_ROOT")
 objects[icon_build] = dict(isa="PBXBuildFile", fileRef=icon_ref)
