@@ -15,7 +15,7 @@ KEYS = frozenset({
     "evidence", "recommended_action", "session_drift", "limitations",
 })
 
-# Anthropic structured-output schema (MVP2 spec §19). Bounds are enforced in validate_verdict
+# Anthropic structured-output schema using the exact AnalysisVerdict keys. Bounds are enforced in validate_verdict
 # because not every JSON-Schema keyword is supported by output_config.format.
 VERDICT_JSON_SCHEMA: dict[str, Any] = {
     "type": "object",

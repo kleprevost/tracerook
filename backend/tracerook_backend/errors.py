@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-# Codes mirror the typed client errors in the MVP1 spec (§15) plus a few service-specific ones.
+# Codes map onto the client's TraceRookError cases plus a few service-specific ones.
 NOT_AUTHENTICATED = "not_authenticated"
 SUBSCRIPTION_INACTIVE = "subscription_inactive"
 QUOTA_EXHAUSTED = "quota_exhausted"
