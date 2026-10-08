@@ -16,7 +16,8 @@ done
 app="$(cd "$(dirname "$app")" && pwd)/$(basename "$app")"
 [[ "$(basename "$app")" == TraceRook.app ]] || { echo "Expected TraceRook.app bundle name." >&2; exit 2; }
 /usr/bin/codesign --verify --deep --strict "$app"
-/usr/bin/codesign -dv "$app" 2>&1 | /usr/bin/grep -q 'Signature=adhoc' || { echo "This beta packager expects an ad-hoc signed bundle." >&2; exit 2; }
+signature_info="$(/usr/bin/codesign -dv --verbose=2 "$app" 2>&1)"
+[[ "$signature_info" == *"Signature=adhoc"* ]] || { echo "This beta packager expects an ad-hoc signed bundle." >&2; exit 2; }
 for binary in TraceRook TraceRookAgent tracerook-hook; do
   [[ "$(/usr/bin/lipo -archs "$app/Contents/MacOS/$binary")" == arm64 ]] || { echo "Expected arm64 executable: $binary" >&2; exit 2; }
 done
