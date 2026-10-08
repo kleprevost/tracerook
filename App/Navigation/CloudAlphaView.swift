@@ -8,10 +8,11 @@ struct CloudAlphaView: View {
     @ViewState<Bool> private var deleteConfirmation = false
     var body: some View {
         let cloud = environment.agent.cloud
-        Surface("TraceRook Cloud · Invited alpha") {
+        Surface("TraceRook Cloud · Private beta") {
             DetailField(name: "Endpoint", value: "api.tracerook.dev · HTTPS")
             DetailField(name: "Reasoning engine", value: "Anthropic Claude Haiku 5.5")
             DetailField(name: "Enrollment", value: cloud.connected ? "Device enrolled" : "Not enrolled")
+            DetailField(name: "Selected for host analysis", value: cloud.analysisEnabledLocally ? "Yes" : "No")
             DetailField(name: "Cloud analysis", value: cloud.capabilities?.analysisEnabled == true ? "Enabled by service operator" : "Unavailable or disabled")
             DetailField(name: "Validated Claude response", value: cloud.realAnalysisValidatedAt ?? "No real analysis validated this session")
             Text("Cloud connectivity does not establish agent coverage. Claude Code and Codex callbacks must be installed and verified separately.").font(.caption).foregroundStyle(.secondary)
@@ -23,10 +24,11 @@ struct CloudAlphaView: View {
                 Text("Cloud request failed: \(failure.rawValue). No new protection was verified. If disconnect or deletion failed, server-side revocation or deletion is not confirmed.").font(.caption).foregroundStyle(.orange)
             }
             if !cloud.connected {
-                SecureField("Invitation code", text: $invitation).textFieldStyle(.roundedBorder)
+                SecureField("Beta access code or invitation", text: $invitation).textFieldStyle(.roundedBorder)
                 Text("TraceRook processes coarse task and action categories plus local signal codes, then sends them to Anthropic. Raw commands, code, paths, file contents and transcripts are excluded. Analysis receipts: 30 days; account and device metadata until account deletion; usage aggregates: 90 days; temporary verdict cache: up to 10 minutes. Anthropic retention follows its API terms. Questions: kyle@tracerook.dev.").font(.callout).foregroundStyle(.secondary)
+                Text("Beta access stays in background-service memory for this session. Enter your access code again after the service restarts. No Keychain access occurs.").font(.caption).foregroundStyle(.secondary)
                 Toggle("I consent to this remote analysis (privacy policy version 2)", isOn: $consent)
-                Button("Enroll this Mac") {
+                Button("Connect to TraceRook Cloud") {
                     let code = invitation; invitation = ""
                     Task { await environment.agent.cloudCommand(.connect, invitation: code, consent: CloudConsent()) }
                 }.buttonStyle(.borderedProminent).disabled(!consent || invitation.isEmpty || cloud.busy || !environment.agent.connected || cloud.failure == .credentialStorage)
@@ -39,6 +41,9 @@ struct CloudAlphaView: View {
                 }
                 Text(cloud.usage?.limits.evaluationsPerDay == nil && cloud.usage?.limits.inputTokensPerDay == nil && cloud.usage?.limits.outputTokensPerDay == nil ? "Usage reports actual activity. No customer inference quota is configured. Request and concurrency limits protect service availability." : "The operator has configured usage limits. Refresh capabilities and usage for the current account settings.").font(.caption).foregroundStyle(.secondary)
                 HStack {
+                    Button(cloud.analysisEnabledLocally ? "Pause cloud analysis" : "Resume cloud analysis") {
+                        Task { await environment.agent.cloudCommand(cloud.analysisEnabledLocally ? .pause : .resume) }
+                    }.disabled(cloud.busy)
                     Button("Refresh connection and usage") { Task { await environment.agent.cloudCommand(.refresh) } }.disabled(cloud.busy)
                     Button("Rotate device credential") { Task { await environment.agent.cloudCommand(.rotate) } }.disabled(cloud.busy)
                     Button("Disconnect") { Task { await environment.agent.cloudCommand(.disconnect) } }
