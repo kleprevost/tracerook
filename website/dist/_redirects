@@ -1,0 +1,8 @@
+/docs/quickstart/          /docs/beta/          301
+/docs/roadmap/             /docs/beta/          301
+/docs/mvp2/                /docs/               301
+/docs/cloud-demo/          /docs/cloud/         301
+/docs/local-api-demo/      /docs/build/         301
+/docs/testing/             /docs/build/         301
+/docs/safe-installation/   /docs/claude-code/   301
+/reference/*               /docs/               301

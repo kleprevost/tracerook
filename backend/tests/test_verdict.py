@@ -6,7 +6,7 @@ import pytest
 
 from tracerook_backend.verdict import InvalidVerdict, validate_verdict
 
-# Example straight from the MVP2 spec §7.4.
+# Reference verdict shared with the client contract tests.
 GOOD = {
     "schema_version": 1, "category": ["unsafe_action", "agent_misbehavior"], "severity": "high",
     "confidence": 0.83, "suspicious": True,
