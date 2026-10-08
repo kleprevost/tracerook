@@ -7,14 +7,16 @@ public actor EventBroker {
     public let securityMode: ServiceSecurityMode
     private var mutations: [UUID: ContinuousClock.Instant] = [:]
     private let localAPIDemo: LocalAPIDemoClient?
-    public init(store: SessionStore, securityMode: ServiceSecurityMode, localAPIDemo: LocalAPIDemoClient? = nil) {
+    private let liveCloud: LiveCloudClient?
+    public init(store: SessionStore, securityMode: ServiceSecurityMode, localAPIDemo: LocalAPIDemoClient? = nil, liveCloud: LiveCloudClient? = nil) {
         self.store = store; self.securityMode = securityMode; reviews = ApprovalCoordinator(store: store)
-        self.localAPIDemo = localAPIDemo
+        self.localAPIDemo = localAPIDemo; self.liveCloud = liveCloud
     }
     public func control(_ request: ServiceControlRequest) async -> ServiceControlReply {
         do {
             try request.validate()
-            if request.method != .snapshot {
+            let readOnlyCloud = request.method == .liveCloud && request.payload["operation"] == .string("status")
+            if request.method != .snapshot && !readOnlyCloud {
                 let now = ContinuousClock().now
                 mutations = mutations.filter { now.duration(to: $0.value) > .zero }
                 guard mutations[request.requestID] == nil else { return ServiceControlReply(requestID: request.requestID, error: .invalidRequest) }
@@ -38,6 +40,14 @@ public actor EventBroker {
                     kind: .preToolUse, cwd: "[PROJECT]", toolName: "Bash", actionType: .shellExec,
                     argsSummary: "SIMULATED INGESTION · No host tool was running", actionFingerprint: String(repeating: "0", count: 64))
                 _ = try await store.record(event, provenance: .serviceSimulation)
+            case .liveCloud:
+                guard let liveCloud else {
+                    let unavailable = LiveCloudStatus(failure: .credentialStorage)
+                    return ServiceControlReply(requestID: request.requestID, payload: try JSONValue.decodeBounded(WireCodec.encodePayload(unavailable, maximumBytes: WireLimits.replyBytes)))
+                }
+                let command = try WireCodec.decodePayload(LiveCloudControl.self, payload: request.payload.canonicalData(), maximumBytes: WireLimits.replyBytes)
+                let status = try await liveCloud.start(command)
+                return ServiceControlReply(requestID: request.requestID, payload: try JSONValue.decodeBounded(WireCodec.encodePayload(status, maximumBytes: WireLimits.replyBytes)))
             case .localAPIDemo:
                 guard securityMode == .developer, let localAPIDemo else {
                     return ServiceControlReply(requestID: request.requestID, error: .forbidden)

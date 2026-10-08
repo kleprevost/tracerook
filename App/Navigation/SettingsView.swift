@@ -92,6 +92,8 @@ struct SettingsView: View {
                     StatusBadge(text: "Connection unavailable in this build", color: .orange)
                     Text("BYOK is unavailable in this development build. No key is requested, stored or sent.").font(.callout).foregroundStyle(.secondary)
                     Button("What leaves my Mac?") { environment.privacyPreviewPresented = true }.buttonStyle(.bordered)
+                } else if environment.model.mode == .traceRookCloud {
+                    Text("Invitation-only Claude analysis. Enrollment and inference are separate from verified host protection.").font(.callout).foregroundStyle(.secondary)
                 } else if environment.model.mode == .traceRookCloudDemo {
                     Text("Cloud AI analysis unavailable for real activity. The account, usage and plans below are synthetic; no Cloud backend or billing exists.").font(.callout).foregroundStyle(.secondary)
                     Button("Explore Demo") { environment.model.exploreDemo() }.buttonStyle(.borderedProminent)
@@ -99,6 +101,7 @@ struct SettingsView: View {
                     Text("Offline analysis mode. No remote requests. Live enforcement still requires installed, verified hooks.").font(.callout).foregroundStyle(.secondary)
                 }
             }
+            if environment.model.mode == .traceRookCloud { CloudAlphaView() }
             if environment.model.mode == .traceRookCloudDemo {
                 Surface {
                     HStack { Text("TraceRook Cloud").font(.title2.bold()); Spacer(); DemoBadge() }

@@ -184,7 +184,7 @@ public struct ProviderStatus: IPCMessage, Equatable {
         switch mode {
         case .traceRookCloudDemo: guard availability == .demo else { throw TraceRookError.notDemoData }
         case .localRulesOnly: guard availability == .localOnly || availability == .degraded else { throw TraceRookError.malformedInput }
-        case .anthropicBYOK: guard [.notConfigured, .consentRequired, .ready, .degraded].contains(availability) else { throw TraceRookError.malformedInput }
+        case .anthropicBYOK, .traceRookCloud: guard [.notConfigured, .consentRequired, .ready, .degraded].contains(availability) else { throw TraceRookError.malformedInput }
         }
         try IPCValidation.text(reasonCode, maximumBytes: 64)
     }
