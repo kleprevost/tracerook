@@ -6,6 +6,8 @@ trap 'rm -rf "$test_root"' EXIT
 cp -R build/TraceRook.app "$test_root/TraceRook.app"
 "$test_root/TraceRook.app/Contents/MacOS/TraceRookAgent" --self-test
 "$test_root/TraceRook.app/Contents/MacOS/tracerook-hook" --self-test
+[[ "$("$test_root/TraceRook.app/Contents/MacOS/TraceRookAgent" --protocol-version)" == 2 ]]
+[[ "$("$test_root/TraceRook.app/Contents/MacOS/tracerook-hook" --protocol-version)" == 2 ]]
 codesign --verify --deep --strict "$test_root/TraceRook.app"
 # A packaged helper must refuse a missing fixture bundle rather than silently reading the checkout.
 rm -rf "$test_root/TraceRook.app/Contents/Resources/TraceRook_TraceRookFixtures.bundle"

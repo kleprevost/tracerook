@@ -2,6 +2,8 @@
 
 The [MVP1 architecture specification](../TraceRook_MVP1_Architecture_Spec.md) is authoritative. The [implementation record](IMPLEMENTATION_STATUS.md) documents completed checks, platform observations, and pending release gates.
 
+MVP2 work follows the additive [MVP2 specification](../TraceRook_MVP2_Architecture_Implementation_Spec.md) and [handoff](../TraceRook_MVP2_Agent_Handoff.md), starting with PR 1 only. Consult [MVP2 acceptance](MVP2_ACCEPTANCE.md) and the [PR 2 plan](MVP2_PR2_PLAN.md) before advancing phases.
+
 ## Requirements
 
 - Apple Silicon (`arm64`) Mac, macOS 26 or later.
@@ -22,6 +24,8 @@ Build the optimized development configuration with `./scripts/build.sh release`.
 Open `TraceRook.xcodeproj` and select the TraceRook scheme for Xcode development. SwiftPM owns the Swift Testing harness. Build settings restrict CPU to arm64, deployment to macOS 26.0, and Swift language mode to 6; hardened runtime is enabled.
 
 The app bundle includes the service executable, hook CLI, and LaunchAgent plist. The Phase 0/1 build does **not** register a Login Item or install agent hooks. The bridge refuses ordinary operational invocation. Do not wire it into agent settings manually.
+
+The MVP2 baseline keeps that operational refusal. Packaged `TraceRookAgent` and `tracerook-hook` support read-only `--version`, `--protocol-version` (v2 contract), and `--self-test`. The bridge self-test demonstrates synthetic length-prefixed v2 encoding/decoding; the service self-test validates fixtures and budget framing. Neither starts a listener or changes agent configuration.
 
 Development builds are ad-hoc signed unless `TRACEROOK_SIGNING_IDENTITY` is provided. Configuring an identity alone does not complete Developer ID distribution or notarization. Read [security and release limitations](../SECURITY_LIMITATIONS.md).
 
