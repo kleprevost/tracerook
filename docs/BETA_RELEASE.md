@@ -2,6 +2,8 @@
 
 Current release: [**0.1.0-beta.1**](https://github.com/kleprevost/tracerook/releases/tag/v0.1.0-beta.1) for Apple Silicon Macs running macOS 26 or later.
 
+TraceRook is in an invitation-only private beta. Your invitation includes the TraceRook Cloud access code used in step 4; [request an invitation](https://tracerook.dev/register/) if you don't have one. Billing isn't active during the beta.
+
 ## 1. Download and verify
 
 1. Download the ZIP, its manifest and `SHA256SUMS` from [GitHub Releases](https://github.com/kleprevost/tracerook/releases/tag/v0.1.0-beta.1).
@@ -53,7 +55,7 @@ Select **Test Hook** in Integrations. Then start a Claude Code session and ask i
 
 ## Feedback
 
-Send reports through the channel in your invitation with the app version, macOS version, Claude Code version and reproduction steps. Remove secrets, prompts and private paths from screenshots and logs first.
+Send reports to [kyle@tracerook.dev](mailto:kyle@tracerook.dev) or [john@tracerook.dev](mailto:john@tracerook.dev), or through the channel in your invitation, with the app version, macOS version, Claude Code version and reproduction steps. Remove secrets, prompts and private paths from screenshots and logs first.
 
 ## Packaging a release
 
