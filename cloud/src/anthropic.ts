@@ -151,13 +151,21 @@ export async function analyze(
       ),
     ) as Record<string, unknown>;
     stage = "message_shape";
-    if (
-      !r ||
-      r.model !== MODEL ||
-      r.stop_reason !== "end_turn" ||
-      !Array.isArray(r.content) ||
-      r.content.length > 32
-    )
+    if (!r || typeof r !== "object")
+      throw new APIError(503, "provider_unavailable", true);
+    stage = "model_mismatch";
+    if (r.model !== MODEL)
+      throw new APIError(503, "provider_unavailable", true);
+    stage =
+      r.stop_reason === "max_tokens"
+        ? "stop_max_tokens"
+        : r.stop_reason === "refusal"
+          ? "stop_refusal"
+          : "stop_unexpected";
+    if (r.stop_reason !== "end_turn")
+      throw new APIError(503, "provider_unavailable", true);
+    stage = "content_shape";
+    if (!Array.isArray(r.content) || r.content.length > 32)
       throw new APIError(503, "provider_unavailable", true);
     stage = "content_blocks";
     if (
