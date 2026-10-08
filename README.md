@@ -24,9 +24,9 @@
   <a href="https://tracerook.dev">Website</a>
 </p>
 
-TraceRook is an independent review layer for developers working with **Claude Code and OpenAI Codex**. Its MVP1 architecture combines deterministic local policy with **Anthropic Claude** to assess risky supported tool calls before execution, explain the evidence, and put consequential decisions in your hands.
+TraceRook is an independent review layer for developers working with **Claude Code and OpenAI Codex**. Its MVP2 design combines deterministic local policy with **Anthropic Claude** to assess risky supported tool calls before execution, explain the evidence, and put consequential decisions in your hands.
 
-> **Development preview:** The native app and Cloud Demo are working. Live agent integrations, pre-execution enforcement, and Anthropic BYOK analysis are upcoming. This build does not protect real sessions or collect API keys; signed, notarized distribution remains a release gate.
+> **MVP2 development preview:** The native app, Cloud Demo, and MVP2.0 contracts are working. **43 automated tests** and 20 native appearance checks pass locally. Live hooks, enforcement, and Anthropic BYOK are pending. This build does not protect real sessions or collect API keys; signed, notarized distribution remains a release gate.
 
 ![TraceRook native macOS dashboard showing explicitly labeled Cloud Demo fixtures and real integrations marked Not integrated](docs/assets/dashboard-demo.png)
 
@@ -34,7 +34,7 @@ TraceRook is an independent review layer for developers working with **Claude Co
 
 ## Why TraceRook
 
-Coding agents act on commands, files, services, and instructions from sources you may not trust. TraceRook’s MVP1 design adds a second look at the action—and its relationship to the task you asked for.
+Coding agents act on commands, files, services, and instructions from sources you may not trust. TraceRook’s design adds a second look at the action—and its relationship to the task you asked for.
 
 - **Review before execution.** Supported local hooks provide the opportunity to block critical actions or pause high-risk ones for human review.
 - **Local policy + Claude context.** Deterministic rules handle concrete dangerous signatures. Anthropic Claude adds task relevance, prompt-injection indicators, and intent-drift analysis. Model findings remain advisory.
@@ -49,6 +49,7 @@ The current preview includes:
 - Onboarding, provider selection, privacy previews, and light/dark appearance.
 - A focused review panel with sample Allow once, Block, and expiry behavior.
 - Cloud Demo account, usage, plans, and findings backed by bundled fixtures, with no analysis network requests.
+- Strict IPC v2 framing, request/reply validation, exact invocation bindings, and packaged helper self-tests, preserving v1 compatibility.
 
 Demo data stays separate from real activity. Real sessions remain empty and **Not integrated** until the live phases pass their acceptance gates.
 
@@ -71,7 +72,7 @@ For Xcode setup, automated checks, and preview switches, see the [development gu
 
 | Guide | What you’ll find |
 | --- | --- |
-| [Product documentation](https://tracerook.dev/docs/) | 20 searchable guides covering the app, Claude, privacy, integrations, policy, and engineering |
+| [Product documentation](https://tracerook.dev/docs/) | 21 searchable guides covering the app, MVP2, Claude, privacy, integrations, policy, and engineering |
 | [Development](docs/DEVELOPMENT.md) | Build, run, test, and work on the native app |
 | [Architecture](docs/ARCHITECTURE.md) | Processes, Swift packages, and transport boundaries |
 | [Privacy](docs/PRIVACY.md) | Data minimization, redaction, and planned BYOK behavior |
@@ -79,6 +80,9 @@ For Xcode setup, automated checks, and preview switches, see the [development gu
 | [Agent compatibility](docs/AGENT_COMPATIBILITY.md) | Host-specific decisions and verification requirements |
 | [Implementation status](docs/IMPLEMENTATION_STATUS.md) | Acceptance evidence, pending gates, and platform observations |
 | [Authoritative MVP1 specification](TraceRook_MVP1_Architecture_Spec.md) | Approved product and engineering requirements |
+| [Authoritative MVP2 specification](TraceRook_MVP2_Architecture_Implementation_Spec.md) | Additive real-protection architecture and release gates |
+| [MVP2 acceptance matrix](docs/MVP2_ACCEPTANCE.md) | Passed contract checks, source gaps, and phase-by-phase requirements |
+| [Next implementation: PR2](docs/MVP2_PR2_PLAN.md) | Exact service, authentication, SQLite, and native UI changes |
 
 The [static website source](website/README.md) is included in this repository and can be served by a static host.
 
@@ -86,11 +90,13 @@ The [static website source](website/README.md) is included in this repository an
 
 | Milestone | Status |
 | --- | --- |
-| Phase 0 · Native foundations, contracts, and test harness | Passed locally |
-| Phase 1 · Native UI and Cloud Demo | Implemented; manual accessibility and notification acceptance remain |
-| Phases 2–3 · Live hooks, safe installation, persistence, and enforcement | Upcoming; real-host pre-execution proof required |
-| Phase 4 · Direct Anthropic BYOK and session drift | Upcoming |
-| Phase 5 · Hardening, Developer ID signing, and notarized beta | Upcoming |
+| MVP1 · Native UI and Cloud Demo | Implemented; manual accessibility and notification acceptance remain |
+| MVP2.0 · Baseline and IPC v2 contracts | Passed locally; 43 tests, debug/release builds, native launch and renders |
+| MVP2.1 · Authenticated service, SQLite and real UI state | Next; signed caller rejection and persistence tests required |
+| MVP2.2–2.3 · Claude Code and Codex live hooks | Pending; safe installation, native trust and actual pre-execution deny proof |
+| MVP2.4 · Local rules and native approval loop | Pending; service-owned expiry, exact-invocation CAS and replay tests |
+| MVP2.5 · Direct Anthropic Claude BYOK and drift | Pending; consent, Keychain, privacy preflight and a real provider call |
+| MVP2.6 · Signed and notarized beta | Pending; macOS 26/27, performance, accessibility and clean installation |
 
 Each phase must compile, pass relevant automated tests, and deliver a working native demonstration. The [implementation record](docs/IMPLEMENTATION_STATUS.md) tracks the evidence; there is no signed beta download yet.
 
@@ -102,7 +108,7 @@ Redaction can miss secrets, and same-user processes can disable hooks. Read the 
 
 ## Contributing
 
-Start with the [MVP1 specification](TraceRook_MVP1_Architecture_Spec.md) and [development guide](docs/DEVELOPMENT.md). Contributions should preserve explicit demo labeling, user privacy, reversible configuration changes, and truthful coverage. Include relevant acceptance evidence and document deviations caused by actual platform or host behavior.
+Start with the [MVP2 specification](TraceRook_MVP2_Architecture_Implementation_Spec.md), [handoff](TraceRook_MVP2_Agent_Handoff.md), retained [MVP1 specification](TraceRook_MVP1_Architecture_Spec.md), and [development guide](docs/DEVELOPMENT.md). Contributions should preserve explicit demo labeling, user privacy, reversible configuration changes, and truthful coverage. Include relevant acceptance evidence and document deviations caused by actual platform or host behavior.
 
 ## License
 

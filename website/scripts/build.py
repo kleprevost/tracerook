@@ -25,7 +25,7 @@ def header(active=""):
 </div></header>'''
 
 def footer():
-    return '''<footer class="site-footer"><div class="footer-top"><a class="brand" href="/"><img src="/assets/tracerook.png" alt="" width="32" height="32">TraceRook</a><p>Independent judgment. Before the next tool call.</p><div><a href="/docs/">Documentation</a><a href="/docs/roadmap/">Release status</a><a href="https://github.com/kleprevost/tracerook">GitHub</a></div></div><div class="footer-bottom"><span>© 2026 TraceRook</span><span>Native macOS · Apple Silicon · MVP1 development preview</span><span>Claude is a product of Anthropic. No affiliation or endorsement implied.</span></div></footer>'''
+    return '''<footer class="site-footer"><div class="footer-top"><a class="brand" href="/"><img src="/assets/tracerook.png" alt="" width="32" height="32">TraceRook</a><p>Independent judgment. Before the next tool call.</p><div><a href="/docs/">Documentation</a><a href="/docs/roadmap/">Release status</a><a href="https://github.com/kleprevost/tracerook">GitHub</a></div></div><div class="footer-bottom"><span>© 2026 TraceRook</span><span>Native macOS · Apple Silicon · MVP2 development preview</span><span>Claude is a product of Anthropic. No affiliation or endorsement implied.</span></div></footer>'''
 
 def shell(title, description, body, active="", extra="", path="/"):
     if path is not None:
@@ -35,7 +35,7 @@ def shell(title, description, body, active="", extra="", path="/"):
 
 def build_home():
     body = (ROOT / "content" / "home.html").read_text()
-    (DIST / "index.html").write_text(shell("A second look before your agent acts", "Native macOS guardrails for local coding agents. Local policy first, Anthropic Claude for contextual analysis. Explore the MVP1 development preview.", body))
+    (DIST / "index.html").write_text(shell("A second look before your agent acts", "Native macOS guardrails designed around local policy and Anthropic Claude. Explore the native demo and completed MVP2 foundation; live protection remains pending.", body))
 
 def build_docs():
     groups = list(dict.fromkeys(p["group"] for p in PAGES))
@@ -56,7 +56,7 @@ def build_docs():
                 q = PAGES[index]
                 adjacent += f'<a href="/docs/{q["slug"]}/"><small>{label}</small><strong>{esc(q["title"])}</strong></a>'
         adjacent += '</nav>'
-        body = f'''<div class="docs-layout"><aside class="docs-sidebar"><div class="docs-top"><a href="/docs/">Documentation</a><button class="docs-toggle" aria-expanded="false" aria-controls="docs-nav">Browse topics</button></div><nav id="docs-nav" aria-label="Documentation">{nav}</nav></aside><main id="main" class="doc-main"><div class="doc-eyebrow">{esc(p['group'])} <span>MVP1 / v1.0</span></div><h1>{esc(p['title'])}</h1><p class="doc-lead">{esc(p['description'])}</p><div class="doc-status"><strong>Development preview</strong><span>Live hooks, enforcement, and Anthropic BYOK are pending. This guide distinguishes current behavior from the MVP1 design.</span></div><div class="mobile-toc"><details><summary>On this page</summary>{toc}</details></div><article class="doc-article">{sections}</article><div class="doc-source">Based on the <a href="/reference/TraceRook_MVP1_Architecture_Spec.md">MVP1 architecture specification</a>, version 1.0 · October 8, 2026.</div>{adjacent}</main><aside class="docs-toc" aria-label="On this page"><p>On this page</p>{toc}<a class="toc-bottom" href="https://github.com/kleprevost/tracerook">GitHub project</a></aside></div>'''
+        body = f'''<div class="docs-layout"><aside class="docs-sidebar"><div class="docs-top"><a href="/docs/">Documentation</a><button class="docs-toggle" aria-expanded="false" aria-controls="docs-nav">Browse topics</button></div><nav id="docs-nav" aria-label="Documentation">{nav}</nav></aside><main id="main" class="doc-main"><div class="doc-eyebrow">{esc(p['group'])} <span>MVP2 / foundation</span></div><h1>{esc(p['title'])}</h1><p class="doc-lead">{esc(p['description'])}</p><div class="doc-status"><strong>Development preview</strong><span>MVP2 foundation complete. Live hooks, enforcement, and Anthropic BYOK are pending. Planned behavior is labeled separately from working features.</span></div><div class="mobile-toc"><details><summary>On this page</summary>{toc}</details></div><article class="doc-article">{sections}</article><div class="doc-source">Based on the <a href="/reference/TraceRook_MVP1_Architecture_Spec.md">MVP1 specification</a>, the additive <a href="/reference/TraceRook_MVP2_Architecture_Implementation_Spec.md">MVP2 specification</a>, and the <a href="/reference/docs/MVP2_ACCEPTANCE.md">acceptance matrix</a> · October 8, 2026.</div>{adjacent}</main><aside class="docs-toc" aria-label="On this page"><p>On this page</p>{toc}<a class="toc-bottom" href="https://github.com/kleprevost/tracerook">GitHub project</a></aside></div>'''
         out = DIST / 'docs' / p['slug']
         out.mkdir(parents=True, exist_ok=True)
         (out/'index.html').write_text(shell(p['title'], p['description'], body, 'docs', path=f'/docs/{p["slug"]}/'))
@@ -67,7 +67,7 @@ def build_docs():
             if page['group'] == group:
                 cards += f'<a class="doc-card" href="/docs/{page["slug"]}/"><h3>{esc(page["title"])}</h3><p>{esc(page["description"])}</p><span>Read guide</span></a>'
         cards += '</div></section>'
-    body = f'''<main id="main" class="docs-index wrap"><div class="eyebrow">The TraceRook field guide</div><h1>Understand every<br><span class="muted">decision.</span></h1><p class="intro">From your first demo to the boundaries of pre-execution enforcement. Product guides and engineering references, grounded in the MVP1 specification.</p><div class="search-area"><label for="doc-search">Search documentation</label><div class="search-box"><input id="doc-search" type="search" placeholder="Try privacy, Claude, or approvals…" autocomplete="off"><kbd>/</kbd></div><p id="search-status" role="status" aria-live="polite"></p><div id="search-results" hidden></div><noscript><p>Browse the guides below. Search requires JavaScript; every guide is available without it.</p></noscript></div><div id="doc-collections">{cards}</div></main>'''
+    body = f'''<main id="main" class="docs-index wrap"><div class="eyebrow">The TraceRook field guide</div><h1>Understand every<br><span class="muted">decision.</span></h1><p class="intro">From your first native demo to the MVP2 foundation and the gates for real protection. Product guides and engineering references grounded in the specifications and measured implementation.</p><div class="search-area"><label for="doc-search">Search documentation</label><div class="search-box"><input id="doc-search" type="search" placeholder="Try MVP2, privacy, or Claude…" autocomplete="off"><kbd>/</kbd></div><p id="search-status" role="status" aria-live="polite"></p><div id="search-results" hidden></div><noscript><p>Browse the guides below. Search requires JavaScript; every guide is available without it.</p></noscript></div><div id="doc-collections">{cards}</div></main>'''
     (DIST/'docs'/'index.html').write_text(shell('Documentation', 'Comprehensive TraceRook guides for the native macOS preview, Claude analysis, privacy, integrations, policy, and engineering.', body, 'docs', path='/docs/'))
     index = [{"title":p['title'],"url":f"/docs/{p['slug']}/","group":p['group'],"description":p['description'],"text":html.unescape(re.sub(r'<[^>]+>', ' ', ' '.join(s[2] for s in p['sections'])))} for p in PAGES]
     (DIST/'assets'/'search-index.json').write_text(json.dumps(index, ensure_ascii=False))
@@ -76,13 +76,21 @@ def build():
     DIST.mkdir(exist_ok=True)
     references = DIST / 'reference'
     references.mkdir(exist_ok=True)
-    for source in ('TraceRook_MVP1_Architecture_Spec.md', 'SECURITY_LIMITATIONS.md', 'docs/IMPLEMENTATION_STATUS.md'):
+    for source in ('TraceRook_MVP1_Architecture_Spec.md', 'TraceRook_MVP2_Architecture_Implementation_Spec.md',
+                   'TraceRook_MVP2_Agent_Handoff.md', 'SECURITY_LIMITATIONS.md', 'docs/IMPLEMENTATION_STATUS.md',
+                   'docs/MVP2_ACCEPTANCE.md', 'docs/MVP2_PR2_PLAN.md', 'docs/AGENT_COMPATIBILITY.md',
+                   'docs/ARCHITECTURE.md', 'docs/DEVELOPMENT.md', 'docs/PRIVACY.md', 'docs/THREAT_MODEL.md',
+                   'website/README.md'):
         path = ROOT.parent / source
-        destination = references / path.name
+        destination = references / source
+        destination.parent.mkdir(parents=True, exist_ok=True)
         if path.exists():
             shutil.copyfile(path, destination)
         elif not destination.exists():
             raise FileNotFoundError(f'Reference document missing: {source}')
+    # Keep the original public reference URL working while preserving relative
+    # Markdown links in the new mirrored engineering documents.
+    shutil.copyfile(references / 'docs/IMPLEMENTATION_STATUS.md', references / 'IMPLEMENTATION_STATUS.md')
     build_home()
     build_docs()
     (DIST/'404.html').write_text(shell('Page not found', 'Find your way back to TraceRook.', '<main id="main" class="not-found wrap"><div class="eyebrow">404 / Off the board</div><h1>This page moved<br>out of play.</h1><p>Find what you need in the documentation, or start at home.</p><div class="button-row"><a class="button primary" href="/">Back to TraceRook</a><a class="button" href="/docs/">Browse documentation</a></div></main>', extra='<meta name="robots" content="noindex">', path=None))
