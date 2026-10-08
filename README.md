@@ -26,7 +26,7 @@
 
 TraceRook is an independent review layer for developers working with **Claude Code and OpenAI Codex**. Its MVP2 design combines deterministic local policy with **Anthropic Claude** to assess risky supported tool calls before execution, explain the evidence, and put consequential decisions in your hands.
 
-> **Development preview:** The native app, offline Cloud Demo, authenticated local service, and private SQLite state are implemented. **64 Swift tests** and **22 native appearance checks** pass locally. The local API demo connects through the authenticated service to a real loopback HTTP server; **103 backend tests** pass. A separate developer probe validated one real Anthropic Haiku 5.5 verdict. Live hooks, enforcement, and native real Claude analysis remain unavailable. Source builds are explicitly non-notarized; no verified protection beta is claimed.
+> **Invited beta in preparation:** Native app, authenticated local service, private SQLite history, exact-action review UI, and fixture demonstrations are implemented. Production Cloud API deployment and HTTPS authentication are verified; 55 Worker tests pass. Claude Code 2.1.290 passed actual callback allow/deny, bounded timeout, and high-risk service-outage checks using a local model double. Genuine hosted inference and final native Cloud evidence remain pending; Codex coverage remains unverified. The beta retains ad-hoc signatures and is not notarized. No public download is published.
 
 ![TraceRook native macOS dashboard showing explicitly labeled Cloud Demo fixtures and real integrations marked Not integrated](docs/assets/dashboard-demo.png)
 
@@ -38,7 +38,7 @@ Coding agents act on commands, files, services, and instructions from sources yo
 
 - **Review before execution.** Supported local hooks provide the opportunity to block critical actions or pause high-risk ones for human review.
 - **Local policy + Claude context.** Deterministic rules handle concrete dangerous signatures. Anthropic Claude adds task relevance, prompt-injection indicators, and intent-drift analysis. Model findings remain advisory.
-- **A deliberate privacy boundary.** Planned BYOK sends minimized context directly to Anthropic using your own key. MVP3 adds a separate TraceRook-operated Claude service with a company-owned key. The connected local API demonstration uses synthetic fixtures. One separate developer Haiku probe succeeds; native BYOK and hosted Cloud are still unavailable.
+- **A deliberate privacy boundary.** Planned BYOK sends minimized context directly to Anthropic using your own key. MVP3 adds a separate TraceRook-operated Claude service with a company-owned key. The connected local API demonstration uses synthetic fixtures. The Cloud API is deployed; hosted inference and the final native path await receipt evidence. Native BYOK remains unavailable.
 - **Native decisions, clear evidence.** A menu bar companion, session timelines, incident details, and exact-action approvals make the reasoning visible. Protection status must reflect verified coverage.
 
 ## Explore what works today
@@ -50,10 +50,14 @@ The current preview includes:
 - A focused review panel with sample Allow once, Block, and expiry behavior.
 - Cloud Demo account, usage, plans, and findings backed by bundled fixtures, with no analysis network requests.
 - Strict IPC v2 framing, request/reply validation, exact invocation bindings, and packaged helper self-tests, preserving v1 compatibility.
-- An authenticated local service, sanitized private SQLite history, and durable exact-review transitions, with host integration still disabled.
+- An authenticated local service, sanitized private SQLite history, and durable exact-review transitions, with supported callbacks feeding local policy and exact-action review.
 - Settings → Local API Demo: authenticated enrollment, six fixed scenarios, validated synthetic verdicts, typed failures, actual fixture usage, credential rotation, revocation and deletion over local HTTP.
 
 Demo data stays separate from real activity. Simulated service ingestion is labeled and excluded from observed host-session counts. Host integrations remain **Not integrated** until live acceptance gates pass.
+
+## Invited beta preparation
+
+An initial ten-tester beta is being prepared as a versioned Apple Silicon ZIP. It retains ad-hoc signatures and is not notarized. See [beta release instructions](docs/BETA_RELEASE.md) for macOS 26+ requirements, checksum verification, Apple’s manual opening workflow, and current acceptance limits. No public beta download is claimed; deployment alone does not establish hosted inference or host coverage.
 
 ## Try the preview
 
@@ -98,12 +102,12 @@ The [static website source](website/README.md) is included in this repository an
 | MVP1 · Native UI and Cloud Demo | Implemented; manual accessibility and notification acceptance remain |
 | MVP2.0 · Baseline and IPC v2 contracts | Passed locally; 43 tests, debug/release builds, native launch and renders |
 | MVP2.1 · Authenticated service, SQLite and real UI state | Implemented locally; actual peer-rejection tests pass in explicit ad-hoc mode; Developer ID validation remains untested |
-| MVP2.2–2.3 · Claude Code and Codex live hooks | Pending; safe installation, native trust and actual pre-execution deny proof |
-| MVP2.4 · Local rules and native approval loop | Initial policy corpus and durable review CAS implemented; operational hook wiring and real review flow pending |
+| MVP2.2–2.3 · Claude Code and Codex live hooks | Claude Code 2.1.290 allow/deny, timeout and outage gates pass; Codex remains unverified; manual configuration only |
+| MVP2.4 · Local rules and native approval loop | Local policy, operational callbacks, durable review CAS and real approval UI implemented; final interactive acceptance pending |
 | MVP2.5 · Direct Anthropic Claude BYOK and drift | Pending; consent, Keychain, privacy preflight and a real provider call |
-| MVP2.6 · Signed and notarized beta | Pending; macOS 26/27, performance, accessibility and clean installation |
+| Invited beta distribution | Ad-hoc signatures and non-notarized ZIP preparation; macOS 26, clean tester installation, accessibility and release checks remain |
 | Local API demonstration | Implemented locally; actual native/XPC/HTTP and lifecycle proof pass; fixtures have no protection authority |
-| MVP3 · TraceRook-operated Claude alpha | Hosted alpha pending; one isolated real Haiku probe succeeds, native mock remains fixture-only |
+| MVP3 · TraceRook-operated Claude alpha | Production API deployed; 55 Worker tests pass; genuine hosted receipts and final native Cloud evidence pending |
 
 Each phase must compile, pass relevant automated tests, and deliver a working native demonstration. The [implementation record](docs/IMPLEMENTATION_STATUS.md) tracks the evidence; there is no signed beta download yet.
 
@@ -111,7 +115,7 @@ Each phase must compile, pass relevant automated tests, and deliver a working na
 
 TraceRook’s intended enforcement depends on supported callbacks that actually run and return in time. Lost, skipped, untrusted, or timed-out hooks can permit execution. Nested processes, hosted tools, remote sessions, and commands outside an integrated agent may be outside coverage. Native agent permissions remain independent.
 
-Redaction can miss secrets, and same-user processes can disable hooks. Read the [security limitations](SECURITY_LIMITATIONS.md) for the complete boundary. Do not manually install the current foundation bridge into agent settings; live integration is not enabled.
+Redaction can miss secrets, and same-user processes can disable hooks. Read the [security limitations](SECURITY_LIMITATIONS.md) for the complete boundary. Use only the manual configuration and tested scope in [beta release instructions](docs/BETA_RELEASE.md); installing an agent alone does not establish coverage.
 
 ## Contributing
 
