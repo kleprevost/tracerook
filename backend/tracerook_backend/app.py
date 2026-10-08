@@ -265,6 +265,8 @@ def create_app(settings: Settings | None = None, *, analyzer: Analyzer | None = 
 
     @app.post("/v1/events", response_model=TelemetryResponse)
     async def events(body: TelemetryRequest, _: AuthContext = Depends(authed)) -> TelemetryResponse:
+        if not settings.is_dev and body.origin != "live":
+            raise ApiError(400, errors.UNSAFE_PAYLOAD, "Synthetic events are not accepted")
         # Opt-in sanitized counters: validated and acknowledged, deliberately not stored.
         return TelemetryResponse(acknowledged=True)
 
@@ -274,4 +276,13 @@ def create_app(settings: Settings | None = None, *, analyzer: Analyzer | None = 
 
 def app_factory() -> FastAPI:
     """`uvicorn tracerook_backend.app:app_factory --factory`"""
-    return create_app()
+    import os
+    if os.environ.get("TRACEROOK_MODE", "local_mock") == "local_mock":
+        from .mock import create_mock_app
+        return create_mock_app()
+    if os.environ.get("TRACEROOK_MODE") != "production":
+        raise RuntimeError("TRACEROOK_MODE must be local_mock or production")
+    settings = Settings.from_env()
+    if settings.analyzer != "anthropic" or settings.env != "production":
+        raise RuntimeError("Production mode requires production settings and Anthropic analyzer")
+    return create_app(settings)
