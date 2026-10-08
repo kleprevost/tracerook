@@ -21,11 +21,11 @@ def header(active=""):
 <header class="site-header"><div class="nav-shell">
 <a class="brand" href="/" aria-label="TraceRook home"><img src="/assets/tracerook.png" alt="" width="36" height="36">TraceRook</a>
 <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav">Menu</button>
-<nav id="main-nav" aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/docs/privacy/">Privacy</a><a href="/docs/" {('aria-current="page"' if active == 'docs' else '')}>Documentation</a><a class="nav-cta" href="/docs/quickstart/">Explore the preview</a></nav>
+<nav id="main-nav" aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/docs/privacy/">Privacy</a><a href="/docs/" {('aria-current="page"' if active == 'docs' else '')}>Documentation</a><a class="nav-cta" href="/docs/beta/">Download beta</a></nav>
 </div></header>'''
 
 def footer():
-    return '''<footer class="site-footer"><div class="footer-top"><a class="brand" href="/"><img src="/assets/tracerook.png" alt="" width="32" height="32">TraceRook</a><p>Independent judgment. Before the next tool call.</p><div><a href="/docs/">Documentation</a><a href="/docs/roadmap/">Release status</a><a href="https://github.com/kleprevost/tracerook">GitHub</a></div></div><div class="footer-bottom"><span>© 2026 TraceRook</span><span>Native macOS · Apple Silicon · MVP2 development preview</span><span>Claude is a product of Anthropic. No affiliation or endorsement implied.</span></div></footer>'''
+    return '''<footer class="site-footer"><div class="footer-top"><a class="brand" href="/"><img src="/assets/tracerook.png" alt="" width="32" height="32">TraceRook</a><p>Independent judgment. Before the next tool call.</p><div><a href="/docs/">Documentation</a><a href="/docs/roadmap/">Release status</a><a href="https://github.com/kleprevost/tracerook">GitHub</a></div></div><div class="footer-bottom"><span>© 2026 TraceRook</span><span>Native macOS · Apple Silicon · Invited beta</span><span>Claude is a product of Anthropic. No affiliation or endorsement implied.</span></div></footer>'''
 
 def shell(title, description, body, active="", extra="", path="/"):
     if path is not None:
@@ -56,7 +56,7 @@ def build_docs():
                 q = PAGES[index]
                 adjacent += f'<a href="/docs/{q["slug"]}/"><small>{label}</small><strong>{esc(q["title"])}</strong></a>'
         adjacent += '</nav>'
-        body = f'''<div class="docs-layout"><aside class="docs-sidebar"><div class="docs-top"><a href="/docs/">Documentation</a><button class="docs-toggle" aria-expanded="false" aria-controls="docs-nav">Browse topics</button></div><nav id="docs-nav" aria-label="Documentation">{nav}</nav></aside><main id="main" class="doc-main"><div class="doc-eyebrow">{esc(p['group'])} <span>MVP2 / foundation</span></div><h1>{esc(p['title'])}</h1><p class="doc-lead">{esc(p['description'])}</p><div class="doc-status"><strong>Development preview</strong><span>MVP2 foundation complete. Local service and the synthetic API demo work locally. Live hooks, enforcement, and Anthropic BYOK are pending.</span></div><div class="mobile-toc"><details><summary>On this page</summary>{toc}</details></div><article class="doc-article">{sections}</article><div class="doc-source">Based on the <a href="/reference/TraceRook_MVP1_Architecture_Spec.md">MVP1 specification</a>, the additive <a href="/reference/TraceRook_MVP2_Architecture_Implementation_Spec.md">MVP2 specification</a>, and the <a href="/reference/docs/MVP2_ACCEPTANCE.md">acceptance matrix</a> · October 8, 2026.</div>{adjacent}</main><aside class="docs-toc" aria-label="On this page"><p>On this page</p>{toc}<a class="toc-bottom" href="https://github.com/kleprevost/tracerook">GitHub project</a></aside></div>'''
+        body = f'''<div class="docs-layout"><aside class="docs-sidebar"><div class="docs-top"><a href="/docs/">Documentation</a><button class="docs-toggle" aria-expanded="false" aria-controls="docs-nav">Browse topics</button></div><nav id="docs-nav" aria-label="Documentation">{nav}</nav></aside><main id="main" class="doc-main"><div class="doc-eyebrow">{esc(p['group'])} <span>Invited beta</span></div><h1>{esc(p['title'])}</h1><p class="doc-lead">{esc(p['description'])}</p><div class="doc-status"><strong>Beta 0.1.0-beta.1</strong><span>Published with ad-hoc signatures; not notarized. TraceRook Cloud and Claude Code review have passed together. Codex remains unverified. <a href="/docs/beta/">Download and setup</a>.</span></div><div class="mobile-toc"><details><summary>On this page</summary>{toc}</details></div><article class="doc-article">{sections}</article><div class="doc-source">Based on the <a href="/reference/TraceRook_MVP1_Architecture_Spec.md">MVP1 specification</a>, the additive <a href="/reference/TraceRook_MVP2_Architecture_Implementation_Spec.md">MVP2 specification</a>, and the <a href="/reference/docs/MVP2_ACCEPTANCE.md">acceptance matrix</a> · October 8, 2026.</div>{adjacent}</main><aside class="docs-toc" aria-label="On this page"><p>On this page</p>{toc}<a class="toc-bottom" href="https://github.com/kleprevost/tracerook">GitHub project</a></aside></div>'''
         out = DIST / 'docs' / p['slug']
         out.mkdir(parents=True, exist_ok=True)
         (out/'index.html').write_text(shell(p['title'], p['description'], body, 'docs', path=f'/docs/{p["slug"]}/'))
@@ -78,7 +78,7 @@ def build():
     references.mkdir(exist_ok=True)
     for source in ('TraceRook_MVP1_Architecture_Spec.md', 'TraceRook_MVP2_Architecture_Implementation_Spec.md',
                    'TraceRook_MVP2_Agent_Handoff.md', 'SECURITY_LIMITATIONS.md', 'docs/IMPLEMENTATION_STATUS.md',
-                   'docs/MVP2_ACCEPTANCE.md', 'docs/MVP2_PR2_PLAN.md', 'docs/AGENT_COMPATIBILITY.md',
+                   'docs/BETA_RELEASE.md', 'docs/BETA_E2E_EVIDENCE.md', 'docs/CLOUD_ALPHA_IMPLEMENTATION.md', 'docs/MVP3_ACCEPTANCE.md', 'docs/MVP2_ACCEPTANCE.md', 'docs/MVP2_PR2_PLAN.md', 'docs/AGENT_COMPATIBILITY.md',
                    'docs/ARCHITECTURE.md', 'docs/DEVELOPMENT.md', 'docs/PRIVACY.md', 'docs/THREAT_MODEL.md',
                    'website/README.md', 'docs/LOCAL_MOCK_API_HANDOFF.md', 'docs/LOCAL_API_CLIENT_PREPARATION.md', 'docs/LOCAL_API_DEMO_EVIDENCE.md',
                    'docs/MVP2_SERVICE_EVIDENCE.md', 'docs/MVP2_RULES_EVIDENCE.md',
