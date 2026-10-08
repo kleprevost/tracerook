@@ -9,9 +9,12 @@ import TraceRookIPC
 final class AgentConnection {
     private(set) var status = "Service not connected"
     private(set) var connected = false
+    private(set) var localAPI = LocalAPIDemoStatus()
+    private(set) var localAPIBusy = false
     private var client: XPCClient?
     private let model: DesktopModel
     private var refreshTask: Task<Void, Never>?
+    private var localAPIGeneration = 0
     var servicePlan: LocalServicePlan?
     init(model: DesktopModel) { self.model = model }
     func start() {
@@ -44,7 +47,23 @@ final class AgentConnection {
         } catch {
             client = nil; connected = false; status = "Service unavailable · no verified protection"
             model.disconnectService()
+            localAPI = LocalAPIDemoStatus(failure: .unavailable)
+            localAPIGeneration += 1; localAPIBusy = false
         }
+    }
+    func localAPICommand(_ operation: LocalAPIDemoOperation, request: LocalAPIDemoRequest? = nil) async {
+        guard connected, !localAPIBusy || operation == .disconnect || operation == .delete else { return }
+        localAPIGeneration += 1
+        let generation = localAPIGeneration
+        localAPIBusy = true
+        defer { if generation == localAPIGeneration { localAPIBusy = false } }
+        do {
+            let command = LocalAPIDemoControl(operation: operation, request: request)
+            let payload = try JSONValue.decodeBounded(WireCodec.encodePayload(command, maximumBytes: WireLimits.replyBytes))
+            let reply = try await self.command(.localAPIDemo, payload: payload)
+            let status = try WireCodec.decodePayload(LocalAPIDemoStatus.self, payload: reply.payload.canonicalData(), maximumBytes: WireLimits.replyBytes)
+            if generation == localAPIGeneration && connected { localAPI = status }
+        } catch { if generation == localAPIGeneration { localAPI = LocalAPIDemoStatus(failure: .unavailable) } }
     }
     func enable() {
         do {
@@ -77,5 +96,7 @@ final class AgentConnection {
         }
         catch { status = "Service removal failed · check Login Items" }
         client = nil; connected = false; model.disconnectService()
+        localAPI = LocalAPIDemoStatus()
+        localAPIGeneration += 1; localAPIBusy = false
     }
 }

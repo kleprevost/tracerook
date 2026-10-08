@@ -1,5 +1,7 @@
 # Local API client preparation — 2026-10-08
 
+**Historical preparation milestone.** The backend and native HTTP connection have since been implemented and demonstrated. Current results and run instructions are in [connected local API evidence](LOCAL_API_DEMO_EVIDENCE.md); the text below records the earlier preparation, not current availability.
+
 The user assigned the mock backend to a separate agent on `claude/zealous-einstein-nxxnwd`. Current client work is on `codex/mvp2-live-beta`. The backend branch was not present in the local checkout when this preparation was validated. Its contract must be reviewed before connection is enabled.
 
 ## Implemented and demonstrated

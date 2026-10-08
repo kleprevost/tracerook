@@ -30,6 +30,9 @@ final class AppEnvironment {
         if CommandLine.arguments.contains("--demo") { model.exploreDemo(); onboardingPresented = false }
         if CommandLine.arguments.contains("--appearance-dark") { appearance = "Dark" }
         if CommandLine.arguments.contains("--appearance-light") { appearance = "Light" }
+        if CommandLine.arguments.contains("--local-api-demo") {
+            model.destination = .settings; settingsSection = "Local API Demo"; onboardingPresented = false
+        }
         if !CommandLine.arguments.contains("--ui-smoke-test") { agent.start() }
     }
     var colorScheme: SwiftUI.ColorScheme? { appearance == "Dark" ? .dark : appearance == "Light" ? .light : nil }

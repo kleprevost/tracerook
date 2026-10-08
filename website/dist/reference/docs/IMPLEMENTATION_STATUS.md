@@ -11,6 +11,8 @@ Authoritative specifications: `TraceRook_MVP1_Architecture_Spec.md` version 1.0,
 | 4 — BYOK / drift | Pending | Real direct Anthropic requests, Keychain, consent, privacy, budgets and timeouts |
 | 5 — Beta packaging | Pending | Developer ID, notarization, macOS 26/27, performance and release checklist |
 
+Current local development extends this original phase record: authenticated service and private SQLite, durable review CAS, initial policy corpus, and connected synthetic HTTP API are implemented. Validation passes 64 Swift tests, 103 backend tests and 22 native renders. Live host hooks, native real-provider analysis and hosted Cloud remain pending. See the [latest local API evidence](LOCAL_API_DEMO_EVIDENCE.md) and dated updates below.
+
 ## Platform observations and necessary development adjustments
 
 - Development host: Apple Silicon, macOS 27.0, Swift 6.4, macOS 27 SDK from Command Line Tools. Full Xcode is absent. A checked-in native Xcode project accompanies a SwiftPM build path that packages a real `.app`; Xcode-specific build/archive validation is still required on a host with full Xcode.
@@ -79,3 +81,9 @@ Implemented and tested on macOS 27: authenticated XPC/control observers, audit-t
 ## Local API client preparation — October 8, 2026
 
 The user assigned the local mock backend to `claude/zealous-einstein-nxxnwd`. Client request preview and strict isolated fixture-response validation are prepared, with connection disabled until the actual backend contract is integrated. The full local suite now passes 60 test functions and 22 native appearance cases. An initial 50-case local policy corpus is also implemented, but operational hook enforcement is still disabled. No real Claude request or backend deployment occurred. See [client preparation evidence](LOCAL_API_CLIENT_PREPARATION.md), [API handoff](LOCAL_MOCK_API_HANDOFF.md), and [policy evidence](MVP2_RULES_EVIDENCE.md).
+
+## Connected local API and Haiku diagnostic — 2026-10-08
+
+The supplied backend branch is integrated and hardened. The native app now reaches the actual loopback HTTP server through authenticated XPC and the service-owned bounded transport. Enrollment, three validated fixtures, three typed failures, usage, rotation, revocation/deletion and unchanged live history pass actual process tests. GUI enrollment/result/outage controls were visually verified. **64 Swift tests, 103 backend tests and 22 native renders pass.** See [scoped evidence and run steps](LOCAL_API_DEMO_EVIDENCE.md).
+
+One explicitly authorized, isolated real Anthropic diagnostic validated `claude-haiku-5-5`, a structured verdict, 798 input tokens, 178 output tokens and 3,006 ms. Credentials and upstream bodies were not persisted. The native mock still makes zero Claude calls; no backend is deployed. Operational host enforcement, native BYOK, hosted Cloud, release signing and other acceptance gates remain open.

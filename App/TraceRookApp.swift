@@ -7,6 +7,54 @@ import TraceRookIPC
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if CommandLine.arguments.contains("--local-api-smoke-test") {
+            Task { @MainActor in
+                do {
+                    let client = XPCClient(agent: try SignedFamily(bundle: Bundle.main.bundleURL).agent)
+                    func control(_ command: LocalAPIDemoControl) async throws -> LocalAPIDemoStatus {
+                        let value = try JSONValue.decodeBounded(WireCodec.encodePayload(command, maximumBytes: WireLimits.replyBytes))
+                        let request = ServiceControlRequest(method: .localAPIDemo, payload: value)
+                        let reply = try WireCodec.decode(ServiceControlReply.self, frame: await client.call(WireCodec.encode(request)))
+                        guard reply.requestID == request.requestID, reply.error == nil else { throw IPCError.transport }
+                        return try WireCodec.decodePayload(LocalAPIDemoStatus.self, payload: reply.payload.canonicalData(), maximumBytes: WireLimits.replyBytes)
+                    }
+                    func snapshot() async throws -> ServiceSnapshot {
+                        let request = ServiceControlRequest(method: .snapshot, payload: .object(["limit": .number(25)]))
+                        let reply = try WireCodec.decode(ServiceControlReply.self, frame: await client.call(WireCodec.encode(request)))
+                        guard reply.requestID == request.requestID, reply.error == nil else { throw IPCError.transport }
+                        let result = try JSONDecoder().decode(ServiceSnapshot.self, from: reply.payload.canonicalData())
+                        try result.validate(); return result
+                    }
+                    let before = try await snapshot()
+                    let enrolled = try await control(.init(operation: .connect))
+                    guard enrolled.connected, enrolled.failure == nil, let device = enrolled.deviceID else { throw TraceRookError.disconnected }
+                    for scenario in [LocalAPIDemoScenario.benign, .credentialTransfer, .taskDrift] {
+                        let request = LocalAPIDemoRequest(scenario: scenario, deviceID: device)
+                        let status = try await control(.init(operation: .analyze, request: request))
+                        guard status.failure == nil, let response = status.lastResponse else { throw TraceRookError.malformedResponse }
+                        try response.validate(matching: request)
+                        print("Native → authenticated service → local HTTP: \(scenario.rawValue) passed; synthetic, zero Claude tokens.")
+                    }
+                    let failures: [(LocalAPIDemoScenario, LocalAPIDemoFailure)] = [(.providerUnavailable, .providerUnavailable), (.quotaExhausted, .quotaExhausted), (.deadlineExceeded, .deadlineExceeded)]
+                    for (scenario, expected) in failures {
+                        let status = try await control(.init(operation: .analyze, request: .init(scenario: scenario, deviceID: device)))
+                        guard status.failure == expected, status.lastResponse == nil else { throw TraceRookError.malformedResponse }
+                        print("Typed local API failure: \(scenario.rawValue) passed; no verdict or permission.")
+                    }
+                    let rotated = try await control(.init(operation: .rotate))
+                    guard rotated.connected, rotated.deviceID == device, rotated.failure == nil else { throw TraceRookError.notAuthenticated }
+                    let usage = try await control(.init(operation: .usage))
+                    guard usage.fixtureEvaluations == enrolled.fixtureEvaluations + 3 else { throw TraceRookError.malformedResponse }
+                    let deleted = try await control(.init(operation: .delete))
+                    guard !deleted.connected, deleted.failure == nil else { throw TraceRookError.notAuthenticated }
+                    let after = try await snapshot()
+                    guard before.sessions.map(\.id) == after.sessions.map(\.id), before.incidents.map(\.id) == after.incidents.map(\.id),
+                          before.approvals.map(\.id) == after.approvals.map(\.id) else { throw TraceRookError.notDemoData }
+                    print("Mock rotation, actual fixture usage, deletion, and unchanged live history: passed. Host protection remains unverified.")
+                    exit(0)
+                } catch { FileHandle.standardError.write(Data("Local API native smoke failed: \(error as? TraceRookError ?? .disconnected).\n".utf8)); exit(1) }
+            }
+        }
         if CommandLine.arguments.contains("--service-smoke-test") {
             Task { @MainActor in
                 do {

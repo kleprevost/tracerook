@@ -161,7 +161,7 @@ public struct LocalAPIDemoResponse: IPCMessage, Equatable {
     }
 }
 
-private enum LocalAPIDemoWire {
+enum LocalAPIDemoWire {
     static func exact(_ value: JSONValue?, keys: Set<String>) throws {
         guard case .object(let object) = value, Set(object.keys) == keys else { throw TraceRookError.malformedInput }
     }

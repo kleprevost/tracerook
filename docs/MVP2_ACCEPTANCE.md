@@ -107,3 +107,7 @@ Rendering checks verify cases and dimensions with representative visual review; 
 - [ ] Repository, docs, public claims and real end-to-end demonstration agree.
 
 No release checkbox is satisfied solely by this contract phase.
+
+## Subsequent local demonstration update — 2026-10-08
+
+The pinned inventory and PR1 evidence above are historical. Current local work implements the authenticated service, private SQLite, durable exact-review transitions, initial policy corpus and isolated connected local API demonstration. Current evidence: 64 Swift tests, 103 backend tests, 22 native renders, and actual native/XPC/loopback HTTP lifecycle checks. See [service evidence](MVP2_SERVICE_EVIDENCE.md), [initial rules evidence](MVP2_RULES_EVIDENCE.md) and [connected API evidence](LOCAL_API_DEMO_EVIDENCE.md). Full live-host and release gates above remain unmet; neither synthetic verdicts nor the separate single real Haiku diagnostic closes them.

@@ -6,8 +6,10 @@ public actor EventBroker {
     public let reviews: ApprovalCoordinator
     public let securityMode: ServiceSecurityMode
     private var mutations: [UUID: ContinuousClock.Instant] = [:]
-    public init(store: SessionStore, securityMode: ServiceSecurityMode) {
+    private let localAPIDemo: LocalAPIDemoClient?
+    public init(store: SessionStore, securityMode: ServiceSecurityMode, localAPIDemo: LocalAPIDemoClient? = nil) {
         self.store = store; self.securityMode = securityMode; reviews = ApprovalCoordinator(store: store)
+        self.localAPIDemo = localAPIDemo
     }
     public func control(_ request: ServiceControlRequest) async -> ServiceControlReply {
         do {
@@ -36,6 +38,13 @@ public actor EventBroker {
                     kind: .preToolUse, cwd: "[PROJECT]", toolName: "Bash", actionType: .shellExec,
                     argsSummary: "SIMULATED INGESTION · No host tool was running", actionFingerprint: String(repeating: "0", count: 64))
                 _ = try await store.record(event, provenance: .serviceSimulation)
+            case .localAPIDemo:
+                guard securityMode == .developer, let localAPIDemo else {
+                    return ServiceControlReply(requestID: request.requestID, error: .forbidden)
+                }
+                let command = try WireCodec.decodePayload(LocalAPIDemoControl.self, payload: request.payload.canonicalData(), maximumBytes: WireLimits.replyBytes)
+                let status = await localAPIDemo.control(command)
+                return ServiceControlReply(requestID: request.requestID, payload: try JSONValue.decodeBounded(WireCodec.encodePayload(status, maximumBytes: WireLimits.replyBytes)))
             }
             return ServiceControlReply(requestID: request.requestID)
         } catch TraceRookError.wrongBinding { return ServiceControlReply(requestID: request.requestID, error: .wrongBinding) }

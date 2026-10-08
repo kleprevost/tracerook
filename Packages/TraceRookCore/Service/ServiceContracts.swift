@@ -9,6 +9,7 @@ public enum ActivityProvenance: String, Codable, Sendable { case hostHook = "hos
 public enum ControlMethod: String, Codable, Sendable {
     case snapshot, resolveReview = "resolve_review", clearHistory = "clear_history"
     case simulatedIngestion = "simulated_ingestion"
+    case localAPIDemo = "local_api_demo"
 }
 public struct ServiceControlRequest: IPCMessage {
     public let protocolVersion: Int
@@ -28,6 +29,8 @@ public struct ServiceControlRequest: IPCMessage {
         case .clearHistory, .simulatedIngestion: guard object.isEmpty else { throw TraceRookError.malformedInput }
         case .resolveReview:
             _ = try WireCodec.decodePayload(ReviewResolution.self, payload: payload.canonicalData(), maximumBytes: WireLimits.replyBytes)
+        case .localAPIDemo:
+            _ = try WireCodec.decodePayload(LocalAPIDemoControl.self, payload: payload.canonicalData(), maximumBytes: WireLimits.replyBytes)
         }
     }
 }

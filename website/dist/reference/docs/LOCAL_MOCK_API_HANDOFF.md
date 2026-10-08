@@ -1,12 +1,12 @@
-# Local mock backend — proposed shared contract
+# Local mock backend — frozen shared contract
 
-Status: **provisional contract; native request preview and response validators are prepared. The server and native HTTP connection are not integrated yet.** The user assigned the backend to a separate agent on `claude/zealous-einstein-nxxnwd`; reconcile that branch's actual protocol before wiring transport. See [client preparation evidence](LOCAL_API_CLIENT_PREPARATION.md).
+Status: **implemented and demonstrated locally.** The supplied backend branch was reviewed and hardened, and the native app now connects through its authenticated service to the actual loopback HTTP server. See [current evidence](LOCAL_API_DEMO_EVIDENCE.md) and [backend run instructions](../backend/LOCAL_MOCK.md).
 
 The user clarified that the immediate target is a locally running mock backend connected to the native client. This is an explicitly simulated development demonstration, not the hosted Claude alpha described in the [MVP3 specification](../TraceRook_MVP3_Complete_Package/TraceRook_MVP3_Claude_Cloud_Alpha_Spec.md). It does not establish working Claude inference, customer enrollment, or verified host enforcement.
 
 ## Ownership
 
-- Backend work: `cloud/local-mock/`, its tests, and its run instructions.
+- Backend work: `backend/tracerook_backend/mock.py`, its tests, and `backend/LOCAL_MOCK.md`.
 - Client work: additive Swift contracts, service-owned HTTP transport, authenticated UI control calls, and native presentation.
 - Website work: truthful documentation distinguishing the offline Cloud Demo, this local API demonstration, and future Claude integration.
 
@@ -35,7 +35,9 @@ Issue random high-entropy device tokens. Store only token digests in backend mem
 
 Use the MVP3 canonical request/context shape and bounds, with two mandatory additional fields: `simulation: true` and an allowlisted `scenario`. Only client-generated, predefined synthetic examples are accepted. Scenario contexts must match the shared fixtures exactly; no arbitrary action text, paths, transcripts, repository data, API keys, or host payloads. Allowed scenarios: `benign`, `credential_transfer`, `task_drift`, `provider_unavailable`, `quota_exhausted`, `deadline_exceeded`.
 
-The prepared client uses `source: claude_code`, `event: pre_tool_use`, privacy policy version 2, and a 1,000–4,000 ms budget (default 3,000 ms) inside the existing five-second XPC call budget. This is a narrower mock subset of the hosted specification's 12,000 ms maximum. Context fixtures are defined in `Packages/TraceRookCore/LocalAPIDemo.swift`; preview UUIDs are placeholders until enrollment. Timestamps accept canonical UTC seconds or three fractional digits. Freeze the approved request bytes before sending and generate a fresh request ID for a changed scenario.
+The connected client uses `source: claude_code`, `event: pre_tool_use`, privacy policy version 2, and a 1,000–4,000 ms budget (default 3,000 ms) inside the existing five-second XPC call budget. This is a narrower mock subset of the hosted specification's 12,000 ms maximum. Context fixtures are defined in `Packages/TraceRookCore/LocalAPIDemo.swift`; preview UUIDs are placeholders until enrollment. Timestamps accept canonical UTC seconds or three fractional digits. Freeze the approved request bytes before sending and generate a fresh request ID for a changed scenario.
+
+Enrollment sends exactly `invitation_id: "local-demo"`, `consent: true`, and `privacy_policy_version: 2`. Rotation/revocation send only the enrolled `device_id`; deletion additionally requires `confirm: true`. Tokens expire after one hour. The backend bounds devices to 64, receipts to 1,024 for 120 seconds and successful fixtures to 30 per device per UTC day. This ephemeral state is not production enrollment or durable quota evidence.
 
 Responses follow the MVP3 analysis envelope, but require `simulation: true` and the following provenance:
 
