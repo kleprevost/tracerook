@@ -52,40 +52,92 @@ export const VERDICT_SCHEMA = {
   },
   required: keys,
 };
+type VerdictReason =
+  | "shape"
+  | "category"
+  | "severity"
+  | "confidence"
+  | "flags"
+  | "recommendation"
+  | "rationale_privacy"
+  | "evidence_privacy"
+  | "limitations_privacy"
+  | "cardinality";
+class VerdictRejection extends APIError {
+  constructor(readonly reason: VerdictReason) {
+    super(503, "provider_unavailable", true);
+  }
+}
 export function verdict(value: unknown): Record<string, unknown> {
-  const o = object(value, keys);
+  const reject = (reason: VerdictReason): never => {
+    throw new VerdictRejection(reason);
+  };
+  let o: Record<string, unknown>;
+  try {
+    o = object(value, keys);
+  } catch {
+    return reject("shape");
+  }
+  if (o.schema_version !== 1) reject("shape");
+  if (!Array.isArray(o.category)) return reject("shape");
   if (
-    o.schema_version !== 1 ||
-    !Array.isArray(o.category) ||
     o.category.length < 1 ||
     o.category.length > 2 ||
-    new Set(o.category).size !== o.category.length ||
-    o.category.some(
-      (c) => !["unsafe_action", "agent_misbehavior"].includes(c),
-    ) ||
+    new Set(o.category).size !== o.category.length
+  )
+    reject("cardinality");
+  if (
+    o.category.some((c) => !["unsafe_action", "agent_misbehavior"].includes(c))
+  )
+    reject("category");
+  if (
     !["critical", "high", "medium", "low", "unknown"].includes(
       o.severity as string,
-    ) ||
+    )
+  )
+    reject("severity");
+  if (
     typeof o.confidence !== "number" ||
     !Number.isFinite(o.confidence) ||
     o.confidence < 0 ||
-    o.confidence > 1 ||
-    typeof o.suspicious !== "boolean" ||
-    typeof o.session_drift !== "boolean" ||
+    o.confidence > 1
+  )
+    reject("confidence");
+  if (typeof o.suspicious !== "boolean" || typeof o.session_drift !== "boolean")
+    reject("flags");
+  if (
     !["allow", "warn_allow", "request_approval"].includes(
       o.recommended_action as string,
     )
   )
-    throw new APIError(503, "provider_unavailable", true);
-  string(o.rationale, 2048, 2048);
-  privacy(o.rationale as string);
-  for (const field of ["evidence", "limitations"]) {
+    reject("recommendation");
+  try {
+    string(o.rationale, 2048, 2048);
+  } catch {
+    reject("shape");
+  }
+  try {
+    privacy(o.rationale as string);
+  } catch {
+    reject("rationale_privacy");
+  }
+  for (const field of ["evidence", "limitations"] as const) {
     const a = o[field];
-    if (!Array.isArray(a) || a.length > 10)
-      throw new APIError(503, "provider_unavailable", true);
-    for (const s of a) {
-      string(s, 512, 512);
-      privacy(s);
+    if (!Array.isArray(a)) return reject("shape");
+    if (a.length > 10) reject("cardinality");
+    for (const text of a) {
+      try {
+        string(text, 512, 512);
+      } catch {
+        reject("shape");
+      }
+      try {
+        privacy(text);
+      } catch {
+        reject(
+          field === "evidence" ? "evidence_privacy" : "limitations_privacy",
+        );
+      }
     }
   }
   return o;
@@ -252,6 +304,8 @@ export async function analyze(
         stage: controller.signal.aborted ? "deadline" : stage,
         upstream_status: upstreamStatus,
         ...providerErrorDiagnostic(e),
+        verdict_reason:
+          e instanceof VerdictRejection ? e.reason : "not_applicable",
         key_format_valid: /^sk-ant-[A-Za-z0-9_-]+$/.test(key),
       }),
     );
