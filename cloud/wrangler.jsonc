@@ -1,0 +1,63 @@
+{
+  "name": "tracerook-cloud",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-08",
+  "workers_dev": true,
+  "upload_source_maps": false,
+  "observability": { "enabled": false },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AlphaCoordinator"] }],
+  "env": {
+    "staging": {
+      "name": "tracerook-cloud-staging",
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "CLOUD_ANALYSIS_ENABLED": "false",
+        "GLOBAL_MONTHLY_CAP_MICRO_USD": "null",
+        "INPUT_PRICE_MICRO_USD_PER_TOKEN": "0.1",
+        "OUTPUT_PRICE_MICRO_USD_PER_TOKEN": "0.5",
+        "DAILY_EVALUATION_LIMIT": "null",
+        "DAILY_INPUT_TOKEN_LIMIT": "null",
+        "DAILY_OUTPUT_TOKEN_LIMIT": "null",
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "COORDINATOR", "class_name": "AlphaCoordinator" },
+        ],
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "tracerook-cloud-staging",
+          "database_id": "REPLACE_STAGING_D1_ID",
+          "migrations_dir": "migrations",
+        },
+      ],
+    },
+    "production": {
+      "name": "tracerook-cloud-production",
+      "vars": {
+        "ENVIRONMENT": "production",
+        "CLOUD_ANALYSIS_ENABLED": "false",
+        "GLOBAL_MONTHLY_CAP_MICRO_USD": "null",
+        "INPUT_PRICE_MICRO_USD_PER_TOKEN": "0.1",
+        "OUTPUT_PRICE_MICRO_USD_PER_TOKEN": "0.5",
+        "DAILY_EVALUATION_LIMIT": "null",
+        "DAILY_INPUT_TOKEN_LIMIT": "null",
+        "DAILY_OUTPUT_TOKEN_LIMIT": "null",
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "COORDINATOR", "class_name": "AlphaCoordinator" },
+        ],
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "tracerook-cloud-production",
+          "database_id": "REPLACE_PRODUCTION_D1_ID",
+          "migrations_dir": "migrations",
+        },
+      ],
+    },
+  },
+}
