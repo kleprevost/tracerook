@@ -41,6 +41,10 @@ import TraceRookCore
             let deniedName = "\(appearance.lowercased())-notifications-denied"
             try await render(AnyView(SettingsView().environment(environment).tint(RookTheme.accent).preferredColorScheme(environment.colorScheme)), name: deniedName, directory: directory)
             report.append(deniedName)
+            environment.settingsSection = "Local API Demo"
+            let apiName = "\(appearance.lowercased())-local-api-pending"
+            try await render(AnyView(SettingsView().environment(environment).tint(RookTheme.accent).preferredColorScheme(environment.colorScheme)), name: apiName, directory: directory)
+            report.append(apiName)
         }
         try report.joined(separator: "\n").write(to: directory.appendingPathComponent("rendered-cases.txt"), atomically: true, encoding: .utf8)
         print("Native UI smoke: \(report.count) light/dark cases rendered. No live hooks or remote analysis used.")

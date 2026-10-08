@@ -1,6 +1,6 @@
 # Implementation and acceptance record
 
-Authoritative specifications: `TraceRook_MVP1_Architecture_Spec.md` version 1.0 and the additive `TraceRook_MVP2_Architecture_Implementation_Spec.md`, with PR scope defined by `TraceRook_MVP2_Agent_Handoff.md`. No product requirement is waived by this record.
+Authoritative specifications: `TraceRook_MVP1_Architecture_Spec.md` version 1.0, the additive `TraceRook_MVP2_Architecture_Implementation_Spec.md`, and `TraceRook_MVP3_Complete_Package/TraceRook_MVP3_Claude_Cloud_Alpha_Spec.md`. PR scope follows each milestone's coding handoff. Product requirements remain in force except for explicitly user-authorized distribution deviations recorded in the milestone evidence.
 
 | Phase | Status | Evidence / remaining gate |
 |---|---|---|
@@ -61,3 +61,21 @@ Evidence logs and before/after native render artifacts remain in ignored `build/
 Source adaptations: Review DTOs belong to Core because `ApprovalBinding` is already there; moving them into Contracts would require a dependency cycle or a duplicate domain type. No SQLite implementation exists at baseline, so schema-v1 readers are retained now and actual database migrations remain PR 2. The spec's illustrative SQL `real` origin will be translated to existing `DataOrigin.live`. The executable rule corpus assumed by the spec is absent and must be implemented. The foundation Codex normalizer's object-only input assumption needs tool-specific decoding before live integration.
 
 Platform limits: full Xcode and Developer ID identities are absent; no production signed-family IPC, archive, notarization or macOS 26 validation occurred. The native SwiftPM backend still passes but now emits a deprecation warning; its eventual removal needs a build-tool migration, not weaker security. JSON decode deadline checks are cooperative around Foundation calls and bounded packets; PR 2 must add transport deadlines and cancellation. Hooks, service-owned reviews, SQLite and actual BYOK remain pending. No public beta claim or deployment is made by this phase.
+
+## MVP3.0 / PR 0 — available-baseline and release-state audit (2026-10-08)
+
+Audited source and public main: **`e2615b8e9f3b47e4330360a0b77f5dc97f2dfaf7`**, including the already-deployed MVP2 website update. [MVP3_BASELINE.md](MVP3_BASELINE.md) records exact source, local binary hashes, installed hosts, deployment and capability inventory. [MVP3_ACCEPTANCE.md](MVP3_ACCEPTANCE.md) separates passed, failed and not-run checks. [MVP3_PR1_PLAN.md](MVP3_PR1_PLAN.md) prepares the isolated Cloud contract/privacy scope; [PUBLIC_CLAIMS.md](PUBLIC_CLAIMS.md) records permitted current claims.
+
+The available-preview regression passes: **43 tests**, three debug/optimized arm64 products, packaged self-tests/v2 protocol/resource/signature checks, **20 native render cases**, and debug/optimized visible Scene launch. Static checks pass for **24 pages, 1,300 local references and 21 guides**. Existing public website deployment `03b41904-e68f-4fcd-9136-3d1e6617c1d4` has a successful Cloudflare Pages check on GitHub; the live roadmap matches this preview's implementation state.
+
+The package's reported shipping MVP2 release remains **unresolved**: no separate tag/release/installed distribution was discovered in the inspected locations. Local 0.1.0/build 1 bundles are ad-hoc signed, rejected by Gatekeeper and lack a stapled ticket. No live-host denial, actual BYOK, signed-family service, SQLite or hosted API runtime was found or exercised; their shipping regression remains not run. Installed Claude Code 2.1.290 and Codex 0.162.0-alpha.2 do not establish verified tool coverage.
+
+PR 0 changes documentation only, preserves the supplied package, leaves runtime/build/site files and user-agent configuration unchanged, and makes **no deployments, hook installations, token changes or billable provider calls**. Raw local evidence stays ignored under `build/mvp3-baseline/`. Follow the handoff's **PR 0 only / review before PR 1** boundary; no live Cloud or protection claim is promoted by this audit. See [MVP3_DEVIATIONS.md](MVP3_DEVIATIONS.md) for unresolved baseline assumptions and retained free-tier constraints.
+
+## MVP2.1 — local service implementation
+
+Implemented and tested on macOS 27: authenticated XPC/control observers, audit-token-authenticated bounded hook socket, sole-writer SQLite, sanitized durable state and service-owned exact review transitions. **50 automated tests pass**; native 20-case rendering passes. Actual packaged app/CLI authentication and altered-peer rejection were exercised. [Service evidence and deviations](MVP2_SERVICE_EVIDENCE.md) distinguish these transport proofs from live protection. The hook remains nonoperational until the real rule engine and emergency fallback are enabled. No host/tool class is verified. The user explicitly accepted a non-notarized distribution; local ad-hoc mode and its per-user LaunchAgent are separate from Developer ID policy.
+
+## Local API client preparation — October 8, 2026
+
+The user assigned the local mock backend to `claude/zealous-einstein-nxxnwd`. Client request preview and strict isolated fixture-response validation are prepared, with connection disabled until the actual backend contract is integrated. The full local suite now passes 60 test functions and 22 native appearance cases. An initial 50-case local policy corpus is also implemented, but operational hook enforcement is still disabled. No real Claude request or backend deployment occurred. See [client preparation evidence](LOCAL_API_CLIENT_PREPARATION.md), [API handoff](LOCAL_MOCK_API_HANDOFF.md), and [policy evidence](MVP2_RULES_EVIDENCE.md).

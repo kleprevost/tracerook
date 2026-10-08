@@ -80,7 +80,9 @@ def build():
                    'TraceRook_MVP2_Agent_Handoff.md', 'SECURITY_LIMITATIONS.md', 'docs/IMPLEMENTATION_STATUS.md',
                    'docs/MVP2_ACCEPTANCE.md', 'docs/MVP2_PR2_PLAN.md', 'docs/AGENT_COMPATIBILITY.md',
                    'docs/ARCHITECTURE.md', 'docs/DEVELOPMENT.md', 'docs/PRIVACY.md', 'docs/THREAT_MODEL.md',
-                   'website/README.md'):
+                   'website/README.md', 'docs/LOCAL_MOCK_API_HANDOFF.md', 'docs/LOCAL_API_CLIENT_PREPARATION.md',
+                   'docs/MVP2_SERVICE_EVIDENCE.md', 'docs/MVP2_RULES_EVIDENCE.md',
+                   'TraceRook_MVP3_Complete_Package/TraceRook_MVP3_Claude_Cloud_Alpha_Spec.md'):
         path = ROOT.parent / source
         destination = references / source
         destination.parent.mkdir(parents=True, exist_ok=True)

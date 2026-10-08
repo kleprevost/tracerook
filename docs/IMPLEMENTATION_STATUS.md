@@ -75,3 +75,7 @@ PR 0 changes documentation only, preserves the supplied package, leaves runtime/
 ## MVP2.1 — local service implementation
 
 Implemented and tested on macOS 27: authenticated XPC/control observers, audit-token-authenticated bounded hook socket, sole-writer SQLite, sanitized durable state and service-owned exact review transitions. **50 automated tests pass**; native 20-case rendering passes. Actual packaged app/CLI authentication and altered-peer rejection were exercised. [Service evidence and deviations](MVP2_SERVICE_EVIDENCE.md) distinguish these transport proofs from live protection. The hook remains nonoperational until the real rule engine and emergency fallback are enabled. No host/tool class is verified. The user explicitly accepted a non-notarized distribution; local ad-hoc mode and its per-user LaunchAgent are separate from Developer ID policy.
+
+## Local API client preparation — October 8, 2026
+
+The user assigned the local mock backend to `claude/zealous-einstein-nxxnwd`. Client request preview and strict isolated fixture-response validation are prepared, with connection disabled until the actual backend contract is integrated. The full local suite now passes 60 test functions and 22 native appearance cases. An initial 50-case local policy corpus is also implemented, but operational hook enforcement is still disabled. No real Claude request or backend deployment occurred. See [client preparation evidence](LOCAL_API_CLIENT_PREPARATION.md), [API handoff](LOCAL_MOCK_API_HANDOFF.md), and [policy evidence](MVP2_RULES_EVIDENCE.md).

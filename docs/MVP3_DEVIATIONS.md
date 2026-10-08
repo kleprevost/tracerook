@@ -14,3 +14,9 @@ Reviewed **2026-10-08**, PR 0, source `e2615b8e9f3b47e4330360a0b77f5dc97f2dfaf7`
 | Default Cloud architecture vs user's Cloudflare free-tier requirement | Free-tier requirement remains active; PR 0 provisions nothing | Verify free-tier support and limits before infrastructure changes. Document an actual incompatibility and reviewed equivalent if necessary; no automatic paid upgrade |
 
 These are baseline observations and future dependencies, not implemented alternative functionality. [Acceptance](MVP3_ACCEPTANCE.md) records exact passed, failed and not-run checks. Platform-driven implementation deviations must be appended with official/API evidence and regression results when they actually arise.
+
+## User-directed local demonstration scope
+
+After the baseline audit, the user explicitly requested a locally running mock backend connected to the client, with no backend deployment. The backend is assigned to a separate agent; [client preparation](LOCAL_API_CLIENT_PREPARATION.md) records the current subset. A distinct mock namespace, mandatory simulation field and fixture provenance are proposed so sample requests cannot reach the production analysis route. The offline Cloud Demo remains unchanged. The synthetic types are not live providers or host authorization inputs.
+
+This is a scope clarification authorized by the user, not a platform-driven waiver of the hosted alpha. Production authentication, privacy preflight, actual Anthropic inference, hosted quota/retention and live enforcement requirements remain open. No mock result may be described as real Claude analysis or proprietary backend evidence.
