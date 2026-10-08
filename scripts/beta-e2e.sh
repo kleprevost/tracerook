@@ -13,7 +13,7 @@ case "$mode" in
     scratch="$(mktemp -d "${TMPDIR:-/tmp}/tracerook-beta-tests.XXXXXX")"
     trap 'rm -rf "$scratch"' EXIT
     cd "$root"
-    "$root/scripts/test.sh" --scratch-path "$scratch/swift" --filter 'ServiceTests|AdapterTests|RulesTests|PrivacyTests|ContractsTests'
+    "$root/scripts/test.sh" --scratch-path "$scratch/swift" --filter 'ServiceTests|AdapterTests|RulesTests|PrivacyTests|ContractsTests|CoreTests'
     ;;
   --host-callback)
     shift

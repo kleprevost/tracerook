@@ -79,7 +79,15 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
         records = [json.loads(line) for line in callbacks.read_text().splitlines()] if callbacks.exists() else []
         benign = (project / 'benign-sentinel').exists()
         absent = not (project / 'denied-sentinel').exists()
-        denied = any(r['payload'].get('tool_input', {}).get('command') == commands[1] and (r['exit']==2 or '"deny"' in r['stdout']) for r in records)
+        def is_deny(record):
+            if record['exit'] == 2:
+                return True
+            try:
+                decision = json.loads(record['stdout']).get('hookSpecificOutput', {})
+                return decision.get('hookEventName') == 'PreToolUse' and decision.get('permissionDecision') == 'deny'
+            except (ValueError, AttributeError):
+                return False
+        denied = any(r['payload'].get('tool_input', {}).get('command') == commands[1] and is_deny(r) for r in records)
         result = {'kind':'actual_claude_callback_local_model_double','host_exit':run.returncode,'callback_count':len(records),'benign_executed':benign,'dangerous_denied':denied,'denied_sentinel_absent':absent,'provider':'loopback_double'}
         print(json.dumps(result, sort_keys=True))
         if run.returncode or not (benign and absent and denied): raise SystemExit(1)
