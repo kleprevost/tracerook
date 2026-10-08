@@ -32,7 +32,8 @@ let package = Package(
         .testTarget(name: "AdapterTests", dependencies: ["TraceRookAgentAdapters", "TraceRookFixtures"], path: "Tests/AdapterTests"),
         .testTarget(name: "CoreTests", dependencies: ["TraceRookCore", "TraceRookFixtures"], path: "Tests/CoreTests"),
         .testTarget(name: "UIBasicTests", dependencies: ["TraceRookCore", "TraceRookFixtures"], path: "Tests/UIBasicTests"),
-        .testTarget(name: "ServiceTests", dependencies: ["TraceRookCore", "TraceRookContracts", "TraceRookIPC", "TraceRookFixtures"], path: "Tests/ServiceTests")
+        .testTarget(name: "ServiceTests", dependencies: ["TraceRookCore", "TraceRookContracts", "TraceRookIPC", "TraceRookFixtures"], path: "Tests/ServiceTests"),
+        .testTarget(name: "RulesTests", dependencies: ["TraceRookRules", "TraceRookContracts"], path: "Tests/RulesTests")
     ],
     swiftLanguageModes: [.v6]
 )
