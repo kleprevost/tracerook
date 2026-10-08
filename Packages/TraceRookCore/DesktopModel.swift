@@ -19,7 +19,7 @@ public enum DashboardDestination: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-/// Phase 1 has no live-event transport. Its real-activity collections stay empty.
+/// Real-activity collections are filled from the service; demo collections come from bundled fixtures.
 @MainActor @Observable
 public final class DesktopModel {
     public var destination: DashboardDestination = .overview

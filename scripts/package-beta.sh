@@ -57,7 +57,7 @@ manifest = {
     'source_provenance_note': 'Packaging checkout identity; does not establish the source of a previously built bundle.',
     'archive': stem+'.zip', 'archive_sha256': sha, 'bundle_file_sha256': files,
     'verification': ['deep strict signature', 'arm64 executables', 'ZIP round-trip signature', 'file-byte equality'],
-    'feature_evidence': 'Consult BETA_RELEASE.md and the acceptance records; packaging does not prove live coverage or hosted availability.'
+    'install_guide': 'docs/BETA_RELEASE.md'
 }
 manifest_path = work/(stem+'-manifest.json')
 manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True)+'\n')
