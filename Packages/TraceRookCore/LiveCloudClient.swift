@@ -90,6 +90,7 @@ public actor LiveCloudClient {
     private var failure: LiveCloudFailure?
     private var generation: UInt64 = 0
     private var busy = false
+    private var analysisEnabledLocally = false
     private var network: Task<LocalAPIDemoHTTPResponse, any Error>?
     private var job: Task<Void, Never>?
     public init(vault: any CloudCredentialStore, transport: any CloudHTTPTransport = CloudHTTPSTransport()) { self.vault = vault; self.transport = transport }
@@ -99,8 +100,8 @@ public actor LiveCloudClient {
         catch { guard epoch == generation, !busy else { return }; enrollment = nil; failure = .credentialStorage }
     }
     public func status() -> LiveCloudStatus {
-        if let enrollment, (try? enrollment.validate()) == nil { self.enrollment = nil; capabilities = nil; usage = nil; validatedAt = nil; failure = .unauthorized }
-        return LiveCloudStatus(connected: enrollment != nil, busy: busy, deviceID: enrollment?.credential.deviceID,
+        if let enrollment, (try? enrollment.validate()) == nil { self.enrollment = nil; capabilities = nil; usage = nil; validatedAt = nil; analysisEnabledLocally = false; failure = .unauthorized }
+        return LiveCloudStatus(connected: enrollment != nil, analysisEnabledLocally: enrollment != nil && analysisEnabledLocally, busy: busy, deviceID: enrollment?.credential.deviceID,
             capabilities: capabilities, usage: usage, realAnalysisValidatedAt: validatedAt, failure: failure)
     }
     /// Returns promptly to XPC. Long-running requests are polled through status;
@@ -108,13 +109,21 @@ public actor LiveCloudClient {
     public func start(_ command: LiveCloudControl) throws -> LiveCloudStatus {
         try command.validate()
         if command.operation == .status { return status() }
+        if command.operation == .pause {
+            analysisEnabledLocally = false; generation &+= 1; network?.cancel(); job?.cancel(); busy = false
+            return status()
+        }
+        if command.operation == .resume {
+            guard let enrollment else { throw LiveCloudFailure.notConnected }; try enrollment.validate()
+            analysisEnabledLocally = true; return status()
+        }
         guard !busy || command.operation == .disconnect || command.operation == .delete else { throw LiveCloudFailure.busy }
         generation &+= 1; let epoch = generation
         let previous = job
         let old = enrollment
         if command.operation == .disconnect || command.operation == .delete {
             network?.cancel(); previous?.cancel()
-            enrollment = nil; capabilities = nil; usage = nil; validatedAt = nil
+            enrollment = nil; capabilities = nil; usage = nil; validatedAt = nil; analysisEnabledLocally = false
         }
         busy = true; failure = nil
         job = Task {
@@ -133,6 +142,19 @@ public actor LiveCloudClient {
             case .connect:
                 guard let invitation = command.invitation, let consent = command.consent else { throw LiveCloudFailure.consentRequired }
                 try consent.validate()
+                if invitation.hasPrefix("trb_") {
+                    let credential = try BetaAccessCode.decode(invitation)
+                    let candidate = CloudStoredEnrollment(credential: credential, consent: consent)
+                    let capBytes = try await send("GET", "capabilities", token: credential.deviceToken, deadline: deadline)
+                    let cap = try WireCodec.decodePayload(CloudCapabilities.self, payload: capBytes, maximumBytes: 32768)
+                    let usageBytes = try await send("GET", "usage", token: credential.deviceToken, deadline: deadline)
+                    let count = try WireCodec.decodePayload(LiveCloudUsage.self, payload: usageBytes, maximumBytes: 32768)
+                    guard epoch == generation else { throw CancellationError() }
+                    try await vault.save(candidate)
+                    guard epoch == generation else { throw CancellationError() }
+                    enrollment = candidate; capabilities = cap; usage = count; validatedAt = nil; analysisEnabledLocally = true
+                    break
+                }
                 let device = enrollment?.credential.deviceID ?? UUID()
                 let bytes = try await send("POST", "alpha/enroll", body: .object([
                     "schema_version": .number(1), "invitation": .string(invitation), "device_id": .string(device.uuidString),
@@ -143,7 +165,7 @@ public actor LiveCloudClient {
                 let saved = CloudStoredEnrollment(credential: credential, consent: consent)
                 try await vault.save(saved)
                 guard epoch == generation else { throw CancellationError() }
-                enrollment = saved; validatedAt = nil
+                enrollment = saved; validatedAt = nil; analysisEnabledLocally = true
                 try await refresh(deadline: deadline, epoch: epoch)
             case .refresh: try await refresh(deadline: deadline, epoch: epoch)
             case .rotate:
@@ -155,7 +177,7 @@ public actor LiveCloudClient {
                 try await vault.save(saved); guard epoch == generation else { throw CancellationError() }; enrollment = saved
             case .disconnect, .delete:
                 let old = oldEnrollment
-                enrollment = nil; capabilities = nil; usage = nil; validatedAt = nil
+                enrollment = nil; capabilities = nil; usage = nil; validatedAt = nil; analysisEnabledLocally = false
                 try await vault.clear()
                 if let old {
                     var body = deviceBody(old)
@@ -166,19 +188,19 @@ public actor LiveCloudClient {
                     try CloudWire.exact(value, keys: ["schema_version", key])
                     guard value["schema_version"] == .number(1), value[key] == .bool(true) else { throw TraceRookError.malformedResponse }
                 }
-            case .status: break
+            case .status, .pause, .resume: break
             }
         } catch {
             guard epoch == generation else { return }
             failure = classify(error)
             if command.operation == .rotate || failure == .unauthorized || failure == .revoked {
-                enrollment = nil; capabilities = nil; usage = nil; validatedAt = nil
+                enrollment = nil; capabilities = nil; usage = nil; validatedAt = nil; analysisEnabledLocally = false
                 try? await vault.clear()
             }
         }
     }
     public func analyze(_ request: CloudAnalysisRequest, deadline: ContinuousClock.Instant) async throws -> LiveCloudAnalysisResponse {
-        guard !busy, let enrollment, let capabilities, capabilities.analysisEnabled else { throw LiveCloudFailure.notConnected }
+        guard !busy, analysisEnabledLocally, let enrollment, let capabilities, capabilities.analysisEnabled else { throw LiveCloudFailure.notConnected }
         try enrollment.validate(); try request.validate()
         guard request.deviceID == enrollment.credential.deviceID else { throw TraceRookError.wrongBinding }
         busy = true; let epoch = generation; defer { if epoch == generation { busy = false } }

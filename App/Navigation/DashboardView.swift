@@ -52,7 +52,7 @@ struct DashboardView: View {
                     } else {
                         StatusBadge(text: environment.model.liveCoverage.title, symbol: "circle.dashed")
                         Spacer()
-                        Button("Explore Demo") { environment.model.exploreDemo() }.buttonStyle(.bordered)
+                        Button("Explore Demo") { Task { await environment.exploreDemo() } }.buttonStyle(.bordered)
                     }
                 }.padding(.horizontal, 28).padding(.vertical, 14).background(.bar)
                 Divider()
@@ -71,12 +71,14 @@ struct DashboardView: View {
         .sheet(isPresented: $env.onboardingPresented) { OnboardingView().environment(environment) }
         .sheet(isPresented: $env.privacyPreviewPresented) { PrivacyPreviewView() }
         .overlay(alignment: .bottom) {
-            if let message = environment.model.message {
+            if let message = environment.analysisModeError ?? environment.model.message {
                 HStack {
                     Image(systemName: "info.circle")
                     Text(message).font(.callout)
-                    Button { environment.model.dismissMessage() } label: { Image(systemName: "xmark") }
-                        .buttonStyle(.plain).accessibilityLabel("Dismiss message")
+                    if environment.analysisModeError == nil {
+                        Button { environment.model.dismissMessage() } label: { Image(systemName: "xmark") }
+                            .buttonStyle(.plain).accessibilityLabel("Dismiss message")
+                    }
                 }.padding(14).background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
                     .shadow(radius: 8, y: 3).padding(20)
             }

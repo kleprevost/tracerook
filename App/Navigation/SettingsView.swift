@@ -10,7 +10,11 @@ struct SettingsView: View {
         @Bindable var env = environment
         VStack(alignment: .leading, spacing: 20) {
             PageHeading(title: "Settings", subtitle: "Protection, analysis and privacy should be understandable.")
-            Picker("Settings section", selection: $env.settingsSection) {
+            Picker("Settings section", selection: Binding(get: { environment.settingsSection }, set: { section in
+                if section == "Local API Demo" {
+                    Task { if await environment.selectAnalysisMode(.localRulesOnly) { environment.settingsSection = section } }
+                } else { environment.settingsSection = section }
+            })) {
                 ForEach(["General", "Protection", "AI Provider", "Local API Demo", "Privacy", "About"], id: \.self) { Text($0) }
             }.pickerStyle(.segmented)
             ScrollView {
@@ -62,13 +66,10 @@ struct SettingsView: View {
         Group {
             Surface("Current coverage") {
                 StatusBadge(text: environment.model.liveCoverage.title, symbol: "circle.dashed")
-                Text("No supported host callback has been verified. Local rules become enforceable only when the live hook and service are installed and tested.").foregroundStyle(.secondary)
-                if let until = environment.model.pauseUntil {
-                    Text("Pause ends \(until.formatted(date: .omitted, time: .shortened))")
-                    Button("Resume") { environment.model.resume() }.buttonStyle(.bordered)
-                } else { Button("Pause protection for 15 minutes") { environment.model.pause() }.buttonStyle(.bordered) }
+                Text("Supported callbacks can reach local policy and exact-action human review through the service. Coverage remains unverified until the configured host proves its pre-execution path.").foregroundStyle(.secondary)
+                Text("Cloud analysis is controlled in AI Provider. This screen does not pause local hook enforcement.").font(.caption).foregroundStyle(.secondary)
             }
-            Surface("Policy defaults · live wiring pending") {
+            Surface("Local policy defaults") {
                 DetailField(name: "Critical", value: "Deterministic catastrophic evidence → deny")
                 DetailField(name: "High ≥ 70", value: "Hold for exact-action human review")
                 DetailField(name: "Medium ≥ 40", value: "Allow with warning")
@@ -77,7 +78,7 @@ struct SettingsView: View {
                 Text("Models cannot silently cause a critical hard block or erase local catastrophic evidence. Thresholds are routing aids, not proof of malicious intent.").font(.caption).foregroundStyle(.secondary)
             }
             Surface("Outages and exceptions") {
-                Text("Strict offline protection and scoped exceptions will be available after the shared fallback engine is implemented and tested. No wildcard trust or notification-based catastrophic exception is created.").font(.callout).foregroundStyle(.secondary)
+                Text("Local deterministic policy remains authoritative when cloud analysis is unavailable. Human review and host deadlines are bounded; scoped exceptions are not available.").font(.callout).foregroundStyle(.secondary)
                 Text("A callback that never ran cannot be made fail-closed by a preference.").font(.callout.weight(.medium))
             }
         }
@@ -85,9 +86,12 @@ struct SettingsView: View {
     private var provider: some View {
         Group {
             Surface("Analysis mode") {
-                Picker("Provider", selection: Binding(get: { environment.model.mode }, set: { environment.model.selectMode($0) })) {
+                Picker("Provider", selection: Binding(get: { environment.model.mode }, set: { mode in
+                    Task { await environment.selectAnalysisMode(mode) }
+                })) {
                     ForEach(AnalysisMode.allCases, id: \.self) { Text($0.title).tag($0) }
-                }.pickerStyle(.radioGroup)
+                }.pickerStyle(.radioGroup).disabled(environment.analysisModeBusy)
+                if let error = environment.analysisModeError { Text(error).font(.callout).foregroundStyle(.orange) }
                 if environment.model.mode == .anthropicBYOK {
                     StatusBadge(text: "Connection unavailable in this build", color: .orange)
                     Text("BYOK is unavailable in this development build. No key is requested, stored or sent.").font(.callout).foregroundStyle(.secondary)
@@ -95,10 +99,10 @@ struct SettingsView: View {
                 } else if environment.model.mode == .traceRookCloud {
                     Text("Invitation-only Claude analysis. Enrollment and inference are separate from verified host protection.").font(.callout).foregroundStyle(.secondary)
                 } else if environment.model.mode == .traceRookCloudDemo {
-                    Text("Cloud AI analysis unavailable for real activity. The account, usage and plans below are synthetic; no Cloud backend or billing exists.").font(.callout).foregroundStyle(.secondary)
-                    Button("Explore Demo") { environment.model.exploreDemo() }.buttonStyle(.borderedProminent)
+                    Text("Cloud AI analysis unavailable for real activity. The account, usage and plans below are synthetic and never enroll a real account or create billing.").font(.callout).foregroundStyle(.secondary)
+                    Button("Explore Demo") { Task { await environment.exploreDemo() } }.buttonStyle(.borderedProminent)
                 } else {
-                    Text("Offline analysis mode. No remote requests. Live enforcement still requires installed, verified hooks.").font(.callout).foregroundStyle(.secondary)
+                    Text("Cloud analysis is paused in the service. Local policy remains separate; host coverage requires installed, verified hooks.").font(.callout).foregroundStyle(.secondary)
                 }
             }
             if environment.model.mode == .traceRookCloud { CloudAlphaView() }
