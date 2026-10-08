@@ -26,7 +26,7 @@
 
 TraceRook is an independent review layer for developers working with **Claude Code and OpenAI Codex**. Its MVP2 design combines deterministic local policy with **Anthropic Claude** to assess risky supported tool calls before execution, explain the evidence, and put consequential decisions in your hands.
 
-> **Invited beta in preparation:** Native app, authenticated local service, private SQLite history, exact-action review UI, and fixture demonstrations are implemented. Production Cloud API deployment and HTTPS authentication are verified; 59 Worker tests pass. Claude Code 2.1.290 passed actual callback allow/deny, bounded timeout, and high-risk service-outage checks using a local model double. Genuine hosted Haiku inference and the full signed native host-to-Cloud-to-Claude-to-human-review path passed; the broader hosted evaluation corpus remains in progress; Codex coverage remains unverified. The beta retains ad-hoc signatures and is not notarized. No public download is published.
+> **Invited beta available:** Native app, authenticated local service, private SQLite history, exact-action review UI, and fixture demonstrations are implemented. Production Cloud API deployment and HTTPS authentication are verified; 60 Worker tests pass. Claude Code 2.1.290 passed actual callback allow/deny, bounded timeout, and high-risk service-outage checks using a local model double. Genuine hosted Haiku inference and the full signed native host-to-Cloud-to-Claude-to-human-review path passed; the broader hosted evaluation corpus remains in progress; Codex coverage remains unverified. The beta retains ad-hoc signatures and is not notarized. [Download beta 0.1.0-beta.1](https://github.com/kleprevost/tracerook/releases/tag/v0.1.0-beta.1); Cloud access requires an invitation.
 
 ![TraceRook native macOS dashboard showing explicitly labeled Cloud Demo fixtures and real integrations marked Not integrated](docs/assets/dashboard-demo.png)
 
@@ -55,9 +55,9 @@ The current preview includes:
 
 Demo data stays separate from real activity. Simulated service ingestion is labeled and excluded from observed host-session counts. Host integrations remain **Not integrated** until live acceptance gates pass.
 
-## Invited beta preparation
+## Invited beta download
 
-An initial ten-tester beta is being prepared as a versioned Apple Silicon ZIP. It retains ad-hoc signatures and is not notarized. See [beta release instructions](docs/BETA_RELEASE.md) for macOS 26+ requirements, checksum verification, Apple’s manual opening workflow, and current acceptance limits. No public beta download is claimed; deployment alone does not establish hosted inference or host coverage.
+[Beta 0.1.0-beta.1](https://github.com/kleprevost/tracerook/releases/tag/v0.1.0-beta.1) is published as a versioned Apple Silicon ZIP with a manifest and SHA256SUMS for the initial ten testers. It retains ad-hoc signatures and is not notarized. See [beta release instructions](docs/BETA_RELEASE.md) for macOS 26+ requirements, checksum verification, Apple’s manual opening workflow, and current acceptance limits. Cloud access requires a separate invitation; installation alone does not enable host protection.
 
 ## Try the preview
 
@@ -105,11 +105,11 @@ The [static website source](website/README.md) is included in this repository an
 | MVP2.2–2.3 · Claude Code and Codex live hooks | Claude Code 2.1.290 allow/deny, timeout and outage gates pass; Codex remains unverified; manual configuration only |
 | MVP2.4 · Local rules and native approval loop | Local policy, operational callbacks, durable review CAS and real approval UI implemented; actual native Allow once/Block passed |
 | MVP2.5 · Direct Anthropic Claude BYOK and drift | Pending; consent, Keychain, privacy preflight and a real provider call |
-| Invited beta distribution | Ad-hoc signatures and non-notarized ZIP preparation; macOS 26, clean tester installation, accessibility and release checks remain |
+| Invited beta distribution | Published ad-hoc, non-notarized ZIP; macOS 26, clean tester installation, accessibility and release checks remain |
 | Local API demonstration | Implemented locally; actual native/XPC/HTTP and lifecycle proof pass; fixtures have no protection authority |
-| MVP3 · TraceRook-operated Claude alpha | Production API deployed; 59 Worker tests pass; genuine hosted receipts and full native Claude review passed; wider evaluation remains |
+| MVP3 · TraceRook-operated Claude alpha | Production API deployed; 60 Worker tests pass; genuine hosted receipts and full native Claude review passed; wider evaluation remains |
 
-Each phase must compile, pass relevant automated tests, and deliver a working native demonstration. The [implementation record](docs/IMPLEMENTATION_STATUS.md) tracks the evidence; there is no signed beta download yet.
+Each phase must compile, pass relevant automated tests, and deliver a working native demonstration. The [implementation record](docs/IMPLEMENTATION_STATUS.md) tracks the evidence; the published beta uses ad-hoc signatures and is not notarized.
 
 ## Security boundaries
 
