@@ -47,3 +47,21 @@ Earlier local attempts encountered a concurrent missing credential-store symbol 
 The Codex harness is `python3 scripts/test-support/beta-codex-callback.py --helper ABSOLUTE_HELPER --coordinated --review-hooks`. It creates private subprocess-only `CODEX_HOME`, file-only credential storage, a localhost Responses double, and exact PreToolUse hooks. It opens the native TUI for `/hooks` review before noninteractive execution. It does not fabricate a trust registry or use a trust-bypass option. The exact configured hook must be reviewed and trusted through the native workflow. Codex remains unverified until this gate and actual callbacks execute successfully; the Responses double is currently syntax-checked, not a tested inference implementation.
 
 The [official OpenAI hooks documentation](https://learn.chatgpt.com/docs/hooks) documents canonical Bash hooks, `tool_input.command`, exact-definition native trust review through `/hooks`, and skipping hooks that remain untrusted. The [official configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) documents custom provider base URL, Responses transport, and provider authentication options. Installed 0.162.0-alpha.2 help confirms `--no-daemon`, `exec --ephemeral`, and `--strict-config`. These prerequisites establish a documented testing path, not successful installed-version coverage.
+
+### Actual Claude timeout result
+
+The parent confirmed the original callback-tested bundle was unchanged and the test service was running. The timeout case then passed without any review approval or click. One actual Claude callback took 3.104 seconds with the helper's 4000ms hard limit and returned explicit deny; the sentinel was absent and the host exited zero. This establishes bounded hook timeout denial, not a successful human review or real provider inference.
+
+```json
+{"benign_executed":null,"callback_count":1,"callback_elapsed_seconds":3.104,"case":"timeout","dangerous_denied":true,"denied_sentinel_absent":true,"elapsed_seconds":3.813,"host_exit":0,"kind":"actual_claude_callback_local_model_double","provider":"loopback_double"}
+```
+
+Codex remains unverified pending normal native hook trust review. Service outage remains pending the parent-owned stop window.
+
+### Actual Claude service outage result
+
+The parent explicitly authorized stopping only `com.tracerook.agent.test` for this gate. Its `launchctl bootout` returned zero; the harness then passed against the unchanged callback-tested helper while that test service was stopped. The one callback returned explicit deny in 0.078 seconds, the sentinel remained absent, and Claude exited zero. The test service was deliberately left stopped for the parent to rebuild the final source. This tests the helper's conservative high-risk local fallback, with no real provider request or credential use.
+
+```json
+{"benign_executed":null,"callback_count":1,"callback_elapsed_seconds":0.078,"case":"outage","dangerous_denied":true,"denied_sentinel_absent":true,"elapsed_seconds":1.225,"host_exit":0,"kind":"actual_claude_callback_local_model_double","provider":"loopback_double"}
+```
