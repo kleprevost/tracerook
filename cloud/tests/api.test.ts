@@ -20,6 +20,7 @@ import {
   MODEL,
   VERDICT_SCHEMA,
   providerErrorDiagnostic,
+  verdict as validateVerdict,
 } from "../src/anthropic";
 const device = () => crypto.randomUUID();
 const verdict = {
@@ -491,6 +492,7 @@ describe("real Workers, D1 and SQLite Durable Object API", () => {
       expect(JSON.parse(messages[0])).toEqual({
         event: "tracerook_provider_failure",
         stage: "verdict_validation",
+        verdict_reason: "cardinality",
         upstream_status: 200,
         error_name: "Error",
         error_code: "unclassified",
@@ -514,6 +516,7 @@ describe("real Workers, D1 and SQLite Durable Object API", () => {
       expect(JSON.parse(last)).toEqual({
         event: "tracerook_provider_failure",
         stage: "http_status",
+        verdict_reason: "not_applicable",
         upstream_status: 400,
         error_name: "Error",
         error_code: "unclassified",
@@ -580,6 +583,47 @@ describe("real Workers, D1 and SQLite Durable Object API", () => {
         (call) => call.url === "https://api.anthropic.com/v1/messages",
       ),
     ).toBe(true);
+  });
+  it("reports finite strict verdict rejection reasons without changing acceptance", () => {
+    const cases: Array<[Record<string, unknown>, string]> = [
+      [{ ...verdict, extra: true }, "shape"],
+      [{ ...verdict, category: [] }, "cardinality"],
+      [
+        { ...verdict, category: ["unsafe_action", "unsafe_action"] },
+        "cardinality",
+      ],
+      [{ ...verdict, category: ["unrecognized"] }, "category"],
+      [{ ...verdict, severity: "Low" }, "severity"],
+      [{ ...verdict, confidence: 1.01 }, "confidence"],
+      [{ ...verdict, suspicious: "false" }, "flags"],
+      [
+        { ...verdict, recommended_action: "grant_permission" },
+        "recommendation",
+      ],
+      [
+        { ...verdict, rationale: "https://private.example.com" },
+        "rationale_privacy",
+      ],
+      [
+        { ...verdict, evidence: ["api_key=private-canary"] },
+        "evidence_privacy",
+      ],
+      [
+        { ...verdict, limitations: ["/Users/private/project"] },
+        "limitations_privacy",
+      ],
+    ];
+    for (const [value, reason] of cases) {
+      let error: any;
+      try {
+        validateVerdict(value);
+      } catch (caught) {
+        error = caught;
+      }
+      expect(error?.code).toBe("provider_unavailable");
+      expect(error?.reason).toBe(reason);
+    }
+    expect(validateVerdict(verdict)).toEqual(verdict);
   });
   it("expired verdict clears replay while durable identity and conservative crash charges remain", async () => {
     const e = await enroll(),
