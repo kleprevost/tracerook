@@ -53,3 +53,10 @@ import TraceRookFixtures
     }
     #expect(Set(fingerprints).count == 32)
 }
+
+@Test func realHostExtensiblePayloadRejectsDuplicateKeys() throws {
+    let duplicate = Data(#"{"session_id":"s","session_id":"other","cwd":"/tmp","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"true"}}"#.utf8)
+    #expect(throws: (any Error).self) { try ClaudeCodeAdapter().normalize(duplicate, hookKind: .preToolUse) }
+    let future = Data(#"{"session_id":"s","cwd":"/tmp","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"true"},"future_host_field":true}"#.utf8)
+    #expect(try CodexAdapter().normalize(future, hookKind: .preToolUse).actionType == .shellExec)
+}

@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import TraceRookCore
+import TraceRookContracts
 
 struct ApprovalsView: View {
     @Environment(AppEnvironment.self) private var environment
@@ -18,27 +19,34 @@ struct ApprovalsView: View {
             } else {
                 HStack(spacing: 0) {
                     List(selection: $selectedID) {
-                        Section("Pending · Simulation") {
-                            ForEach(environment.model.approvals.filter { $0.state == .pending }) { approval in ApprovalQueueRow(approval: approval).tag(approval.id) }
+                        Section(environment.model.showingDemo ? "Pending · Simulation" : "Pending · Live") {
+                            ForEach(environment.model.approvals.filter { $0.state == .pending }) { approval in ApprovalQueueRow(approval: approval, title: environment.model.incidents.first(where: { $0.id == approval.incidentID })?.title ?? "Proposed action").tag(approval.id) }
                         }
-                        Section("Resolved · Simulation") {
-                            ForEach(environment.model.approvals.filter { $0.state != .pending }) { approval in ApprovalQueueRow(approval: approval).tag(approval.id) }
+                        Section(environment.model.showingDemo ? "Resolved · Simulation" : "Resolved · Live") {
+                            ForEach(environment.model.approvals.filter { $0.state != .pending }) { approval in ApprovalQueueRow(approval: approval, title: environment.model.incidents.first(where: { $0.id == approval.incidentID })?.title ?? "Proposed action").tag(approval.id) }
                         }
                     }.listStyle(.sidebar).frame(width: 285)
                     Divider()
-                    if let selectedID { ApprovalDetail(approvalID: selectedID, inPanel: false) }
+                    if let selectedID {
+                        if environment.model.showingDemo { ApprovalDetail(approvalID: selectedID, inPanel: false) }
+                        else { LiveApprovalDetail(approvalID: selectedID).id(selectedID) }
+                    }
                     else { EmptyActivity(title: "Select a review", description: "Inspect its evidence and exact action digest.", symbol: "hand.raised") }
                 }.onAppear { selectedID = environment.model.approvals.first?.id }
-                .onChange(of: environment.model.approvals.count) { _, _ in selectedID = environment.model.approvals.first?.id }
+                .onChange(of: environment.model.approvals.map(\.id)) { _, ids in
+                    if let selectedID, ids.contains(selectedID) { return }
+                    selectedID = ids.first
+                }
             }
         }
     }
 }
 struct ApprovalQueueRow: View {
     let approval: ApprovalRecord
+    var title: String = "Unexpected package publication"
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Unexpected package publication").font(.headline)
+            Text(title).font(.headline)
             Text(approval.binding.provider.title).font(.caption).foregroundStyle(.secondary)
             if approval.state == .pending {
                 TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -107,5 +115,113 @@ final class ReviewPanelController {
             })
         panel.center(); panel.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
         self.panel = panel
+    }
+}
+
+
+/// A live decision is built only from the current authenticated snapshot request.
+struct LiveApprovalDetail: View {
+    @Environment(AppEnvironment.self) private var environment
+    let approvalID: UUID
+    @ViewState private var submitting = false
+    @ViewState private var resolutionMessage: String?
+
+    private var approval: ApprovalRecord? {
+        environment.model.liveSnapshot?.approvals.first { $0.id == approvalID && $0.origin == .live }
+    }
+    private func actionPreview(for approval: ApprovalRecord) -> TimelineEntry? {
+        guard let session = environment.model.liveSnapshot?.sessions.first(where: {
+            $0.id == approval.binding.sessionID && $0.origin == .live && $0.provider == approval.binding.provider
+        }), !environment.model.isSimulatedSession(session.id),
+              let event = session.events.first(where: { $0.id == approval.binding.eventID }),
+              !event.summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        return event
+    }
+    private func activeRequest(for approval: ApprovalRecord, at now: Date) -> ReviewRequest? {
+        guard !environment.model.showingDemo, environment.agent.connected,
+              !environment.model.isSimulatedSession(approval.binding.sessionID), approval.isPending(at: now),
+              let request = environment.model.liveSnapshot?.reviewRequests.first(where: { $0.approvalID == approval.id }),
+              request.origin == .live, request.binding == approval.binding,
+              request.incidentID == approval.incidentID,
+              request.expiresAtMS > Int64(now.timeIntervalSince1970 * 1000),
+              abs(Double(request.expiresAtMS) / 1000 - approval.expiresAt.timeIntervalSince1970) < 0.001,
+              (try? request.validate()) != nil else { return nil }
+        return request
+    }
+    var body: some View {
+        if let approval, let incident = environment.model.liveSnapshot?.incidents.first(where: {
+            $0.id == approval.incidentID && $0.origin == .live && $0.sessionID == approval.binding.sessionID
+        }) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    HStack { Text("Live action review").font(.caption.weight(.semibold)); Spacer(); SeverityBadge(severity: incident.severity) }
+                    PageHeading(title: incident.title, subtitle: approval.binding.provider.title)
+                    Text(incident.summary).font(.title3.weight(.medium))
+                    Surface("Proposed action · sanitized preview") {
+                        if let preview = actionPreview(for: approval) {
+                            DetailField(name: "Action type", value: preview.tool)
+                            Text(preview.summary).font(.callout.monospaced()).textSelection(.enabled)
+                            Text("This service-redacted summary may omit sensitive details. Compare it with the pending action in your agent before allowing.").font(.caption).foregroundStyle(.secondary)
+                        } else {
+                            Text("Action preview unavailable; inspect the host before allowing. Allow once is disabled until a matching preview is available.").font(.callout).foregroundStyle(.orange)
+                        }
+                    }
+                    Surface("Evidence and task relevance") {
+                        Text(incident.rationale).font(.callout)
+                        ForEach(incident.evidence, id: \.self) { Label($0, systemImage: "magnifyingglass").font(.callout) }
+                        DetailField(name: "User task", value: environment.model.liveSnapshot?.sessions.first(where: { $0.id == approval.binding.sessionID })?.taskAnchor ?? "Task unknown")
+                        ForEach(incident.limitations, id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
+                    }
+                    Surface("Exact action binding") {
+                        DetailField(name: "Review ID", value: approval.id.uuidString)
+                        DetailField(name: "Action digest", value: approval.binding.fingerprint)
+                        DetailField(name: "Tool call", value: approval.binding.toolCallID)
+                        DetailField(name: "Deadline", value: approval.expiresAt.formatted(date: .omitted, time: .standard))
+                    }
+                    TimelineView(.periodic(from: .now, by: 1)) { context in
+                        let pending = activeRequest(for: approval, at: context.date) != nil
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text(pending ? "\(max(0, Int(ceil(approval.expiresAt.timeIntervalSince(context.date))))) seconds to review · expiry denies" : "No active review · \(approval.state == .pending ? "Expired or unavailable" : approval.state.title)")
+                                .font(.headline.monospacedDigit()).foregroundStyle(pending ? .orange : .secondary)
+                            HStack {
+                                Button("Block", role: .destructive) { resolve(.block) }.buttonStyle(.bordered)
+                                Button("Allow once") { resolve(.allowOnce) }.buttonStyle(.borderedProminent)
+                                    .disabled(actionPreview(for: approval) == nil)
+                            }.disabled(!pending || submitting)
+                        }
+                    }
+                    if let resolutionMessage { Text(resolutionMessage).font(.callout).accessibilityLabel(resolutionMessage) }
+                    Text("Allow once releases only TraceRook's gate for this exact invocation. The agent's native permissions still apply. It does not prove the action executed.").font(.caption).foregroundStyle(.secondary)
+                }.padding(24)
+            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            EmptyActivity(title: "Review unavailable", description: "This live request is no longer present. No action can be authorized.", symbol: "hand.raised.slash")
+        }
+    }
+    private func resolve(_ choice: ReviewChoice) {
+        guard !submitting, let approval, let request = activeRequest(for: approval, at: .now) else {
+            resolutionMessage = "This review expired or is no longer available."
+            return
+        }
+        guard choice != .allowOnce || actionPreview(for: approval) != nil else {
+            resolutionMessage = "Action preview unavailable. This invocation cannot be allowed from the app."
+            return
+        }
+        submitting = true
+        resolutionMessage = nil
+        Task { @MainActor in
+            defer { submitting = false }
+            do {
+                let resolution = ReviewResolution(requestID: request.requestID, approvalID: request.approvalID,
+                    binding: request.binding, invocationNonce: request.invocationNonce, choice: choice)
+                try resolution.validateBinding(to: request)
+                let payload = try JSONValue.decodeBounded(WireCodec.encodePayload(resolution, maximumBytes: WireLimits.replyBytes))
+                _ = try await environment.agent.command(.resolveReview, payload: payload)
+                resolutionMessage = choice == .block ? "Block recorded for this invocation." : "Allow once recorded; native agent permissions still apply."
+            } catch {
+                resolutionMessage = "The service did not confirm this decision. Refresh the review; it may have expired."
+            }
+            await environment.agent.refresh()
+        }
     }
 }

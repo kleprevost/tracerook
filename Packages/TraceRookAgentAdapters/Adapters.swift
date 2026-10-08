@@ -38,7 +38,7 @@ public struct CodexAdapter: AgentAdapter {
 }
 private enum AdapterParser {
     static func normalize(_ raw: Data, provider: AgentProvider, hookKind: HookKind) throws -> AgentEvent {
-        let json = try JSONValue.decodeBounded(raw)
+        let json = try HostPayloadDocument.decode(raw)
         guard case .object = json, let session = json["session_id"]?.string, !session.isEmpty,
               session.utf8.count <= 256, let cwd = json["cwd"]?.string, cwd.hasPrefix("/")
         else { throw TraceRookError.malformedInput }
@@ -62,7 +62,7 @@ private enum AdapterParser {
         default: action = tool?.hasPrefix("mcp__") == true ? .mcp : .other
         }
         // Summaries contain shape only, never raw shell, source, prompt, or tool-output bodies.
-        let summary = hookKind == .userPrompt ? "User task update observed; context not yet accumulated" : "\(tool ?? hookKind.hostName) · \(action.rawValue)"
+        let summary = hookKind == .userPrompt ? "User task update observed; context not yet accumulated" : "\(hookKind.hostName) · \(action.rawValue)"
         let redactor = Redactor()
         return AgentEvent(agent: provider, sourceSessionID: redactor.redact(session, limit: 256).text,
             sourceTurnID: turnID.map { redactor.redact($0, limit: 256).text }, sourceToolCallID: redactor.redact(callID, limit: 256).text,
@@ -81,5 +81,21 @@ private enum AdapterParser {
         ])])
         guard let encoded = try? value.canonicalData() else { return .init(stderr: Data("TraceRook could not inspect this action.\n".utf8), exitCode: 2) }
         return .init(stdout: encoded)
+    }
+}
+
+/// Host schemas legitimately add fields. Strict JSON preflight still rejects duplicate
+/// keys, excessive nesting and allocation before decoding the extensible document.
+public struct HostPayloadDocument: IPCMessage {
+    public let value: JSONValue
+    public static let wireKeys: Set<String> = []
+    public init(from decoder: any Decoder) throws { value = try JSONValue(from: decoder) }
+    public func encode(to encoder: any Encoder) throws { try value.encode(to: encoder) }
+    public static func validateWireShape(_ value: JSONValue) throws {
+        guard case .object = value else { throw TraceRookError.malformedInput }
+    }
+    public func validate() throws { try Self.validateWireShape(value) }
+    public static func decode(_ data: Data) throws -> JSONValue {
+        try WireCodec.decodePayload(Self.self, payload: data).value
     }
 }

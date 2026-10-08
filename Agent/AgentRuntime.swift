@@ -2,22 +2,28 @@ import Foundation
 import TraceRookContracts
 import TraceRookCore
 import TraceRookIPC
+import TraceRookAgentAdapters
 
 final class AgentRuntime {
     let store: SessionStore
     let broker: EventBroker
     let control: UIControlService
     let socket: HookSocketServer
-    init(bundle: URL, stateDirectory: URL = PrivateStateDirectory.standard) throws {
+    init(bundle: URL, stateDirectory: URL = PrivateStateDirectory.standard, liveCloud suppliedClient: LiveCloudClient? = nil) throws {
         let family = try SignedFamily(bundle: bundle)
         store = try SessionStore(directory: stateDirectory)
+        let liveCloud = suppliedClient ?? LiveCloudClient(vault: SessionCloudCredentialStore())
         broker = EventBroker(store: store, securityMode: family.mode,
-            localAPIDemo: family.mode == .developer ? LocalAPIDemoClient() : nil)
+            localAPIDemo: family.mode == .developer ? LocalAPIDemoClient() : nil, liveCloud: liveCloud)
         control = UIControlService(broker: broker, app: family.app)
+        let eventStore = store, eventBroker = broker
+        let pipeline = Task { HostEventPipeline(store: eventStore, reviews: await eventBroker.reviews, liveCloud: liveCloud) }
         socket = try HookSocketServer(path: stateDirectory.appendingPathComponent("hook.sock").path, peer: family.hook) { frame in
             let envelope = try WireCodec.decode(HookEnvelopeV2.self, frame: frame)
-            let reply = HookReplyV2(requestID: envelope.requestID, decision: .deny, reasonCode: "policy_unavailable",
-                explanation: "Local policy is not yet available. No host permission was granted.", decisionSource: .fallback, coverageClass: .other)
+            let raw = try envelope.hostPayload.canonicalData()
+            let adapter: any AgentAdapter = envelope.adapter == .claudeCode ? ClaudeCodeAdapter() : CodexAdapter()
+            let event = try adapter.normalize(raw, hookKind: envelope.requestKind)
+            let reply = await pipeline.value.handle(envelope, event: event)
             return try WireCodec.encode(reply, maximumBytes: WireLimits.replyBytes)
         }
         control.start()
@@ -60,7 +66,8 @@ private final class ControlEndpoint: NSObject, AgentControlProtocol, @unchecked 
             guard let request = try? WireCodec.decode(ServiceControlRequest.self, frame: frame, maximumBytes: 16_384) else { sender.send(Data()); return }
             let response = await broker.control(request)
             sender.send((try? WireCodec.encode(response)) ?? Data())
-            if request.method != .snapshot { observers.pulse() }
+            let readOnlyCloud = request.method == .liveCloud && request.payload["operation"] == .string("status")
+            if request.method != .snapshot && !readOnlyCloud { observers.pulse() }
         }
     }
 }

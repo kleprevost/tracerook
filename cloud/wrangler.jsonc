@@ -1,0 +1,66 @@
+{
+  "name": "tracerook-cloud",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-08",
+  "workers_dev": true,
+  "upload_source_maps": false,
+  "observability": { "enabled": false },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AlphaCoordinator"] }],
+  "env": {
+    "staging": {
+      "name": "tracerook-cloud-staging",
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "CLOUD_ANALYSIS_ENABLED": "false",
+        "GLOBAL_MONTHLY_CAP_MICRO_USD": "null",
+        "INPUT_PRICE_MICRO_USD_PER_TOKEN": "0.1",
+        "OUTPUT_PRICE_MICRO_USD_PER_TOKEN": "0.5",
+        "DAILY_EVALUATION_LIMIT": "null",
+        "DAILY_INPUT_TOKEN_LIMIT": "null",
+        "DAILY_OUTPUT_TOKEN_LIMIT": "null",
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "COORDINATOR", "class_name": "AlphaCoordinator" },
+        ],
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "tracerook-cloud-staging",
+          "database_id": "5d8add54-a775-47eb-be02-01a823e91082",
+          "migrations_dir": "migrations",
+        },
+      ],
+    },
+    "production": {
+      "name": "tracerook-cloud-production",
+      "routes": [{"pattern":"api.tracerook.dev", "custom_domain":true}],
+      "workers_dev": false,
+      "preview_urls": false,
+      "vars": {
+        "ENVIRONMENT": "production",
+        "CLOUD_ANALYSIS_ENABLED": "true",
+        "GLOBAL_MONTHLY_CAP_MICRO_USD": "null",
+        "INPUT_PRICE_MICRO_USD_PER_TOKEN": "0.1",
+        "OUTPUT_PRICE_MICRO_USD_PER_TOKEN": "0.5",
+        "DAILY_EVALUATION_LIMIT": "null",
+        "DAILY_INPUT_TOKEN_LIMIT": "null",
+        "DAILY_OUTPUT_TOKEN_LIMIT": "null",
+      },
+      "durable_objects": {
+        "bindings": [
+          { "name": "COORDINATOR", "class_name": "AlphaCoordinator" },
+        ],
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "tracerook-cloud-production",
+          "database_id": "f39917fb-a81b-48a3-891c-9c1b9a979d69",
+          "migrations_dir": "migrations",
+        },
+      ],
+    },
+  },
+}

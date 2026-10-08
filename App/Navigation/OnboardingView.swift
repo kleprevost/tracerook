@@ -24,8 +24,8 @@ struct OnboardingView: View {
                     DetailField(name: "Operating system", value: ProcessInfo.processInfo.operatingSystemVersionString)
                     DetailField(name: "Architecture", value: "Apple Silicon · arm64 build")
                     DetailField(name: "Signature", value: environment.signatureDescription)
-                    DetailField(name: "Helper", value: "Bundled foundation executable · not installed")
-                    Text("Developer ID notarization, service registration and macOS 26 testing remain release gates.").foregroundStyle(.secondary)
+                    DetailField(name: "Helper", value: "Bundled helper · see Integrations for service status")
+                    Text("This beta uses ad-hoc signatures and is not notarized. Service installation and host callback coverage must be verified separately.").foregroundStyle(.secondary)
                 case 2:
                     Text("Choose an analysis experience").font(.title2.bold())
                     Picker("Analysis experience", selection: $choice) {
@@ -33,7 +33,7 @@ struct OnboardingView: View {
                         Text("Local rules only · hooks required").tag(AnalysisMode.localRulesOnly)
                         Text("Use my Anthropic API key · Coming soon").tag(AnalysisMode.anthropicBYOK)
                     }.pickerStyle(.radioGroup)
-                    Text(choice == .traceRookCloudDemo ? "Explore account, usage and simulated findings locally. No Cloud backend, login or purchase exists." : choice == .anthropicBYOK ? "BYOK is not operational in this milestone. No key is collected or stored." : "Offline mode makes no remote requests. Real local rules require installed, verified hooks.").foregroundStyle(.secondary)
+                    Text(choice == .traceRookCloudDemo ? "Explore account, usage and simulated findings locally. Demo never enrolls a real account or makes a purchase." : choice == .anthropicBYOK ? "BYOK is not operational in this milestone. No key is collected or stored." : "Selecting offline mode first pauses Cloud analysis in the service. Local coverage requires installed, verified hooks.").foregroundStyle(.secondary)
                 case 3:
                     Text("Keep context small and redacted").font(.title2.bold())
                     Text("Working BYOK will send selected redacted context directly to Anthropic, with explicit consent. Redaction cannot guarantee removal of every secret.")
@@ -64,12 +64,19 @@ struct OnboardingView: View {
             Divider()
             HStack {
                 Button(step == 0 ? "View dashboard" : "Back") {
-                    if step == 0 { environment.finishOnboarding(exploreDemo: false) } else { step -= 1 }
+                    if step == 0 { Task { await environment.finishOnboarding(exploreDemo: false) } } else { step -= 1 }
                 }
                 Spacer()
                 if step == 7 {
                     Button(choice == .traceRookCloudDemo ? "Explore Demo" : "Open dashboard") {
-                        environment.model.selectMode(choice); environment.finishOnboarding(exploreDemo: choice == .traceRookCloudDemo)
+                        Task {
+                            if choice == .traceRookCloudDemo {
+                                await environment.finishOnboarding(exploreDemo: true)
+                            } else {
+                                guard await environment.selectAnalysisMode(choice) else { return }
+                                await environment.finishOnboarding(exploreDemo: false)
+                            }
+                        }
                     }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
                 } else { Button("Continue") { step += 1 }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction) }
             }
