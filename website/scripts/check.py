@@ -2,12 +2,15 @@
 """Check all shipped routes, anchors, assets, metadata, and static-site boundaries."""
 import json
 import re
+import sys
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / 'dist'
+sys.path.insert(0, str(ROOT / 'content'))
+from pages import PAGES
 
 class Document(HTMLParser):
     def __init__(self, source):
@@ -55,7 +58,9 @@ def resolve(path):
 
 def check():
     paths = sorted(DIST.rglob('*.html'))
-    assert len(paths) == 23, f'Expected home, docs index, 20 guides, 404; got {len(paths)}'
+    expected = {DIST / 'index.html', DIST / 'docs/index.html', DIST / '404.html'}
+    expected.update(DIST / 'docs' / page['slug'] / 'index.html' for page in PAGES)
+    assert set(paths) == expected, 'Generated route set does not match the authored guides'
     documents = {path:Document(path.read_text()) for path in paths}
     refs = 0
     for path, document in documents.items():
@@ -76,10 +81,11 @@ def check():
                 assert target in documents and unquote(url.fragment) in documents[target].ids, f'Broken anchor: {path}: {ref}'
             refs += 1
         if path.parent.parent.name == 'docs':
+            assert 'MVP2 foundation complete.' in path.read_text(), f'Milestone missing: {path}'
             assert 'Live hooks, enforcement, and Anthropic BYOK are pending.' in path.read_text(), f'Status missing: {path}'
     index = json.loads((DIST/'assets/search-index.json').read_text())
-    assert len(index) == 20
-    assert len({page['url'] for page in index}) == 20
+    assert len(index) == len(PAGES)
+    assert len({page['url'] for page in index}) == len(PAGES)
     for page in index:
         assert resolve(page['url']) in documents
         assert len(page['text']) > 1000, f'Guide lacks substantive content: {page["title"]}'
@@ -92,7 +98,11 @@ def check():
     manifest = json.loads((ROOT/'.openai/hosting.json').read_text())
     assert manifest['static']['directory'] == 'dist'
     assert not any(key in manifest for key in ('d1','r2','plugins','connectors')), 'Unexpected runtime capability'
-    print(f'PASS: {len(paths)} HTML pages, {refs} local links/assets/anchors, 20 searchable guides, {len(text.split())} documentation words, static privacy boundaries.')
+    for source in ['TraceRook_MVP2_Architecture_Implementation_Spec.md', 'docs/MVP2_ACCEPTANCE.md', 'docs/MVP2_PR2_PLAN.md']:
+        assert (DIST/'reference'/source).read_bytes() == (ROOT.parent/source).read_bytes(), f'Stale authoritative reference: {source}'
+    roadmap = (DIST/'docs/roadmap/index.html').read_text()
+    assert '43' in roadmap and 'MVP2.0' in roadmap and 'Pending' in roadmap, 'Roadmap loses current evidence or pending gates'
+    print(f'PASS: {len(paths)} HTML pages, {refs} local links/assets/anchors, {len(index)} searchable guides, {len(text.split())} documentation words, static privacy boundaries.')
 
 if __name__ == '__main__':
     check()
