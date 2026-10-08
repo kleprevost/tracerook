@@ -59,11 +59,12 @@ public enum ExecutionState: String, Codable, Sendable {
 }
 public enum DataOrigin: String, Codable, Sendable { case live, demo }
 public enum AnalysisMode: String, Codable, Sendable, CaseIterable {
-    case anthropicBYOK, traceRookCloudDemo, localRulesOnly
+    case anthropicBYOK, traceRookCloudDemo, traceRookCloud, localRulesOnly
     public var title: String {
         switch self {
         case .anthropicBYOK: "Anthropic BYOK"
         case .traceRookCloudDemo: "TraceRook Cloud · Demo"
+        case .traceRookCloud: "TraceRook Cloud · Invited alpha"
         case .localRulesOnly: "Local rules only"
         }
     }

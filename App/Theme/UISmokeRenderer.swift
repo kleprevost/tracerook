@@ -45,6 +45,10 @@ import TraceRookCore
             let apiName = "\(appearance.lowercased())-local-api-demo"
             try await render(AnyView(SettingsView().environment(environment).tint(RookTheme.accent).preferredColorScheme(environment.colorScheme)), name: apiName, directory: directory)
             report.append(apiName)
+            environment.model.selectMode(.traceRookCloud); environment.settingsSection = "AI Provider"
+            let cloudName = "\(appearance.lowercased())-cloud-alpha-unenrolled"
+            try await render(AnyView(SettingsView().environment(environment).tint(RookTheme.accent).preferredColorScheme(environment.colorScheme)), name: cloudName, directory: directory)
+            report.append(cloudName)
         }
         try report.joined(separator: "\n").write(to: directory.appendingPathComponent("rendered-cases.txt"), atomically: true, encoding: .utf8)
         print("Native UI smoke: \(report.count) light/dark cases rendered. No live hooks or remote analysis used.")
