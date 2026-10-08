@@ -42,7 +42,7 @@ import TraceRookCore
             try await render(AnyView(SettingsView().environment(environment).tint(RookTheme.accent).preferredColorScheme(environment.colorScheme)), name: deniedName, directory: directory)
             report.append(deniedName)
             environment.settingsSection = "Local API Demo"
-            let apiName = "\(appearance.lowercased())-local-api-pending"
+            let apiName = "\(appearance.lowercased())-local-api-demo"
             try await render(AnyView(SettingsView().environment(environment).tint(RookTheme.accent).preferredColorScheme(environment.colorScheme)), name: apiName, directory: directory)
             report.append(apiName)
         }

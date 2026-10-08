@@ -11,7 +11,8 @@ final class AgentRuntime {
     init(bundle: URL, stateDirectory: URL = PrivateStateDirectory.standard) throws {
         let family = try SignedFamily(bundle: bundle)
         store = try SessionStore(directory: stateDirectory)
-        broker = EventBroker(store: store, securityMode: family.mode)
+        broker = EventBroker(store: store, securityMode: family.mode,
+            localAPIDemo: family.mode == .developer ? LocalAPIDemoClient() : nil)
         control = UIControlService(broker: broker, app: family.app)
         socket = try HookSocketServer(path: stateDirectory.appendingPathComponent("hook.sock").path, peer: family.hook) { frame in
             let envelope = try WireCodec.decode(HookEnvelopeV2.self, frame: frame)

@@ -1,6 +1,6 @@
 # TraceRook static website
 
-Static product site and 21 documentation guides, based on the authoritative MVP1/MVP2 specifications and current acceptance records. MVP2.0 is complete locally with 43 automated tests; real protection remains pending. Anthropic Claude is prominent as the intended contextual analysis backend, with live BYOK and enforcement explicitly identified as future gates.
+Static product site and 22 documentation guides, based on the authoritative MVP1/MVP2 specifications and current acceptance records. The local service and connected synthetic API demonstration are implemented; 64 Swift tests, 103 backend tests and 22 native renders pass. Real protection remains pending. Anthropic Claude is prominent as the intended contextual analysis backend, with live BYOK and enforcement explicitly identified as future gates.
 
 The shipped `dist/` contains ordinary HTML, CSS, JavaScript, JSON, and PNG assets. It requires no runtime application server, framework, database, package install, API keys, or backend. All reading and navigation work without JavaScript; documentation search, menu toggles, copying code, and fixed policy examples use a small same-origin client script.
 
@@ -37,7 +37,7 @@ For another static host, serve `dist/` at the origin root with directory `index.
 
 ## Validation record — 2026-10-08
 
-Static checks pass for 24 HTML pages, 1,300 local links/assets/anchors, unique landmarks and IDs, metadata, ARIA control targets, 21 search records, and over 8,600 words of guide content. Client JavaScript passes Node syntax validation. The validator also checks the current MVP2 status on each guide and compares packaged specification, acceptance, and implementation-plan copies with their sources.
+Static checks pass for 25 HTML pages, 1,397 local links/assets/anchors, unique landmarks and IDs, metadata, ARIA control targets, 22 search records, and over 9,800 words of guide content. Client JavaScript passes Node syntax validation. The validator also checks the current MVP2 status on each guide and compares packaged specification, acceptance, and implementation-plan copies with their sources.
 
 The initial site checks exercised all alternate policy examples, documentation search and ranking, empty results, Escape reset, mobile navigation open/close, and code copying. The MVP2 update additionally checks the new guide, search results, roadmap, homepage and navigation at desktop width and 390px, with no document-level horizontal overflow or console errors. This is not a full accessibility certification or an enforcement test for the native application.
 
