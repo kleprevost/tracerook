@@ -28,16 +28,23 @@ public enum WireLimits {
 /// Stream reads, peer authentication and request deduplication belong to the service.
 public enum WireCodec {
     public static func encode<T: IPCMessage>(_ message: T, maximumBytes: Int = WireLimits.packetBytes) throws -> Data {
+        let payload = try encodePayload(message, maximumBytes: maximumBytes)
+        let size = UInt32(payload.count)
+        var framed = Data([UInt8((size >> 24) & 255), UInt8((size >> 16) & 255), UInt8((size >> 8) & 255), UInt8(size & 255)])
+        framed.append(payload)
+        return framed
+    }
+
+    /// Validated unframed JSON for an HTTP boundary. Uses the same duplicate-key
+    /// scanner and bounds as IPC; an HTTP body must not carry the IPC prefix.
+    public static func encodePayload<T: IPCMessage>(_ message: T, maximumBytes: Int = WireLimits.packetBytes) throws -> Data {
         try message.validate()
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         let payload = try encoder.encode(message)
         let checked = try inspect(payload, maximumBytes: maximumBytes, deadline: ContinuousClock().now.advanced(by: .milliseconds(WireLimits.decodeMilliseconds)))
         try T.validateWireShape(checked)
-        let size = UInt32(payload.count)
-        var framed = Data([UInt8((size >> 24) & 255), UInt8((size >> 16) & 255), UInt8((size >> 8) & 255), UInt8(size & 255)])
-        framed.append(payload)
-        return framed
+        return payload
     }
 
     public static func decode<T: IPCMessage>(_ type: T.Type, frame: Data, maximumBytes: Int = WireLimits.packetBytes,

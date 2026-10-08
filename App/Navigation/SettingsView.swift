@@ -11,7 +11,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 20) {
             PageHeading(title: "Settings", subtitle: "Protection, analysis and privacy should be understandable.")
             Picker("Settings section", selection: $env.settingsSection) {
-                ForEach(["General", "Protection", "AI Provider", "Privacy", "About"], id: \.self) { Text($0) }
+                ForEach(["General", "Protection", "AI Provider", "Local API Demo", "Privacy", "About"], id: \.self) { Text($0) }
             }.pickerStyle(.segmented)
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -19,6 +19,7 @@ struct SettingsView: View {
                     case "General": general
                     case "Protection": protection
                     case "AI Provider": provider
+                    case "Local API Demo": LocalAPIDemoView()
                     case "Privacy": privacy
                     default: about
                     }
@@ -48,9 +49,12 @@ struct SettingsView: View {
             }
             Surface("Login and retention") {
                 DetailField(name: "Background service", value: environment.agent.status)
-                DetailField(name: "History retention", value: "Planned: events 14 days; incidents and approvals 30 days")
-                Text("No live history database exists in this build. Sample data is held in memory.").font(.caption).foregroundStyle(.secondary)
-                HStack { Button("Reset Demo") { environment.resetDemo() }; Button("Clear sample history…", role: .destructive) { clearConfirmation = true } }.buttonStyle(.bordered)
+                DetailField(name: "History retention", value: "Service events: 14 days; incidents and approvals: 30 days")
+                Text("The service owns a private SQLite history store. Offline Cloud Demo samples remain in memory and separate from service history.").font(.caption).foregroundStyle(.secondary)
+                HStack {
+                    Button("Reset Demo") { environment.resetDemo() }
+                    Button("Clear service history…", role: .destructive) { clearConfirmation = true }.disabled(!environment.agent.connected)
+                }.buttonStyle(.bordered)
             }
         }
     }
