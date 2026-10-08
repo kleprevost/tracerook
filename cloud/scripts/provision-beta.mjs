@@ -209,7 +209,9 @@ export async function requestJSON(
     req.end(bytes);
   });
 }
-export function d1(sql, environment = "production") {
+export function d1(sql, environment = "production", readOnly = false) {
+  if (readOnly && !/^SELECT\s/i.test(sql.trim()))
+    throw new Error("read_only_query_required");
   const directory = mkdtempSync(join(tmpdir(), "tracerook-beta-sql-"));
   try {
     const file = join(directory, "operation.sql");
@@ -226,8 +228,8 @@ export function d1(sql, environment = "production") {
         environment,
         "--remote",
         "--json",
-        "--file",
-        file,
+        readOnly ? "--command" : "--file",
+        readOnly ? sql : file,
       ],
       {
         cwd: join(root, "cloud"),
