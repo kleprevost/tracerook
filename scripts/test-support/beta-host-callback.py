@@ -2,11 +2,12 @@
 """Opt-in real Claude callback against a loopback, deterministic model double.
 Never contacts Anthropic. Does not prove genuine provider classification.
 """
-import argparse, http.server, json, os, pathlib, shlex, shutil, subprocess, tempfile, threading
+import argparse, http.server, json, os, pathlib, shlex, shutil, subprocess, tempfile, threading, time
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--helper', required=True, type=pathlib.Path)
 parser.add_argument('--coordinated', action='store_true')
+parser.add_argument('--case', choices=['deny', 'timeout', 'outage'], default='deny')
 args = parser.parse_args()
 if not args.coordinated:
     parser.error('coordinate signed service availability and explicit host execution with the owner first')
@@ -26,21 +27,23 @@ with tempfile.TemporaryDirectory(prefix='tracerook-beta-host-') as temp:
     config.mkdir()
     callbacks = root / 'callbacks.jsonl'
     wrapper = root / 'callback.py'
-    wrapper.write_text('''import json,subprocess,sys
+    wrapper.write_text('''import json,subprocess,sys,time
 payload=sys.stdin.buffer.read()
+began=time.monotonic()
 p=subprocess.run(sys.argv[1:],input=payload,capture_output=True)
+elapsed=time.monotonic()-began
 with open(''' + repr(str(callbacks)) + ''','a') as f:
- f.write(json.dumps({'payload':json.loads(payload),'exit':p.returncode,'stdout':p.stdout.decode(errors='replace')})+'\\n')
+ f.write(json.dumps({'payload':json.loads(payload),'exit':p.returncode,'elapsed_seconds':round(elapsed,3),'stdout':p.stdout.decode(errors='replace')})+'\\n')
 sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.returncode)
 ''')
-    command = shlex.join([shutil.which('python3'), str(wrapper), str(helper), '--adapter', 'claude_code', '--host-version', subprocess.check_output([claude, '--version'], text=True).strip()])
+    command = shlex.join([shutil.which('python3'), str(wrapper), str(helper), '--adapter', 'claude_code', '--host-version', subprocess.check_output([claude, '--version'], text=True).strip(), '--timeout-ms', '4000' if args.case == 'timeout' else '80000'])
     settings = root / 'settings.json'
     settings.write_text(json.dumps({'hooks': {'PreToolUse': [{'matcher': 'Bash', 'hooks': [{'type': 'command', 'command': command, 'timeout': 10}]}]}, 'permissions': {'allow': ['Bash']}}))
     # Removing this disposable hook-shaped file is harmless, yet exercises concrete
     # policy tampering. Never use a root deletion or a founder configuration path.
     (project / '.claude').mkdir()
     (project / '.claude/settings.local.json').write_text('{}')
-    commands = ["printf benign > benign-sentinel", "rm -f .claude/settings.local.json; printf denied > denied-sentinel"]
+    commands = ["printf benign > benign-sentinel", "rm -f .claude/settings.local.json; printf denied > denied-sentinel"] if args.case == 'deny' else ["sudo --version; printf denied > denied-sentinel"]
     class Model(http.server.BaseHTTPRequestHandler):
         calls = 0
         def log_message(self, *_): pass
@@ -48,8 +51,8 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
             payload = json.loads(self.rfile.read(int(self.headers.get('Content-Length', '0'))))
             index = Model.calls
             Model.calls += 1
-            blocks = [{'type': 'tool_use', 'id': 'toolu_beta_' + str(index), 'name': 'Bash', 'input': {'command': commands[index]}}] if index < 2 else [{'type': 'text', 'text': 'Done.'}]
-            reply = {'id': 'msg_beta_' + str(index), 'type': 'message', 'role': 'assistant', 'model': payload.get('model', 'local-test'), 'content': blocks, 'stop_reason': 'tool_use' if index < 2 else 'end_turn', 'stop_sequence': None, 'usage': {'input_tokens': 1, 'output_tokens': 1}}
+            blocks = [{'type': 'tool_use', 'id': 'toolu_beta_' + str(index), 'name': 'Bash', 'input': {'command': commands[index]}}] if index < len(commands) else [{'type': 'text', 'text': 'Done.'}]
+            reply = {'id': 'msg_beta_' + str(index), 'type': 'message', 'role': 'assistant', 'model': payload.get('model', 'local-test'), 'content': blocks, 'stop_reason': 'tool_use' if index < len(commands) else 'end_turn', 'stop_sequence': None, 'usage': {'input_tokens': 1, 'output_tokens': 1}}
             self.send_response(200)
             if not payload.get('stream'):
                 self.send_header('Content-Type', 'application/json'); self.end_headers(); self.wfile.write(json.dumps(reply).encode()); return
@@ -75,9 +78,11 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
            'ANTHROPIC_BASE_URL': 'http://127.0.0.1:'+str(server.server_port),
            'CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC': '1', 'DISABLE_AUTOUPDATER': '1'}
     try:
+        began = time.monotonic()
         run = subprocess.run([claude, '-p', 'Execute the supplied test tools.', '--settings', str(settings), '--setting-sources', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--no-session-persistence', '--permission-mode', 'dontAsk', '--output-format', 'json', '--max-budget-usd', '0.01'], cwd=project, env=env, capture_output=True, timeout=60)
         records = [json.loads(line) for line in callbacks.read_text().splitlines()] if callbacks.exists() else []
-        benign = (project / 'benign-sentinel').exists()
+        elapsed = time.monotonic() - began
+        benign = (project / 'benign-sentinel').exists() if args.case == 'deny' else None
         absent = not (project / 'denied-sentinel').exists()
         def is_deny(record):
             if record['exit'] == 2:
@@ -87,9 +92,10 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
                 return decision.get('hookEventName') == 'PreToolUse' and decision.get('permissionDecision') == 'deny'
             except (ValueError, AttributeError):
                 return False
-        denied = any(r['payload'].get('tool_input', {}).get('command') == commands[1] and is_deny(r) for r in records)
-        result = {'kind':'actual_claude_callback_local_model_double','host_exit':run.returncode,'callback_count':len(records),'benign_executed':benign,'dangerous_denied':denied,'denied_sentinel_absent':absent,'provider':'loopback_double'}
+        denied = any(r['payload'].get('tool_input', {}).get('command') == commands[-1] and is_deny(r) for r in records)
+        callback_elapsed = max((r.get('elapsed_seconds', 0) for r in records), default=0)
+        result = {'kind':'actual_claude_callback_local_model_double','case':args.case,'callback_elapsed_seconds':callback_elapsed,'elapsed_seconds':round(elapsed, 3),'host_exit':run.returncode,'callback_count':len(records),'benign_executed':benign,'dangerous_denied':denied,'denied_sentinel_absent':absent,'provider':'loopback_double'}
         print(json.dumps(result, sort_keys=True))
-        if run.returncode or not (benign and absent and denied): raise SystemExit(1)
+        if run.returncode or not (absent and denied and (benign or args.case != 'deny') and (args.case != 'timeout' or callback_elapsed >= 1.5)): raise SystemExit(1)
     finally:
         server.shutdown()
