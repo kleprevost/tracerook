@@ -38,12 +38,19 @@ TraceRook reviews what your coding agent is about to do before it does it. It ru
 
 ## Beta
 
-TraceRook is in beta for Apple Silicon Macs running macOS 26 or later. Beta access is **$20/month** and includes TraceRook Cloud analysis. [Join the beta](https://tracerook.dev/register/), then follow the [installation guide](docs/BETA_RELEASE.md).
+TraceRook is in an **invitation-only private beta** for Apple Silicon Macs running macOS 26 or later. Invited members receive the download and a TraceRook Cloud access code. Billing isn't active during the beta; the planned price is **$20/month**, including TraceRook Cloud analysis. [Request an invitation](https://tracerook.dev/register/), then follow the [installation guide](docs/BETA_RELEASE.md).
 
 | Agent | Status |
 | --- | --- |
 | Claude Code | Supported — pre-execution blocking, Cloud analysis and native review |
 | OpenAI Codex | Coming soon |
+
+## About
+
+TraceRook is built by its co-founders:
+
+- **Kyle LePrevost** — [kyle@tracerook.dev](mailto:kyle@tracerook.dev) · [hardcidr.com](https://hardcidr.com)
+- **John Yang** — [john@tracerook.dev](mailto:john@tracerook.dev) · [LinkedIn](https://www.linkedin.com/in/johnwyang/)
 
 ## Repository layout
 
