@@ -1,6 +1,6 @@
 # Implementation and acceptance record
 
-Authoritative specification: `TraceRook_MVP1_Architecture_Spec.md` version 1.0. No product requirement is waived by this record.
+Authoritative specifications: `TraceRook_MVP1_Architecture_Spec.md` version 1.0 and the additive `TraceRook_MVP2_Architecture_Implementation_Spec.md`, with PR scope defined by `TraceRook_MVP2_Agent_Handoff.md`. No product requirement is waived by this record.
 
 | Phase | Status | Evidence / remaining gate |
 |---|---|---|
@@ -37,3 +37,27 @@ Manual demo: launch `build/TraceRook.app`, Explore Demo, Simulate review, Approv
 Phase 2 must implement authenticated signed-family XPC before allowing privileged UI approval mutations, a private UID-checked bounded Unix socket, sole-writer SQLite migrations and optimistic-concurrency integration changes. No UI button can enable live protection before those pieces and real-host callbacks are validated. Codex trust is a separate human review step. Phase 3 cannot pass without harmless real-host pre-execution proof on both agents.
 
 This document records actual platform behavior and acceptance evidence; it must not label pending functionality as complete.
+
+## MVP2.0 / PR 1 — baseline and contracts (2026-10-08)
+
+**Passed locally**, scoped to PR 1 by the handoff. Pinned main is `2d7712c298e7493f9b9b3f209d930d4c88d60cdb`; local branch is `codex/mvp2-baseline-contracts`. [MVP2_ACCEPTANCE.md](MVP2_ACCEPTANCE.md) records the inspected source, exact versions, phase checklist and no-ship gates. [MVP2_PR2_PLAN.md](MVP2_PR2_PLAN.md) lists concrete service/authentication/storage/UI and subsequent hook changes.
+
+- Added additive live IPC v2 without changing v1 schema/fixtures/readers: bounded length-prefixed codec, duplicate-key rejection before Foundation, Decimal preservation, strict DTO keys, bounded timing, system-random invocation nonce, no-override/deny replies and exact request binding.
+- Added per-class/version integration evidence and analysis availability contracts, plus live-only high-review request/resolution contracts reusing Core's existing `ApprovalBinding`. These DTOs do not authenticate callers, attest protection, enforce pending-state CAS or operate a service.
+- Packaged helper `--protocol-version` reports 2. `--self-test` runs a synthetic v2 codec demonstration, preserving fixture checks and operational refusal. No agent configurations or service registrations are changed.
+
+| Executed check | Actual result |
+|---|---|
+| Baseline `scripts/smoke-test.sh`, `scripts/ui-smoke-test.sh` | 23 tests; three debug executables; relocated bundle/signature/resource checks; 20 native renders passed |
+| Final `scripts/smoke-test.sh` | **43 tests passed**: all 23 original + 20 new contract tests; three debug executables, packaged self-tests/protocol version, relocation/missing-resource refusal, ad-hoc integrity and arm64 checks passed |
+| Post-change `scripts/ui-smoke-test.sh` | 20 native light/dark cases passed; case set matches baseline. Real overview and pending demo review visually inspected; labels remain honest |
+| Scene launch | `TraceRook --demo --launch-smoke-test`: one dashboard window visible |
+| Optimized build and `scripts/bundle-smoke-test.sh` | All three release executables compiled; relocated development bundle demonstrations, protocol versions, resources and signature integrity passed |
+| Static site checks only | 23 HTML pages, 1,172 local links/assets/anchors, 20 guides, 7,829 docs words; JavaScript syntax passed. Website/README source unchanged |
+| Configuration preservation | Local SHA-256 comparisons confirm Claude settings/local settings and Codex config unchanged; Codex hooks file remains absent |
+
+Evidence logs and before/after native render artifacts remain in ignored `build/mvp2-baseline/` and `build/ui-smoke/`. Rendering is not a pixel-equality or accessibility certification. Official schema examples are recorded in [agent compatibility](AGENT_COMPATIBILITY.md); no live host was exercised. Installed versions are Claude Code **2.1.290** and Codex **0.162.0-alpha.2**. Neither host nor any tool class has verified protection.
+
+Source adaptations: Review DTOs belong to Core because `ApprovalBinding` is already there; moving them into Contracts would require a dependency cycle or a duplicate domain type. No SQLite implementation exists at baseline, so schema-v1 readers are retained now and actual database migrations remain PR 2. The spec's illustrative SQL `real` origin will be translated to existing `DataOrigin.live`. The executable rule corpus assumed by the spec is absent and must be implemented. The foundation Codex normalizer's object-only input assumption needs tool-specific decoding before live integration.
+
+Platform limits: full Xcode and Developer ID identities are absent; no production signed-family IPC, archive, notarization or macOS 26 validation occurred. The native SwiftPM backend still passes but now emits a deprecation warning; its eventual removal needs a build-tool migration, not weaker security. JSON decode deadline checks are cooperative around Foundation calls and bounded packets; PR 2 must add transport deadlines and cancellation. Hooks, service-owned reviews, SQLite and actual BYOK remain pending. No public beta claim or deployment is made by this phase.

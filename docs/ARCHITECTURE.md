@@ -12,3 +12,11 @@ The macOS 26+ arm64 app, per-user LaunchAgent and hook CLI share Swift 6 modules
 The service will be the sole SQLite writer. The hook socket will carry events and decisions only, with no approval/trust commands. Authenticated XPC will carry UI status and exact approval mutations. Notifications are an affordance; deadlines and pending state belong to the service.
 
 No third-party runtime dependencies, broad disk access, root daemon, cloud backend, embedded web UI or live-agent configuration changes are introduced by the foundation build.
+
+## MVP2 baseline contracts
+
+The [MVP2 specification](../TraceRook_MVP2_Architecture_Implementation_Spec.md) extends this architecture. PR 1 adds live IPC v2 alongside the unchanged v1 event/fixture formats. `LiveIPC.swift` and `WireCodec.swift` define strict framing, invocation nonces, budgets, typed no-override/deny replies, provider status and per-class integration evidence. These are tested contracts; no socket or XPC service is active yet.
+
+`ReviewRequest` and `ReviewResolution` live in Core's `ReviewContracts.swift` so they can reuse `ApprovalBinding` without a dependency cycle or duplicated domain type. Shape/binding validation is not caller authentication or approval consumption. Those operations require the service actor and signed UI control plane in PR 2 and the complete live review loop in PR 5.
+
+See the [acceptance matrix](MVP2_ACCEPTANCE.md) for the actual source inventory, limits and open gates, and the [PR 2 plan](MVP2_PR2_PLAN.md) for exact service/persistence/UI changes. Existing Cloud Demo remains isolated and real coverage remains Not integrated.

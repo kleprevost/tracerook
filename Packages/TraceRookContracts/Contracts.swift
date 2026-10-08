@@ -5,6 +5,9 @@ public enum TraceRookVersion {
     public static let schema = 1
     public static let ipc = 1
     public static let adapter = "1.0.0"
+    // Additive live contracts. The v1 fixture/persistence versions remain unchanged.
+    public static let liveIPC = 2
+    public static let liveAdapter = "2.0.0"
     public static let maxInputBytes = 1_048_576
     public static let maxNestingDepth = 32
 }
@@ -85,6 +88,7 @@ public enum TraceRookError: String, Error, Codable, Sendable {
     case invalidFingerprint, notAuthenticated, quotaExhausted, rateLimited, providerUnavailable
     case malformedResponse, timeout, unsafePayload, notDemoData, conflict, unsupportedOperation
     case staleApproval, wrongBinding, disconnected, incompatibleHost, fixtureInvalid
+    case entropyUnavailable
 }
 
 /// Codable JSON without bridging untrusted inputs into non-Sendable Any dictionaries.
