@@ -1,6 +1,6 @@
 # Implementation and acceptance record
 
-Authoritative specifications: `TraceRook_MVP1_Architecture_Spec.md` version 1.0, the additive `TraceRook_MVP2_Architecture_Implementation_Spec.md`, and `TraceRook_MVP3_Complete_Package/TraceRook_MVP3_Claude_Cloud_Alpha_Spec.md`. PR scope follows each milestone's coding handoff. No product requirement is waived by this record.
+Authoritative specifications: `TraceRook_MVP1_Architecture_Spec.md` version 1.0, the additive `TraceRook_MVP2_Architecture_Implementation_Spec.md`, and `TraceRook_MVP3_Complete_Package/TraceRook_MVP3_Claude_Cloud_Alpha_Spec.md`. PR scope follows each milestone's coding handoff. Product requirements remain in force except for explicitly user-authorized distribution deviations recorded in the milestone evidence.
 
 | Phase | Status | Evidence / remaining gate |
 |---|---|---|
@@ -71,3 +71,7 @@ The available-preview regression passes: **43 tests**, three debug/optimized arm
 The package's reported shipping MVP2 release remains **unresolved**: no separate tag/release/installed distribution was discovered in the inspected locations. Local 0.1.0/build 1 bundles are ad-hoc signed, rejected by Gatekeeper and lack a stapled ticket. No live-host denial, actual BYOK, signed-family service, SQLite or hosted API runtime was found or exercised; their shipping regression remains not run. Installed Claude Code 2.1.290 and Codex 0.162.0-alpha.2 do not establish verified tool coverage.
 
 PR 0 changes documentation only, preserves the supplied package, leaves runtime/build/site files and user-agent configuration unchanged, and makes **no deployments, hook installations, token changes or billable provider calls**. Raw local evidence stays ignored under `build/mvp3-baseline/`. Follow the handoff's **PR 0 only / review before PR 1** boundary; no live Cloud or protection claim is promoted by this audit. See [MVP3_DEVIATIONS.md](MVP3_DEVIATIONS.md) for unresolved baseline assumptions and retained free-tier constraints.
+
+## MVP2.1 — local service implementation
+
+Implemented and tested on macOS 27: authenticated XPC/control observers, audit-token-authenticated bounded hook socket, sole-writer SQLite, sanitized durable state and service-owned exact review transitions. **50 automated tests pass**; native 20-case rendering passes. Actual packaged app/CLI authentication and altered-peer rejection were exercised. [Service evidence and deviations](MVP2_SERVICE_EVIDENCE.md) distinguish these transport proofs from live protection. The hook remains nonoperational until the real rule engine and emergency fallback are enabled. No host/tool class is verified. The user explicitly accepted a non-notarized distribution; local ad-hoc mode and its per-user LaunchAgent are separate from Developer ID policy.

@@ -32,12 +32,20 @@ public final class DesktopModel {
     public private(set) var demoApprovals: [ApprovalRecord] = []
     public private(set) var message: String?
     public private(set) var pauseUntil: Date?
-    public var sessions: [SessionRecord] { showingDemo ? demoSessions : [] }
-    public var incidents: [IncidentRecord] { showingDemo ? demoIncidents : [] }
-    public var approvals: [ApprovalRecord] { showingDemo ? demoApprovals : [] }
+    public private(set) var liveSnapshot: ServiceSnapshot?
+    public private(set) var serviceConnected = false
+    public var sessions: [SessionRecord] { showingDemo ? demoSessions : liveSnapshot?.sessions ?? [] }
+    public var incidents: [IncidentRecord] { showingDemo ? demoIncidents : liveSnapshot?.incidents ?? [] }
+    public var approvals: [ApprovalRecord] { showingDemo ? demoApprovals : liveSnapshot?.approvals ?? [] }
+    public var observedHostSessionCount: Int { liveSnapshot?.sessions.filter { !isSimulatedSession($0.id) }.count ?? 0 }
+    public func isSimulatedSession(_ id: UUID) -> Bool { liveSnapshot?.simulatedSessionIDs.contains(id) ?? false }
     public var liveCoverage: CoverageStatus { pauseUntil == nil ? .notIntegrated : .paused }
-    public var pendingCount: Int { showingDemo ? demoApprovals.filter { $0.isPending(at: .now) }.count : 0 }
+    public var pendingCount: Int { approvals.filter { $0.isPending(at: .now) }.count }
     public init() {}
+    public func apply(_ snapshot: ServiceSnapshot) throws {
+        try snapshot.validate(); liveSnapshot = snapshot; serviceConnected = true
+    }
+    public func disconnectService() { serviceConnected = false; liveSnapshot = nil }
     public func loadDemo(sessions: [SessionRecord], incidents: [IncidentRecord]) throws {
         guard sessions.allSatisfy({ $0.origin == .demo && $0.coverage == .demo }),
               incidents.allSatisfy({ $0.origin == .demo }) else { throw TraceRookError.notDemoData }

@@ -25,9 +25,11 @@ struct SettingsView: View {
                 }.padding(.bottom, 24)
             }
         }.padding(28)
-        .confirmationDialog("Clear sample history for this run?", isPresented: $clearConfirmation) {
-            Button("Clear sample history", role: .destructive) { environment.model.clearDemoHistory() }
-        } message: { Text("This clears only bundled sample findings and simulated review decisions in memory.") }
+        .confirmationDialog("Clear all local history?", isPresented: $clearConfirmation) {
+            Button("Clear history and abort pending reviews", role: .destructive) {
+                Task { _ = try? await environment.agent.command(.clearHistory); await environment.agent.refresh() }
+            }
+        } message: { Text("This permanently removes live history from this Mac. Pending reviews are denied first. Keys and integrations are separate.") }
     }
     private var general: some View {
         @Bindable var env = environment
@@ -45,7 +47,7 @@ struct SettingsView: View {
                 Text("Focus and notification settings can suppress delivery. Pending actions remain in the review queue and expire safely.").font(.caption).foregroundStyle(.secondary)
             }
             Surface("Login and retention") {
-                DetailField(name: "Launch at login", value: "Not registered · live service pending")
+                DetailField(name: "Background service", value: environment.agent.status)
                 DetailField(name: "History retention", value: "Planned: events 14 days; incidents and approvals 30 days")
                 Text("No live history database exists in this build. Sample data is held in memory.").font(.caption).foregroundStyle(.secondary)
                 HStack { Button("Reset Demo") { environment.resetDemo() }; Button("Clear sample history…", role: .destructive) { clearConfirmation = true } }.buttonStyle(.bordered)
@@ -143,11 +145,11 @@ struct SettingsView: View {
             }
             Surface("Separate deletion controls") {
                 HStack {
-                    Button("Delete All Local History") {}.disabled(true)
+                    Button("Delete All Local History") { clearConfirmation = true }.disabled(!environment.agent.connected)
                     Button("Delete API Key") {}.disabled(true)
                     Button("Uninstall Integrations") {}.disabled(true)
                 }.buttonStyle(.bordered)
-                Text("These controls are unavailable until their live stores exist. This build has no stored API key, installed integrations or local history database.").font(.caption).foregroundStyle(.secondary)
+                Text("The service owns the private history store. Clearing it aborts pending reviews first. Key and integration deletion become available when configured.").font(.caption).foregroundStyle(.secondary)
             }
         }
     }
@@ -155,10 +157,10 @@ struct SettingsView: View {
         Surface("TraceRook") {
             HStack { RookMark(size: 52); VStack(alignment: .leading) { Text("TraceRook \(TraceRookVersion.app)").font(.title2.bold()); Text("Native macOS · Swift 6 · Apple Silicon").foregroundStyle(.secondary) } }
             DetailField(name: "App signature", value: environment.signatureDescription)
-            DetailField(name: "Helper version", value: "\(TraceRookVersion.app) · foundation binary; not registered")
+            DetailField(name: "Helper service", value: environment.agent.status)
             DetailField(name: "Adapter schema", value: "\(TraceRookVersion.adapter) · host compatibility not verified")
             DetailField(name: "Fixture status", value: environment.fixtureStatus)
-            Text("Development milestone: native UI and Cloud Demo. Live IPC, installation, enforcement and BYOK remain pending. Developer ID signing and notarization are release gates.").font(.callout).foregroundStyle(.secondary)
+            Text("Non-notarized local build. The service validates exact peer signatures; host coverage requires separately verified hooks. Ad-hoc signatures do not prove publisher identity.").font(.callout).foregroundStyle(.secondary)
             Text("TraceRook is a guardrail for supported hooks, not system-wide endpoint protection. Same-user processes can bypass or disable hooks.").font(.caption).foregroundStyle(.secondary)
         }
     }

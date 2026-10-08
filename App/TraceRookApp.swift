@@ -2,10 +2,31 @@ import AppKit
 import SwiftUI
 import TraceRookContracts
 import TraceRookCore
+import TraceRookIPC
 
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if CommandLine.arguments.contains("--service-smoke-test") {
+            Task { @MainActor in
+                do {
+                    let client = XPCClient(agent: try SignedFamily(bundle: Bundle.main.bundleURL).agent)
+                    let request = ServiceControlRequest(method: .snapshot, payload: .object(["limit": .number(25)]))
+                    let response = try WireCodec.decode(ServiceControlReply.self, frame: await client.call(WireCodec.encode(request)))
+                    guard response.requestID == request.requestID, response.error == nil else { throw IPCError.transport }
+                    let snapshot = try JSONDecoder().decode(ServiceSnapshot.self, from: response.payload.canonicalData())
+                    try snapshot.validate()
+                    print("Authenticated service snapshot: passed; sessions=\(snapshot.sessions.count); security=\(snapshot.securityMode.rawValue).")
+                    if CommandLine.arguments.contains("--simulate-ingestion") {
+                        let mutation = ServiceControlRequest(method: .simulatedIngestion)
+                        let reply = try WireCodec.decode(ServiceControlReply.self, frame: await client.call(WireCodec.encode(mutation)))
+                        guard reply.error == nil else { throw IPCError.transport }
+                        print("Simulated ingestion through authenticated XPC: passed; no host tool was running.")
+                    }
+                    exit(0)
+                } catch { FileHandle.standardError.write(Data("Authenticated service smoke test failed.\n".utf8)); exit(1) }
+            }
+        }
         if CommandLine.arguments.contains("--launch-smoke-test") {
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(500))
@@ -63,7 +84,7 @@ struct MenuBarView: View {
         Text("Claude Code: Not integrated")
         Text("Codex: Not integrated")
         Divider()
-        Text("Real active sessions: 0")
+        Text("Real observed sessions: \(environment.model.observedHostSessionCount)")
         Text("Demo pending reviews: \(environment.model.demoApprovals.filter { $0.isPending(at: .now) }.count)")
         Button("Open Dashboard") { openWindow(id: "dashboard"); NSApp.activate(ignoringOtherApps: true) }
         Button("Approvals") {
@@ -77,7 +98,7 @@ struct MenuBarView: View {
         }
         Button("Settings…") { environment.model.destination = .settings; openWindow(id: "dashboard") }
         Divider()
-        Text("No background agent registered in this build")
+        Text(environment.agent.status)
         Button("Quit UI") { NSApplication.shared.terminate(nil) }.keyboardShortcut("q")
     }
 }
