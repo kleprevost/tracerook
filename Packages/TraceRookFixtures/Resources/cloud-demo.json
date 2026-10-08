@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "origin": "demo",
+  "sessions": [
+    {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "origin": "demo",
+      "provider": "claude_code",
+      "project": "Atlas UI",
+      "taskAnchor": "Build an accessible settings screen for Atlas.",
+      "coverage": "demo",
+      "firstSeenAt": "2026-10-08T11:45:00Z",
+      "lastSeenAt": "2026-10-08T12:00:00Z",
+      "endedAt": null,
+      "risk": "critical",
+      "events": [
+        {
+          "id": "00000000-0000-0000-0000-00000000000b",
+          "at": "2026-10-08T11:46:00Z",
+          "tool": "Read",
+          "summary": "Read project component guidelines",
+          "severity": "low",
+          "execution": "host_executed_observed"
+        },
+        {
+          "id": "00000000-0000-0000-0000-00000000000c",
+          "at": "2026-10-08T11:58:00Z",
+          "tool": "Bash",
+          "summary": "Proposed upload referencing an SSH credential file",
+          "severity": "critical",
+          "execution": "blocked_before_execution"
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "origin": "demo",
+      "provider": "codex",
+      "project": "Harbor API",
+      "taskAnchor": "Add pagination to the local API and run unit tests.",
+      "coverage": "demo",
+      "firstSeenAt": "2026-10-08T11:50:00Z",
+      "lastSeenAt": "2026-10-08T12:00:00Z",
+      "endedAt": null,
+      "risk": "high",
+      "events": [
+        {
+          "id": "00000000-0000-0000-0000-000000000015",
+          "at": "2026-10-08T11:52:00Z",
+          "tool": "apply_patch",
+          "summary": "Updated pagination tests",
+          "severity": "low",
+          "execution": "host_executed_observed"
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000016",
+          "at": "2026-10-08T12:00:00Z",
+          "tool": "Bash",
+          "summary": "Proposed package publication outside the task",
+          "severity": "high",
+          "execution": "intercepted"
+        }
+      ]
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000003",
+      "origin": "demo",
+      "provider": "claude_code",
+      "project": "Lighthouse",
+      "taskAnchor": "Fix the local documentation layout.",
+      "coverage": "demo",
+      "firstSeenAt": "2026-10-08T11:00:00Z",
+      "lastSeenAt": "2026-10-08T11:30:00Z",
+      "endedAt": "2026-10-08T11:30:00Z",
+      "risk": "medium",
+      "events": [
+        {
+          "id": "00000000-0000-0000-0000-00000000001f",
+          "at": "2026-10-08T11:15:00Z",
+          "tool": "Read",
+          "summary": "Observed a policy-override instruction in sample documentation",
+          "severity": "medium",
+          "execution": "host_executed_observed"
+        }
+      ]
+    }
+  ],
+  "incidents": [
+    {
+      "id": "00000000-0000-0000-0000-000000000065",
+      "sessionID": "00000000-0000-0000-0000-000000000001",
+      "origin": "demo",
+      "title": "Credential upload intercepted",
+      "severity": "critical",
+      "categories": [
+        "unsafe_action"
+      ],
+      "ruleIDs": [
+        "TR-CRED-EXFIL"
+      ],
+      "summary": "Outbound upload referenced a sensitive SSH credential location.",
+      "rationale": "A sensitive file reference and upload intent occur in the same proposed action. The local catastrophic rule takes precedence over model advice.",
+      "evidence": [
+        "Sensitive SSH credential path referenced",
+        "Outbound upload within the same effective command",
+        "No relationship to the UI task was visible"
+      ],
+      "limitations": [
+        "Simulated fixture; no command was executed",
+        "Nested activity outside hooks is not independently mediated"
+      ],
+      "execution": "blocked_before_execution",
+      "createdAt": "2026-10-08T11:58:00Z",
+      "providerMode": "localRulesOnly",
+      "reviewed": false,
+      "falsePositive": false
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000066",
+      "sessionID": "00000000-0000-0000-0000-000000000002",
+      "origin": "demo",
+      "title": "Unexpected package publication",
+      "severity": "high",
+      "categories": [
+        "unsafe_action",
+        "agent_misbehavior"
+      ],
+      "ruleIDs": [
+        "TR-PUBLISH-DEPLOY",
+        "TR-TASK-DRIFT"
+      ],
+      "summary": "Proposed publishing a package while implementing local API pagination.",
+      "rationale": "Publication changes an external service and is outside the observed task. Human review is required; TraceRook cannot determine the developer intent with certainty.",
+      "evidence": [
+        "Package publish action",
+        "Original task concerned local pagination and tests"
+      ],
+      "limitations": [
+        "Only sanitized arguments were available",
+        "Allow once passes TraceRook only; host permissions still apply",
+        "Simulated fixture; no package can be published"
+      ],
+      "execution": "intercepted",
+      "createdAt": "2026-10-08T12:00:00Z",
+      "providerMode": "traceRookCloudDemo",
+      "reviewed": false,
+      "falsePositive": false
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000067",
+      "sessionID": "00000000-0000-0000-0000-000000000003",
+      "origin": "demo",
+      "title": "Untrusted instruction attempted to redirect the task",
+      "severity": "medium",
+      "categories": [
+        "agent_misbehavior"
+      ],
+      "ruleIDs": [
+        "TR-REPO-INSTRUCTION"
+      ],
+      "summary": "A sample instruction file asked the agent to ignore the original user task.",
+      "rationale": "Repository content is untrusted. This asynchronous finding can inform future checks but cannot retroactively block an action.",
+      "evidence": [
+        "Instruction hierarchy override language observed"
+      ],
+      "limitations": [
+        "Causal link to later behavior cannot be proven",
+        "Simulated sample data"
+      ],
+      "execution": "execution_unknown",
+      "createdAt": "2026-10-08T11:15:00Z",
+      "providerMode": "traceRookCloudDemo",
+      "reviewed": false,
+      "falsePositive": false
+    }
+  ],
+  "account": {
+    "email": "developer@example.invalid",
+    "plan": "Preview",
+    "state": "demo",
+    "account_id": "demo-account"
+  },
+  "usage": {
+    "period": "2026-10",
+    "quota": 1000,
+    "analyzed_actions": 284,
+    "tokens_used": 148200,
+    "daily_actions": [
+      18,
+      27,
+      35,
+      22,
+      48,
+      31,
+      59,
+      44
+    ]
+  },
+  "plans": [
+    {
+      "id": "preview",
+      "name": "Preview",
+      "description": "Explore the Cloud experience with bundled sample data.",
+      "monthlyPriceLabel": "Demo only",
+      "features": [
+        "Sample account and usage",
+        "Interactive simulated findings",
+        "No network requests"
+      ]
+    },
+    {
+      "id": "individual",
+      "name": "Individual",
+      "description": "A future plan concept. Service and billing are unavailable.",
+      "monthlyPriceLabel": "Not available",
+      "features": [
+        "Future contextual analysis",
+        "Future device enrollment",
+        "No purchase or subscription"
+      ]
+    }
+  ],
+  "verdict": {
+    "category": [
+      "unsafe_action",
+      "agent_misbehavior"
+    ],
+    "severity": "high",
+    "confidence": 0.83,
+    "suspicious": true,
+    "rationale": "Publication is outside the observed pagination task.",
+    "evidence": [
+      "Proposed package publication",
+      "Task anchor is local pagination"
+    ],
+    "limitations": [
+      "Synthetic Cloud Demo fixture",
+      "Only sanitized tool arguments were available"
+    ],
+    "schema_version": 1,
+    "recommended_action": "request_approval",
+    "session_drift": true
+  }
+}
