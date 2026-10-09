@@ -12,7 +12,7 @@ DIST = ROOT / 'dist'
 sys.path.insert(0, str(ROOT / 'content'))
 from pages import PAGES
 
-FORM_PAGES = {'register': '/api/beta/request', 'login': '/api/auth/login'}
+FORM_PAGES = {'register': '/api/beta/request'}
 FOUNDERS = ('Kyle LePrevost', 'mailto:kyle@tracerook.dev', 'https://hardcidr.com', 'John Yang', 'mailto:john@tracerook.dev', 'https://www.linkedin.com/in/johnwyang/')
 # Retired release-status language must not reappear in shipped copy.
 RETIRED_PHRASES = ('Now open', 'Join the beta', 'MVP', 'development preview', 'Development preview', 'release gate', 'acceptance gate',
@@ -76,7 +76,7 @@ def resolve(path):
 def check():
     paths = sorted(DIST.rglob('*.html'))
     expected = {DIST / 'index.html', DIST / 'docs/index.html', DIST / '404.html'}
-    expected.update(DIST / name / 'index.html' for name in ('pricing', 'register', 'login'))
+    expected.update(DIST / name / 'index.html' for name in ('pricing', 'register'))
     expected.update(DIST / 'docs' / page['slug'] / 'index.html' for page in PAGES)
     assert set(paths) == expected, f'Generated route set does not match: {sorted(map(str, set(paths) ^ expected))}'
     documents = {path: Document(path.read_text()) for path in paths}
@@ -93,6 +93,8 @@ def check():
         if route in FORM_PAGES and path.parent.parent == DIST:
             assert len(document.forms) == 1 and document.forms[0].get('action') == FORM_PAGES[route], f'Unexpected form: {path}'
             assert document.forms[0].get('method') == 'post', f'Form must POST: {path}'
+            fallback = document.forms[0].get('data-fallback-to', '').split(',')
+            assert fallback[0] and all(a.endswith('@tracerook.dev') for a in fallback), f'Form needs a @tracerook.dev email fallback: {path}'
             assert "form-action 'self'" in text, f'Form CSP missing: {path}'
             for field in document.inputs:
                 assert field.get('id') in document.labels, f'Unlabeled input in {path}: {field.get("name")}'
@@ -128,8 +130,9 @@ def check():
     assert 'localStorage' not in script and 'sessionStorage' not in script, 'Unexpected client persistence'
     headers = (DIST/'_headers').read_text()
     assert "form-action 'self'" in headers and "frame-ancestors 'none'" in headers, 'Header policy changed'
+    assert re.search(r'^/login/\s+/docs/beta/\s+301$', (DIST/'_redirects').read_text(), re.M), 'Retired /login/ must redirect'
     sitemap = (DIST/'sitemap.xml').read_text()
-    for route in ('/pricing/', '/register/', '/login/'):
+    for route in ('/pricing/', '/register/'):
         assert route in sitemap, f'Sitemap missing {route}'
     pricing = (DIST/'pricing/index.html').read_text()
     assert '$20' in pricing and '/register/' in pricing, 'Pricing page lost its plan or call to action'

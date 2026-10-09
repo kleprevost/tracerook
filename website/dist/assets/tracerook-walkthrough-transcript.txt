@@ -10,8 +10,8 @@ Open a session to see the task and its timeline. Here, the sample shows a creden
 
 Each finding explains the proposed action, its evidence, and its relationship to your task. Local rules retain authority over critical denials.
 
-Higher risk actions can wait for your review. The native panel shows the task, evidence, exact action binding, and a deadline.
+Higher-risk actions can wait for your review. The native panel shows the task, evidence, exact action binding, and a deadline.
 
 Choose Block and the simulated review resolves immediately. Allow once applies to one exact action; the coding agent still controls its own permissions.
 
-TraceRook Cloud uses Anthropic Claude. Explore the invited Mac beta at TraceRook dot dev.
+TraceRook Cloud uses Anthropic Claude. Explore the invited Mac beta at tracerook.dev.

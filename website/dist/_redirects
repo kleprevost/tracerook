@@ -6,3 +6,4 @@
 /docs/testing/             /docs/build/         301
 /docs/safe-installation/   /docs/claude-code/   301
 /reference/*               /docs/               301
+/login/                    /docs/beta/          301

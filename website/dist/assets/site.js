@@ -122,10 +122,15 @@ if (search) {
 document.querySelectorAll("[data-auth-form]").forEach(form => {
   const status = form.querySelector(".form-status");
   const submit = form.querySelector("button[type=submit]");
-  const messages = {
-    request: "Thanks. Your request is in, and we'll email you when an invitation is ready.",
-    login: "Logged in."
-  };
+  // If the endpoint is unavailable, offer the same request as a prefilled email rather than a dead end.
+  function offerEmail(body) {
+    const link = document.createElement("a");
+    link.href = "mailto:" + form.dataset.fallbackTo + "?subject=" + encodeURIComponent("TraceRook beta invitation request") +
+      "&body=" + encodeURIComponent(`Name: ${body.name}\nEmail: ${body.email}\nHow I use coding agents: ${body.use_case || "(not provided)"}`);
+    link.textContent = "Email your request to the founders";
+    status.textContent = "We couldn't send that automatically. ";
+    status.append(link, " instead; it's already filled in.");
+  }
   form.addEventListener("submit", async event => {
     event.preventDefault();
     status.textContent = "";
@@ -140,7 +145,8 @@ document.querySelectorAll("[data-auth-form]").forEach(form => {
     const body = {};
     new FormData(form).forEach((value, key) => { body[key] = String(value); });
     submit.disabled = true;
-    status.textContent = form.dataset.authForm === "request" ? "Sending your request…" : "Logging in…";
+    status.textContent = "Sending your request…";
+    let serverMessage = "";
     try {
       const response = await fetch(form.getAttribute("action"), {
         method: "POST", credentials: "same-origin",
@@ -148,17 +154,24 @@ document.querySelectorAll("[data-auth-form]").forEach(form => {
         body: JSON.stringify(body)
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result && result.error && typeof result.error.message === "string" ? result.error.message : "");
+      if (!response.ok) {
+        if (result && result.error && typeof result.error.message === "string") serverMessage = result.error.message;
+        throw new Error("Request failed");
+      }
       if (typeof result.redirect === "string" && result.redirect.startsWith("/") && !result.redirect.startsWith("//")) {
         window.location.assign(result.redirect);
         return;
       }
       form.reset();
-      status.textContent = messages[form.dataset.authForm];
+      status.textContent = "Thanks. Your request is in, and we'll email you when an invitation is ready.";
       status.dataset.state = "success";
-    } catch (error) {
-      status.textContent = error.message || "We couldn't reach TraceRook right now. Please try again in a moment.";
-      status.dataset.state = "error";
+    } catch {
+      if (serverMessage || !form.dataset.fallbackTo) {
+        status.textContent = serverMessage || "We couldn't reach TraceRook right now. Please try again in a moment.";
+        status.dataset.state = "error";
+      } else {
+        offerEmail(body);
+      }
     } finally {
       submit.disabled = false;
     }

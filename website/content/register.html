@@ -3,7 +3,7 @@
     <div class="auth-copy"><div class="eyebrow">Private beta</div><h1>Request an<br>invitation.</h1><p class="intro">TraceRook is in an invitation-only beta. Tell us who you are and we'll follow up as invitations open. Invited members receive the download and a TraceRook Cloud access code.</p><ul class="auth-points"><li>Pre-execution protection for Claude Code</li><li>Claude analysis with no API key to manage</li><li>No billing during the private beta</li></ul><p class="auth-note">Prefer email? Write to <a href="mailto:kyle@tracerook.dev">kyle@tracerook.dev</a> or <a href="mailto:john@tracerook.dev">john@tracerook.dev</a>.</p></div>
     <section class="auth-card" aria-labelledby="register-title">
       <h2 id="register-title">Request access</h2>
-      <form class="auth-form" data-auth-form="request" action="/api/beta/request" method="post" novalidate>
+      <form class="auth-form" data-auth-form="request" data-fallback-to="kyle@tracerook.dev,john@tracerook.dev" action="/api/beta/request" method="post" novalidate>
         <label for="request-name">Name</label>
         <input id="request-name" name="name" type="text" autocomplete="name" required maxlength="120">
         <label for="request-email">Email</label>
@@ -13,7 +13,7 @@
         <button class="button primary" type="submit">Request an invitation</button>
         <p class="form-status" role="status" aria-live="polite"></p>
       </form>
-      <p class="auth-switch">Already invited? <a href="/login/">Log in</a></p>
+      <p class="auth-switch">Already invited? <a href="/docs/beta/">Install the beta</a></p>
     </section>
   </div>
 </main>
