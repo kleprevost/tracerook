@@ -32,7 +32,7 @@ struct OverviewView: View {
                         Button("Set up TraceRook") { environment.onboardingPresented = true }.buttonStyle(.borderedProminent)
                     }
                 }
-                coverageBanner
+                if environment.model.showingDemo { demoNotice }
                 HStack(spacing: 14) {
                     MetricCard(title: "Verified integrations", value: "0 / 2", caption: "Actual local coverage", symbol: "link")
                     MetricCard(title: environment.model.showingDemo ? "Sample sessions" : "Observed sessions", value: "\(environment.model.showingDemo ? environment.model.sessions.count : environment.model.observedHostSessionCount)", caption: environment.model.showingDemo ? "Bundled fixtures" : "Actual host callbacks only", symbol: "terminal")
@@ -93,12 +93,12 @@ struct OverviewView: View {
             }.padding(28).frame(maxWidth: 1400)
         }
     }
-    private var coverageBanner: some View {
+    private var demoNotice: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: environment.model.showingDemo ? "sparkles" : "exclamationmark.circle").font(.title3)
+            Image(systemName: "sparkles").font(.title3)
             VStack(alignment: .leading, spacing: 5) {
-                Text(environment.model.showingDemo ? "Cloud Demo uses sample data" : "Protection has not been verified").font(.headline)
-                Text(environment.model.showingDemo ? "Account, usage, findings and review actions are simulated locally. Background analysis state is shown separately in provider settings." : (visibleSessions.isEmpty ? "No actual host callbacks appear in this snapshot. A configuration file alone never establishes protected coverage." : "Actual host callbacks have been observed. Exact host versions and tool paths still require coverage verification; observed activity alone does not establish protection."))
+                Text("Cloud Demo uses sample data").font(.headline)
+                Text("Account, usage, findings and review actions are simulated locally. Background analysis state is shown separately in provider settings.")
                     .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             Spacer()
