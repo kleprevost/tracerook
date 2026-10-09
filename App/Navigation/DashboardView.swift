@@ -36,8 +36,8 @@ struct DashboardView: View {
                 }.padding(.horizontal, 12).padding(.top, 18)
                 Spacer()
                 VStack(alignment: .leading, spacing: 9) {
-                    StatusBadge(text: "Not integrated", color: .secondary, symbol: "circle.dashed")
-                    Text("Hook coverage must be verified before protection is claimed.")
+                    StatusBadge(text: environment.agent.connected ? "Service connected" : "Service disconnected", color: .secondary, symbol: "circle.dashed")
+                    Text(environment.claudeIntegration.title(in: environment.model))
                         .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     Button("Setup guide") { environment.onboardingPresented = true }.buttonStyle(.link)
                 }.padding(20)
@@ -50,7 +50,7 @@ struct DashboardView: View {
                         Spacer()
                         Button("Real activity") { environment.model.showRealActivity() }.buttonStyle(.bordered)
                     } else {
-                        StatusBadge(text: environment.model.liveCoverage.title, symbol: "circle.dashed")
+                        StatusBadge(text: environment.claudeIntegration.title(in: environment.model), symbol: "circle.dashed")
                         Spacer()
                         Button("Explore Demo") { Task { await environment.exploreDemo() } }.buttonStyle(.bordered)
                     }

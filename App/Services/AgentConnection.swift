@@ -5,6 +5,8 @@ import TraceRookContracts
 import TraceRookCore
 import TraceRookIPC
 
+private enum AgentResponseError: Error { case service(ServiceErrorCode), mismatchedRequest }
+
 @MainActor @Observable
 final class AgentConnection {
     private(set) var status = "Service not connected"
@@ -38,7 +40,9 @@ final class AgentConnection {
         let request = ServiceControlRequest(method: method, payload: payload)
         guard let client else { throw IPCError.transport }
         let reply = try WireCodec.decode(ServiceControlReply.self, frame: await client.call(WireCodec.encode(request, maximumBytes: 16_384)))
-        guard reply.requestID == request.requestID, reply.error == nil else { throw IPCError.transport }; return reply
+        guard reply.requestID == request.requestID else { throw AgentResponseError.mismatchedRequest }
+        if let error = reply.error { throw AgentResponseError.service(error) }
+        return reply
     }
     func refresh() async {
         let generation = cloudStateGeneration
@@ -55,7 +59,14 @@ final class AgentConnection {
             }
             status = snapshot.securityMode == .developer ? "Connected · local ad-hoc signatures · non-notarized" : "Connected · Developer ID"
         } catch {
-            client = nil; connected = false; status = "Service unavailable · no verified protection"
+            client = nil; connected = false
+            if let error = error as? TraceRookError {
+                status = "Service response rejected: \(error.rawValue)"
+            } else if case AgentResponseError.service(let code) = error {
+                status = "Service reported: \(code.rawValue)"
+            } else {
+                status = "Service unavailable · restart the service after updating this beta"
+            }
             model.disconnectService()
             cloud = LiveCloudStatus(failure: .unavailable)
             localAPI = LocalAPIDemoStatus(failure: .unavailable)

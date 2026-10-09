@@ -129,8 +129,8 @@ struct MenuBarView: View {
     @Environment(\.openWindow) private var openWindow
     var body: some View {
         Text("Protection: \(environment.model.liveCoverage.title)")
-        Text("Claude Code: Not integrated")
-        Text("Codex: Not integrated")
+        Text("Claude Code: \(environment.claudeIntegration.title(in: environment.model))")
+        Text("Codex: Coming soon")
         Divider()
         Text("Real observed sessions: \(environment.model.observedHostSessionCount)")
         Text("Demo pending reviews: \(environment.model.demoApprovals.filter { $0.isPending(at: .now) }.count)")

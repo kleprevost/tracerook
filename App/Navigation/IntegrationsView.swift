@@ -1,11 +1,13 @@
 import SwiftUI
 import TraceRookContracts
+import TraceRookCore
 
 struct IntegrationsView: View {
     @Environment(AppEnvironment.self) private var environment
     @ViewState<AgentProvider?> private var selectedPreview: AgentProvider?
     var body: some View {
         @Bindable var agent = environment.agent
+        @Bindable var claude = environment.claudeIntegration
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeading(title: "Connect with confidence", subtitle: "Installation, host trust and verified execution are separate checks.")
@@ -26,29 +28,34 @@ struct IntegrationsView: View {
                 }
                 ForEach(AgentProvider.allCases, id: \.self) { provider in
                     Surface {
-                        HStack { Text(provider.title).font(.title2.bold()); Spacer(); StatusBadge(text: "Not integrated", symbol: "circle.dashed") }
+                        HStack { Text(provider.title).font(.title2.bold()); Spacer(); StatusBadge(text: provider == .claudeCode ? claude.title(in: environment.model) : "Coming soon", symbol: "circle.dashed") }
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 16) {
-                            fact("Installed", "Not checked")
-                            fact("Configured", "No")
-                            fact("Trusted", provider == .codex ? "Needs host review" : "Not verified")
-                            fact("Verified", "No actual callback")
-                            fact("Host version", "Compatibility unverified")
-                            fact("Recent hook", "Never")
+                            fact("Installed", provider == .claudeCode ? (claude.installed ? "Yes" : "Not found") : "Not checked")
+                            fact("Configured", provider == .claudeCode && claude.configured ? "Yes" : "No")
+                            fact("Trusted", provider == .codex ? "Needs host review" : "Explicit configuration preview")
+                            fact("Callback", provider == .claudeCode && claude.latestCallback(in: environment.model) != nil ? "Observed" : "Awaiting callback")
+                            fact("Host version", provider == .claudeCode ? claude.hostVersion : "Not checked")
+                            fact("Recent hook", provider == .claudeCode ? claude.latestCallback(in: environment.model)?.formatted(date: .omitted, time: .shortened) ?? "Never" : "Never")
                         }
                         Divider()
-                        Text("Supported events").font(.subheadline.bold())
-                        Text("SessionStart · UserPromptSubmit · PreToolUse · PostToolUse · SessionEnd").font(.caption.monospaced()).foregroundStyle(.secondary)
+                        Text("Hook events").font(.subheadline.bold())
+                        Text(provider == .claudeCode ? "PreToolUse · synchronous pre-execution check" : "Integration planned").font(.caption.monospaced()).foregroundStyle(.secondary)
                         Text(provider == .codex
                              ? "Codex must review and trust the exact hook definition via /hooks. Installed does not mean trusted. Hosted tools and write_stdin continuations can be outside the pre-tool path."
                              : "Local Claude Code hooks must actually execute. Remote sessions, disabled hooks and timeouts can bypass the check; post-tool events cannot prevent an action.")
                             .font(.callout).foregroundStyle(.secondary)
                         HStack {
-                            Button("Install") {}.disabled(true)
-                            Button("Repair") {}.disabled(true)
-                            Button("Test Hook") {}.disabled(true)
-                            Button("Uninstall") {}.disabled(true)
-                            Button("View sample changes") { selectedPreview = provider }
+                            if provider == .claudeCode {
+                                Button(claude.configured ? "Review hook settings" : "Connect Claude Code") { Task { await claude.prepare() } }.disabled(claude.busy || !agent.connected)
+                                Button("Refresh status") { Task { await claude.refresh(); await agent.refresh() } }.disabled(claude.busy)
+                            } else {
+                                Button("View sample changes") { selectedPreview = provider }
+                            }
                         }.buttonStyle(.bordered)
+                        if provider == .claudeCode {
+                            if let message = claude.message { Text(message).font(.callout).foregroundStyle(.secondary) }
+                            Text("Restart Claude Code after changing hooks. In a new session, ask it to run `pwd`; an actual PreToolUse callback updates the connection status. This does not establish coverage for every tool or host version.").font(.caption).foregroundStyle(.secondary)
+                        }
                         if provider == .codex {
                             DisclosureGroup("Codex trust instructions") {
                                 Text("After a consented installation, open a local Codex session and run /hooks. Review the TraceRook command and trust the definition. Then run a harmless host smoke test. TraceRook will show Needs approval until an actual callback and compatibility test verify execution.")
@@ -59,6 +66,28 @@ struct IntegrationsView: View {
                 }
                 Text("Add the TraceRook hook to your agent settings using the installation guide at tracerook.dev/docs/beta. TraceRook never edits unrelated settings or hooks.").font(.caption).foregroundStyle(.secondary)
             }.padding(28)
+        }
+        .task { await claude.refresh() }
+        .sheet(item: $claude.preview) { preview in
+            VStack(alignment: .leading, spacing: 16) {
+                PageHeading(title: "Connect Claude Code", subtitle: "Review the actual settings change")
+                Text(preview.plan.settingsURL.path).font(.caption.monospaced()).textSelection(.enabled)
+                Text("Adds a synchronous PreToolUse hook for this app. Existing unrelated settings and hooks are preserved; a private backup is created before replacement. The hook receives proposed tool input for local policy and consented Cloud analysis.").font(.callout)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Before").font(.headline)
+                        Text(preview.plan.beforeText)
+                        Text("After").font(.headline)
+                        Text(preview.plan.afterText)
+                    }.font(.caption.monospaced()).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
+                }.frame(height: 280)
+                if let message = claude.message { Text(message).font(.caption) }
+                HStack {
+                    Button("Cancel") { claude.preview = nil }.disabled(claude.busy)
+                    Spacer()
+                    Button("Install reviewed hook") { Task { await claude.confirm() } }.buttonStyle(.borderedProminent).disabled(claude.busy)
+                }
+            }.padding(24).frame(width: 700)
         }
         .sheet(item: $selectedPreview) { provider in IntegrationPreview(provider: provider) }
         .sheet(item: $agent.servicePlan) { plan in
