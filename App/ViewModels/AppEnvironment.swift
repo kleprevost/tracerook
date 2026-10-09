@@ -11,6 +11,7 @@ final class AppEnvironment {
     let model = DesktopModel()
     let notifications = NotificationController()
     let reviewPanel = ReviewPanelController()
+    let claudeIntegration = ClaudeIntegrationConnection()
     let agent: AgentConnection
     private(set) var snapshot: DemoSnapshot?
     private(set) var fixtureError = false
@@ -38,6 +39,7 @@ final class AppEnvironment {
         }
         if !CommandLine.arguments.contains("--ui-smoke-test") {
             agent.start()
+            Task { await claudeIntegration.refresh() }
             if let index = CommandLine.arguments.firstIndex(of: "--beta-cloud-probe"), CommandLine.arguments.indices.contains(index + 1) {
                 let file = URL(fileURLWithPath: CommandLine.arguments[index + 1])
                 let receipt = file.deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("beta-cloud-probe.json")

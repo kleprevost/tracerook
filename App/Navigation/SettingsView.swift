@@ -65,7 +65,7 @@ struct SettingsView: View {
     private var protection: some View {
         Group {
             Surface("Current coverage") {
-                StatusBadge(text: environment.model.liveCoverage.title, symbol: "circle.dashed")
+                StatusBadge(text: environment.claudeIntegration.title(in: environment.model), symbol: "circle.dashed")
                 Text("Supported callbacks can reach local policy and exact-action human review through the service. Coverage remains unverified until the configured host proves its pre-execution path.").foregroundStyle(.secondary)
                 Text("Cloud analysis is controlled in AI Provider. This screen does not pause local hook enforcement.").font(.caption).foregroundStyle(.secondary)
             }

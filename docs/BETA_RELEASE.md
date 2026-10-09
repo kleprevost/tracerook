@@ -30,7 +30,9 @@ Open **Settings → AI Provider → TraceRook Cloud**, enter the access code tha
 
 ## 5. Configure Claude Code
 
-Add a synchronous `PreToolUse` command hook to your Claude Code settings, keeping your existing settings and hooks:
+Open **Integrations → Connect Claude Code**. Review the actual before/after settings and choose **Install reviewed hook**. TraceRook detects your installed Claude Code version and app path, preserves unrelated settings and hooks, and creates a private backup before replacing the settings. If the settings change after preview, review a fresh preview.
+
+For manual configuration, add a synchronous `PreToolUse` command hook to your Claude Code settings, keeping your existing settings and hooks:
 
 ```json
 {
@@ -51,7 +53,9 @@ Use the path where you installed the app. See [Claude Code hooks](https://code.c
 
 ## 6. Check it works
 
-Start a new Claude Code session and ask it for something harmless; the session appears in **Sessions** with each tool call and its decision. To see a review, ask the agent to run a high-risk command such as fetching and executing a remote script: TraceRook pauses it, shows it in the menu bar and the Approvals queue, and waits for **Allow once** or **Block**.
+Start a new Claude Code session and ask it to run `pwd`. The session appears in **Sessions** with the tool call and its decision, and Integrations shows **Connected · callback observed**. Configuration alone does not set that status. Commands requiring review appear in the menu bar and Approvals queue while the hook waits for **Allow once** or **Block**.
+
+When replacing an ad-hoc beta bundle, quit the app and restart its background service so both processes use the same build. Their exact signature checks reject stale processes. Reconnect Cloud after a service restart because its credential is held in memory.
 
 ## Feedback
 

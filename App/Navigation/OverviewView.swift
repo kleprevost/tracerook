@@ -116,14 +116,15 @@ struct MetricCard: View {
     }
 }
 struct IntegrationSummary: View {
+    @Environment(AppEnvironment.self) private var environment
     let provider: AgentProvider
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 5) {
                 Text(provider.title).font(.headline)
-                Text("Last verified hook: Never").font(.caption).foregroundStyle(.secondary)
+                Text(provider == .claudeCode ? environment.claudeIntegration.latestCallback(in: environment.model).map { "Last callback: \($0.formatted(date: .omitted, time: .shortened))" } ?? "Awaiting callback" : "Coming soon").font(.caption).foregroundStyle(.secondary)
             }
-            Spacer(); StatusBadge(text: "Not integrated", symbol: "circle.dashed")
+            Spacer(); StatusBadge(text: provider == .claudeCode ? environment.claudeIntegration.title(in: environment.model) : "Coming soon", symbol: "circle.dashed")
         }
     }
 }
