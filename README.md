@@ -36,7 +36,7 @@ TraceRook reviews what your coding agent is about to do before it does it. It ru
 
 ## Beta
 
-TraceRook is in an **invitation-only private beta** for Apple Silicon Macs running macOS 26 or later. Invited members receive the download and a TraceRook Cloud access code. Billing isn't active during the beta; the planned price is **$20/month**, including TraceRook Cloud analysis. [Request an invitation](https://tracerook.dev/register/), then follow the [installation guide](docs/BETA_RELEASE.md).
+TraceRook is in an **invitation-only private beta** for Apple Silicon Macs running macOS 26 or later. Invited members receive the download and a TraceRook Cloud access code. Billing isn't active during the beta; the planned price is **$5/month**, including TraceRook Cloud analysis. [Request an invitation](https://tracerook.dev/register/), then follow the [installation guide](docs/BETA_RELEASE.md).
 
 | Agent | Status |
 | --- | --- |

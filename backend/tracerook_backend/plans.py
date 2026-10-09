@@ -21,7 +21,7 @@ def build_plans(settings: Settings) -> dict[str, Plan]:
         id="individual",
         name="Individual",
         description="Contextual analysis of risky agent actions for one developer.",
-        price_label="$20 / month",
+        price_label="$5 / month",
         monthly_quota=settings.individual_quota,
         features=(
             f"{settings.individual_quota:,} analyzed actions per month",

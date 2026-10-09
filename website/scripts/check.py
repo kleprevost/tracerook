@@ -135,7 +135,7 @@ def check():
     for route in ('/pricing/', '/register/'):
         assert route in sitemap, f'Sitemap missing {route}'
     pricing = (DIST/'pricing/index.html').read_text()
-    assert '$20' in pricing and '/register/' in pricing, 'Pricing page lost its plan or call to action'
+    assert '<strong>$5</strong>' in pricing and '/register/' in pricing, 'Pricing page lost its plan or call to action'
     assert 'Invitation only' in pricing and "Billing isn't active" in pricing, 'Pricing must state invitation-only access and inactive billing'
     home = (DIST/'index.html').read_text()
     assert 'id="about"' in home and all(item in home for item in FOUNDERS), 'Homepage About section is missing founder identity or contact'

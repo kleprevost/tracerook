@@ -17,7 +17,7 @@ from pages import PAGES, WALKTHROUGH
 
 # Standalone pages: (route, content file, title, description, active nav key, form page)
 STANDALONE = [
-    ("/pricing/", "pricing.html", "Pricing", "TraceRook is in an invitation-only private beta. The planned price is $20/month, including TraceRook Cloud analysis with Anthropic Claude.", "pricing", False),
+    ("/pricing/", "pricing.html", "Pricing", "TraceRook is in an invitation-only private beta. The planned price is $5/month, including TraceRook Cloud analysis with Anthropic Claude.", "pricing", False),
     ("/register/", "register.html", "Request an invitation", "Request an invitation to the TraceRook private beta.", "register", True),
 ]
 

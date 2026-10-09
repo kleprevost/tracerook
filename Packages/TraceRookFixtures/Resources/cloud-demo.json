@@ -212,7 +212,7 @@
       "id": "individual",
       "name": "Individual",
       "description": "Invitation-only private beta. Billing isn't active during the beta.",
-      "monthlyPriceLabel": "$20 / month at launch",
+      "monthlyPriceLabel": "$5 / month at launch",
       "features": [
         "TraceRook Cloud analysis with Claude",
         "Pre-execution protection for Claude Code",

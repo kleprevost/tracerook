@@ -54,7 +54,7 @@ def test_plans_public_shape(env):
     assert r.status_code == 200
     plan = r.json()["plans"][0]
     assert set(plan) == {"id", "name", "description", "monthlyPriceLabel", "features"}
-    assert plan["monthlyPriceLabel"] == "$20 / month"
+    assert plan["monthlyPriceLabel"] == "$5 / month"
 
 
 def test_account_shape(env):
