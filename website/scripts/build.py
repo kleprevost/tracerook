@@ -19,7 +19,6 @@ from pages import PAGES, WALKTHROUGH
 STANDALONE = [
     ("/pricing/", "pricing.html", "Pricing", "TraceRook is in an invitation-only private beta. The planned price is $20/month, including TraceRook Cloud analysis with Anthropic Claude.", "pricing", False),
     ("/register/", "register.html", "Request an invitation", "Request an invitation to the TraceRook private beta.", "register", True),
-    ("/login/", "login.html", "Log in", "Log in to your TraceRook beta account.", "login", True),
 ]
 
 
@@ -36,7 +35,7 @@ def header(active=""):
 <header class="site-header"><div class="nav-shell">
 <a class="brand" href="/" aria-label="TraceRook home"><img src="/assets/tracerook.png" alt="" width="36" height="36">TraceRook</a>
 <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav">Menu</button>
-<nav id="main-nav" aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#about">About</a><a href="/pricing/" {current(active, 'pricing')}>Pricing</a><a href="/docs/" {current(active, 'docs')}>Documentation</a><a href="/login/" {current(active, 'login')}>Log in</a><a class="nav-cta" href="/register/" {current(active, 'register')}>Request an invitation</a></nav>
+<nav id="main-nav" aria-label="Main navigation"><a href="/#how-it-works">How it works</a><a href="/#about">About</a><a href="/pricing/" {current(active, 'pricing')}>Pricing</a><a href="/docs/" {current(active, 'docs')}>Documentation</a><a class="nav-cta" href="/register/" {current(active, 'register')}>Request an invitation</a></nav>
 </div></header>'''
 
 
@@ -49,7 +48,7 @@ def shell(title, description, body, active="", extra="", path="/", forms=False):
         extra += f'<link rel="canonical" href="{SITE_URL}{esc(path)}"><meta property="og:url" content="{SITE_URL}{esc(path)}">'
     form_action = "'self'" if forms else "'none'"
     return f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="{esc(description)}"><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action {form_action}"><title>{esc(title)} · TraceRook</title><meta property="og:title" content="{esc(title)} · TraceRook"><meta property="og:description" content="{esc(description)}"><meta property="og:type" content="website"><link rel="icon" href="/assets/tracerook.png" type="image/png"><link rel="stylesheet" href="/assets/site.css"><script src="/assets/site.js" defer></script>{extra}<noscript><style>@media(max-width:1000px){{.site-header{{height:auto;position:static}}.nav-shell{{flex-wrap:wrap;padding:18px 0}}.site-header nav{{display:flex;position:static;width:100%;padding:12px 0;background:transparent}}.menu-toggle,.docs-toggle{{display:none}}.docs-sidebar nav{{display:block;max-height:none}}}}</style></noscript></head><body>{header(active)}{body}{footer()}</body></html>'''
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="{esc(description)}"><meta name="referrer" content="strict-origin-when-cross-origin"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action {form_action}"><title>{esc(title)} · TraceRook</title><meta property="og:title" content="{esc(title)} · TraceRook"><meta property="og:description" content="{esc(description)}"><meta property="og:type" content="website"><meta property="og:site_name" content="TraceRook"><meta property="og:image" content="{SITE_URL}/assets/tracerook-social.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="TraceRook: Let your agent build. Keep the next move in check."><meta name="twitter:card" content="summary_large_image"><link rel="icon" href="/assets/tracerook.png" type="image/png"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"><link rel="stylesheet" href="/assets/site.css"><script src="/assets/site.js" defer></script>{extra}<noscript><style>@media(max-width:1000px){{.site-header{{height:auto;position:static}}.nav-shell{{flex-wrap:wrap;padding:18px 0}}.site-header nav{{display:flex;position:static;width:100%;padding:12px 0;background:transparent}}.menu-toggle,.docs-toggle{{display:none}}.docs-sidebar nav{{display:block;max-height:none}}}}</style></noscript></head><body>{header(active)}{body}{footer()}</body></html>'''
 
 
 def write(route, document):
@@ -113,7 +112,7 @@ def build():
     build_standalone()
     build_docs()
     (DIST/'404.html').write_text(shell('Page not found', 'Find your way back to TraceRook.', '<main id="main" class="not-found wrap"><div class="eyebrow">404 / Off the board</div><h1>This page moved<br>out of play.</h1><p>Find what you need in the documentation, or start at home.</p><div class="button-row"><a class="button primary" href="/">Back to TraceRook</a><a class="button" href="/docs/">Browse documentation</a></div></main>', extra='<meta name="robots" content="noindex">', path=None))
-    routes = ['/', '/pricing/', '/register/', '/login/', '/docs/'] + [f'/docs/{page["slug"]}/' for page in PAGES]
+    routes = ['/', '/pricing/', '/register/', '/docs/'] + [f'/docs/{page["slug"]}/' for page in PAGES]
     (DIST/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE_URL}{route}</loc></url>\n' for route in routes) + '</urlset>\n')
     (DIST/'robots.txt').write_text(f'User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n')
     print(f'Generated homepage, {len(STANDALONE)} standalone pages, documentation index, {len(PAGES)} guides, and 404 page.')
