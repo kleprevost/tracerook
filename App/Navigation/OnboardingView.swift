@@ -4,7 +4,7 @@ import TraceRookContracts
 struct OnboardingView: View {
     @Environment(AppEnvironment.self) private var environment
     @ViewState<Int> private var step = 0
-    @ViewState<AnalysisMode> private var choice = AnalysisMode.traceRookCloudDemo
+    @ViewState<AnalysisMode> private var choice = AnalysisMode.traceRookCloud
     @ViewState<Bool> private var payloadPreview = false
     private let steps = ["Welcome", "This Mac", "Analysis", "Privacy", "Integrations", "Notifications", "Verification", "Ready"]
     var body: some View {
@@ -29,11 +29,11 @@ struct OnboardingView: View {
                 case 2:
                     Text("Choose an analysis experience").font(.title2.bold())
                     Picker("Analysis experience", selection: $choice) {
+                        Text("TraceRook Cloud · Claude analysis with your beta access code").tag(AnalysisMode.traceRookCloud)
                         Text("Explore with sample data · Demo").tag(AnalysisMode.traceRookCloudDemo)
                         Text("Local rules only · hooks required").tag(AnalysisMode.localRulesOnly)
-                        Text("Use my Anthropic API key · Coming soon").tag(AnalysisMode.anthropicBYOK)
                     }.pickerStyle(.radioGroup)
-                    Text(choice == .traceRookCloudDemo ? "Explore account, usage and simulated findings locally. Demo never enrolls a real account or makes a purchase." : choice == .anthropicBYOK ? "Direct API keys aren't supported yet. No key is collected or stored." : "Local rules only. Cloud analysis stays paused in the service.").foregroundStyle(.secondary)
+                    Text(choice == .traceRookCloudDemo ? "Explore account, usage and simulated findings locally. Demo never enrolls a real account or makes a purchase." : choice == .traceRookCloud ? "Connect to api.tracerook.dev with your beta access code. TraceRook Cloud runs Anthropic Claude analysis using our API key. Start the background service and approve privacy consent in Settings → AI Provider." : "Local rules only. Cloud analysis stays paused in the service.").foregroundStyle(.secondary)
                 case 3:
                     Text("Keep context small and redacted").font(.title2.bold())
                     Text("With your consent, TraceRook Cloud receives a task category, an action category and local signal codes. Commands, paths, code and transcripts stay on your Mac.")
@@ -56,7 +56,7 @@ struct OnboardingView: View {
                     Text("Integration status reflects recorded host callbacks, never a configuration file alone.").foregroundStyle(.secondary)
                 default:
                     Text(choice == .traceRookCloudDemo ? "Your demo is ready" : "The dashboard is ready").font(.title.bold())
-                    Text("Try session timelines, evidence details and an exact-action review. Demo reviews expire after 45 seconds, and no command is executed.")
+                    Text(choice == .traceRookCloud ? "Next, connect your beta access code in Settings → AI Provider. Start the background service from Integrations if it is not connected. Analysis starts only after you connect and approve consent." : choice == .traceRookCloudDemo ? "Try session timelines, evidence details and an exact-action review using sample data. No command is executed." : "Local rules run through your configured agent hooks. Cloud analysis is paused.")
                     if choice == .traceRookCloudDemo { DemoBadge() }
                     Text("Connect Claude Code from Integrations to protect real sessions.").foregroundStyle(.secondary)
                 }
@@ -68,13 +68,17 @@ struct OnboardingView: View {
                 }
                 Spacer()
                 if step == 7 {
-                    Button(choice == .traceRookCloudDemo ? "Explore Demo" : "Open dashboard") {
+                    Button(choice == .traceRookCloud ? "Connect TraceRook Cloud" : choice == .traceRookCloudDemo ? "Explore Demo" : "Open dashboard") {
                         Task {
                             if choice == .traceRookCloudDemo {
                                 await environment.finishOnboarding(exploreDemo: true)
                             } else {
                                 guard await environment.selectAnalysisMode(choice) else { return }
                                 await environment.finishOnboarding(exploreDemo: false)
+                                if choice == .traceRookCloud {
+                                    environment.model.destination = .settings
+                                    environment.settingsSection = "AI Provider"
+                                }
                             }
                         }
                     }.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)

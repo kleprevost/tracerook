@@ -64,7 +64,7 @@ public enum AnalysisMode: String, Codable, Sendable, CaseIterable {
         switch self {
         case .anthropicBYOK: "Anthropic BYOK"
         case .traceRookCloudDemo: "TraceRook Cloud · Demo"
-        case .traceRookCloud: "TraceRook Cloud · Invited alpha"
+        case .traceRookCloud: "TraceRook Cloud · Claude analysis"
         case .localRulesOnly: "Local rules only"
         }
     }

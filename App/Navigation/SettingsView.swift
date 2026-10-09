@@ -89,7 +89,7 @@ struct SettingsView: View {
                 Picker("Provider", selection: Binding(get: { environment.model.mode }, set: { mode in
                     Task { await environment.selectAnalysisMode(mode) }
                 })) {
-                    ForEach(AnalysisMode.allCases, id: \.self) { Text($0.title).tag($0) }
+                    ForEach([AnalysisMode.traceRookCloud, .localRulesOnly, .traceRookCloudDemo], id: \.self) { Text($0.title).tag($0) }
                 }.pickerStyle(.radioGroup).disabled(environment.analysisModeBusy)
                 if let error = environment.analysisModeError { Text(error).font(.callout).foregroundStyle(.orange) }
                 if environment.model.mode == .anthropicBYOK {
@@ -97,7 +97,7 @@ struct SettingsView: View {
                     Text("Direct Anthropic API keys aren't supported. Choose TraceRook Cloud for Claude analysis. No key is requested, stored or sent.").font(.callout).foregroundStyle(.secondary)
                     Button("What leaves my Mac?") { environment.privacyPreviewPresented = true }.buttonStyle(.bordered)
                 } else if environment.model.mode == .traceRookCloud {
-                    Text("Invitation-only Claude analysis. Enrollment and inference are separate from verified host protection.").font(.callout).foregroundStyle(.secondary)
+                    Text("Connect to api.tracerook.dev using your beta access code. TraceRook Cloud provides real Claude analysis; you do not need an Anthropic API key.").font(.callout).foregroundStyle(.secondary)
                 } else if environment.model.mode == .traceRookCloudDemo {
                     Text("Cloud AI analysis unavailable for real activity. The account, usage and plans below are synthetic and never enroll a real account or create billing.").font(.callout).foregroundStyle(.secondary)
                     Button("Explore Demo") { Task { await environment.exploreDemo() } }.buttonStyle(.borderedProminent)
