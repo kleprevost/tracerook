@@ -26,8 +26,6 @@
 
 TraceRook reviews what your coding agent is about to do before it does it. It runs inside **Claude Code**'s `PreToolUse` hook, checks every proposed tool call against deterministic local rules, and sends ambiguous actions to **TraceRook Cloud**, where **Anthropic Claude** judges whether the action fits the task you asked for. Critical actions are blocked on the spot, high-risk actions wait for your decision, and every outcome comes with the evidence behind it.
 
-![TraceRook native macOS dashboard](docs/assets/dashboard-demo.png)
-
 ## Why TraceRook
 
 - **Review before execution.** Dangerous tool calls are denied before the tool body runs. High-risk calls pause for a native review with a 45-second deadline.

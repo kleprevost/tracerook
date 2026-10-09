@@ -51,7 +51,7 @@ Use the path where you installed the app. See [Claude Code hooks](https://code.c
 
 ## 6. Check it works
 
-Select **Test Hook** in Integrations. Then start a Claude Code session and ask it for something harmless; the session appears in **Sessions** with each tool call and its decision. To see a review, ask the agent to run a high-risk command such as fetching and executing a remote script: TraceRook pauses it, sends a notification, and waits for **Allow once** or **Block**.
+Start a new Claude Code session and ask it for something harmless; the session appears in **Sessions** with each tool call and its decision. To see a review, ask the agent to run a high-risk command such as fetching and executing a remote script: TraceRook pauses it, shows it in the menu bar and the Approvals queue, and waits for **Allow once** or **Block**.
 
 ## Feedback
 

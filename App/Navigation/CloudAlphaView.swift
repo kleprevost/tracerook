@@ -17,7 +17,7 @@ struct CloudAlphaView: View {
             DetailField(name: "Validated Claude response", value: cloud.realAnalysisValidatedAt ?? "No real analysis validated this session")
             Text("Cloud connectivity does not establish agent coverage. Claude Code and Codex callbacks must be installed and verified separately.").font(.caption).foregroundStyle(.secondary)
             if cloud.failure == .credentialStorage {
-                Text("Enrollment is disabled while credential storage is being fixed. No Keychain access or remote enrollment will run in this build.").font(.callout).foregroundStyle(.orange)
+                Text("Enrollment is paused because credential storage is unavailable. No Keychain access or remote enrollment runs.").font(.callout).foregroundStyle(.orange)
             }
             if cloud.busy { ProgressView("Contacting TraceRook Cloud…") }
             if let failure = cloud.failure {
