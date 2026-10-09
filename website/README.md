@@ -27,15 +27,23 @@ Python 3.9+ builds and validates the site; Node 18+ runs the local preview. Comm
 
 ## Invitation requests
 
-The Request an invitation form submits `{"name", "email", "use_case"}` as JSON with `fetch` to `POST /api/beta/request` (`use_case` may be empty). The Cloudflare Pages Function in `functions/api/beta/request.js` validates it and emails it to the founders through Resend, with `reply_to` set to the requester. Requests aren't stored, and nothing is sent to the requester.
+The Request an invitation form submits `{"name", "email", "use_case"}` as JSON with `fetch` to `POST /api/beta/request` (`use_case` may be empty). The Cloudflare Pages Function in `functions/api/beta/request.js` validates it, stores it in the `tracerook-signups` D1 database and, if Resend is configured, also emails the founders with `reply_to` set to the requester. Nothing is sent to the requester. A repeat request from the same email (any letter case) is accepted without creating a duplicate.
 
-| Pages variable | Purpose |
+| Pages binding or variable | Purpose |
 | --- | --- |
-| `RESEND_API_KEY` | Secret. Required to send; without it the endpoint returns 503 |
+| `DB` | D1 binding to `tracerook-signups`. Table: `website/signups-schema.sql` |
+| `RESEND_API_KEY` | Optional secret for a notification email |
 | `INVITE_FROM` | Optional sender on a Resend-verified domain. Default `TraceRook <invites@tracerook.dev>` |
 | `INVITE_TO` | Optional comma-separated recipients. Default `kyle@tracerook.dev,john@tracerook.dev` |
 
-Validation errors return `{"error": {"message": "..."}}`, which the form shows. Any other failure, including a missing key, a Resend error or no network, offers a prefilled email to the addresses in the form's `data-fallback-to`, so the requester always has a working path. `_routes.json` limits Function invocations to `/api/*`; everything else is served as static files. `/login/` redirects to the install guide.
+A request succeeds when it is stored or emailed. Validation errors return `{"error": {"message": "..."}}`, which the form shows. If neither storage nor email works, the form offers a prefilled email to the addresses in its `data-fallback-to`, so the requester always has a working path. `_routes.json` limits Function invocations to `/api/*`; everything else is served as static files. `/login/` redirects to the install guide.
+
+Read requests in the Cloudflare dashboard (Storage & Databases → D1 → `tracerook-signups` → Console) or from the command line:
+
+```sh
+npx wrangler d1 execute tracerook-signups --remote \
+  --command "SELECT created_at, name, email, use_case FROM beta_requests ORDER BY created_at DESC"
+```
 
 ## Cloudflare Pages
 
@@ -45,6 +53,6 @@ Production deploys from `main` with:
 - Root directory: repository root
 - Build command: `python3 website/scripts/build.py && python3 website/scripts/check.py && node --check website/dist/assets/site.js`
 - Build output directory: `website/dist`
-- Functions: `functions/` at the repository root (set the variables above under Settings → Variables and Secrets)
+- Functions: `functions/` at the repository root. Add the `DB` binding under Settings → Bindings and any variables under Settings → Variables and Secrets
 
 `_headers` applies the content security policy and privacy headers; `_redirects` maps retired guide URLs. Directory indexes and `404.html` handle routing. The site has no analytics, trackers, external fonts or third-party scripts.

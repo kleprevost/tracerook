@@ -1,10 +1,12 @@
 // Cloudflare Pages Function for POST /api/beta/request.
-// Emails each invitation request to the founders through Resend. Requests are not stored.
+// Stores each invitation request in D1 and, when Resend is configured, emails the founders.
+// If neither works, the site falls back to a prefilled email.
 //
-// Pages environment:
-//   RESEND_API_KEY  secret, required; without it the site falls back to a prefilled email
-//   INVITE_FROM     optional sender on a Resend-verified domain (default below)
-//   INVITE_TO       optional comma-separated recipients (default below)
+// Pages bindings and environment (all optional; any one makes requests succeed):
+//   DB              D1 binding to tracerook-signups (table beta_requests, see website/README.md)
+//   RESEND_API_KEY  secret for a notification email
+//   INVITE_FROM     sender on a Resend-verified domain (default below)
+//   INVITE_TO       comma-separated recipients (default below)
 
 const DEFAULT_FROM = "TraceRook <invites@tracerook.dev>";
 const DEFAULT_TO = "kyle@tracerook.dev,john@tracerook.dev";
@@ -41,8 +43,16 @@ export async function onRequestPost({request, env}) {
   if (!name) return fail(400, "Enter your name.");
   if (!EMAIL.test(email)) return fail(400, "Enter a valid email address.");
 
+  const stored = env.DB ? await env.DB
+    .prepare("INSERT INTO beta_requests (name, email, use_case) VALUES (?1, ?2, ?3) ON CONFLICT (email) DO NOTHING")
+    .bind(name, email, useCase).run().then(() => true, () => false) : false;
+  const emailed = env.RESEND_API_KEY ? await notify(env, name, email, useCase) : false;
   // An empty message tells the site to offer the prefilled email instead.
-  if (!env.RESEND_API_KEY) return fail(503, "");
+  if (!stored && !emailed) return fail(env.DB || env.RESEND_API_KEY ? 502 : 503, "");
+  return reply(200, {ok: true});
+}
+
+async function notify(env, name, email, useCase) {
   const to = (env.INVITE_TO || DEFAULT_TO).split(",").map(address => address.trim()).filter(Boolean);
   const sent = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -55,6 +65,5 @@ export async function onRequestPost({request, env}) {
       text: `Name: ${name}\nEmail: ${email}\nHow they use coding agents: ${useCase || "(not provided)"}\n\nReply to this email to respond directly.`
     })
   }).catch(() => null);
-  if (!sent || !sent.ok) return fail(502, "");
-  return reply(200, {ok: true});
+  return Boolean(sent && sent.ok);
 }
