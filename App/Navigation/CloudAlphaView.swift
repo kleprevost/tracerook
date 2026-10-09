@@ -13,14 +13,18 @@ struct CloudAlphaView: View {
             DetailField(name: "Reasoning engine", value: "Anthropic Claude Haiku 5.5")
             DetailField(name: "Enrollment", value: cloud.connected ? "Device enrolled" : "Not enrolled")
             DetailField(name: "Selected for host analysis", value: cloud.analysisEnabledLocally ? "Yes" : "No")
-            DetailField(name: "Cloud analysis", value: cloud.capabilities?.analysisEnabled == true ? "Enabled by service operator" : "Unavailable or disabled")
+            DetailField(name: "Cloud analysis", value: cloud.capabilities.map { $0.analysisEnabled ? "Enabled by service operator" : "Disabled by service operator" } ?? "Connect to check availability")
             DetailField(name: "Validated Claude response", value: cloud.realAnalysisValidatedAt ?? "No real analysis validated this session")
             Text("Cloud connectivity does not establish agent coverage. Claude Code and Codex callbacks must be installed and verified separately.").font(.caption).foregroundStyle(.secondary)
+            if !environment.agent.connected {
+                Text("Start the background service to connect your beta access code.").font(.callout)
+                Button("Open Integrations") { environment.model.destination = .integrations }.buttonStyle(.bordered)
+            }
             if cloud.failure == .credentialStorage {
                 Text("Enrollment is paused because credential storage is unavailable. No Keychain access or remote enrollment runs.").font(.callout).foregroundStyle(.orange)
             }
             if cloud.busy { ProgressView("Contacting TraceRook Cloud…") }
-            if let failure = cloud.failure {
+            if environment.agent.connected, let failure = cloud.failure {
                 Text("Cloud request failed: \(failure.rawValue). No new protection was verified. If disconnect or deletion failed, server-side revocation or deletion is not confirmed.").font(.caption).foregroundStyle(.orange)
             }
             if !cloud.connected {
