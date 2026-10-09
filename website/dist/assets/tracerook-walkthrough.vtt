@@ -1,36 +1,70 @@
 WEBVTT
 
 1
-00:00:00.200 --> 00:00:05.800
-Meet TraceRook, a native Mac companion for reviewing risky coding agent
-actions.
+00:00:00.800 --> 00:00:03.740
+Coding agents run real commands on your Mac.
 
 2
-00:00:06.200 --> 00:00:14.800
-The dashboard brings sessions, findings, and pending reviews together. This
-walkthrough uses labeled demo data, with no real commands executing.
+00:00:03.760 --> 00:00:05.100
+Most are routine.
 
 3
-00:00:15.200 --> 00:00:23.800
-Open a session to see the task and its timeline. Here, the sample shows a
-credential upload blocked by local policy.
+00:00:05.120 --> 00:00:06.570
+A few aren't.
 
 4
-00:00:24.200 --> 00:00:33.800
-Each finding explains the proposed action, its evidence, and its relationship
-to your task. Local rules retain authority over critical denials.
+00:00:07.164 --> 00:00:10.664
+TraceRook checks every tool call before it runs.
 
 5
-00:00:34.200 --> 00:00:43.800
-Higher-risk actions can wait for your review. The native panel shows the task,
-evidence, exact action binding, and a deadline.
+00:00:10.684 --> 00:00:12.744
+Routine work goes straight through.
 
 6
-00:00:44.200 --> 00:00:53.800
-Choose Block and the simulated review resolves immediately. Allow once applies
-to one exact action; the coding agent still controls its own permissions.
+00:00:12.764 --> 00:00:19.174
+But when an agent tries to upload your SSH key,
+a local rule blocks it before it executes.
 
 7
-00:00:54.200 --> 00:00:59.800
-TraceRook Cloud uses Anthropic Claude. Explore the invited Mac beta at
-tracerook.dev.
+00:00:19.693 --> 00:00:24.073
+Clear-cut risks are decided on your Mac, in milliseconds.
+
+8
+00:00:24.093 --> 00:00:30.103
+When an action is ambiguous, Claude weighs the
+local signals against the task you gave your agent.
+
+9
+00:00:30.602 --> 00:00:37.942
+When it's your call, TraceRook pauses the agent and
+shows you the exact action, the evidence, and a deadline.
+
+10
+00:00:37.962 --> 00:00:41.972
+Allow once releases that one call, and nothing more.
+
+11
+00:00:42.557 --> 00:00:47.527
+Every session keeps its timeline
+and evidence, in a native Mac app.
+
+12
+00:00:48.633 --> 00:00:50.933
+And your code stays on your Mac.
+
+13
+00:00:50.953 --> 00:00:55.843
+Claude sees categories and signal
+codes, never your commands or files.
+
+14
+00:00:56.355 --> 00:00:57.535
+TraceRook.
+
+15
+00:00:57.555 --> 00:01:00.975
+Let your agent build, and keep the next move in check.
+
+16
+00:01:00.995 --> 00:01:04.205
+Request an invitation at tracerook.dev.

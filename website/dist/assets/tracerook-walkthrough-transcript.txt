@@ -1,17 +1,17 @@
-TraceRook native app walkthrough — 60 seconds
+TraceRook walkthrough
 
-Recorded with labeled demo data. No real commands execute; Codex scenes are simulations.
+App screens show TraceRook's built-in sample data.
 
-Meet TraceRook, a native Mac companion for reviewing risky coding agent actions.
+Coding agents run real commands on your Mac. Most are routine. A few aren't.
 
-The dashboard brings sessions, findings, and pending reviews together. This walkthrough uses labeled demo data, with no real commands executing.
+TraceRook checks every tool call before it runs. Routine work goes straight through. But when an agent tries to upload your SSH key, a local rule blocks it before it executes.
 
-Open a session to see the task and its timeline. Here, the sample shows a credential upload blocked by local policy.
+Clear-cut risks are decided on your Mac, in milliseconds. When an action is ambiguous, Claude weighs the local signals against the task you gave your agent.
 
-Each finding explains the proposed action, its evidence, and its relationship to your task. Local rules retain authority over critical denials.
+When it's your call, TraceRook pauses the agent and shows you the exact action, the evidence, and a deadline. Allow once releases that one call, and nothing more.
 
-Higher-risk actions can wait for your review. The native panel shows the task, evidence, exact action binding, and a deadline.
+Every session keeps its timeline and evidence, in a native Mac app.
 
-Choose Block and the simulated review resolves immediately. Allow once applies to one exact action; the coding agent still controls its own permissions.
+And your code stays on your Mac. Claude sees categories and signal codes, never your commands or files.
 
-TraceRook Cloud uses Anthropic Claude. Explore the invited Mac beta at tracerook.dev.
+TraceRook. Let your agent build, and keep the next move in check. Request an invitation at tracerook.dev.
